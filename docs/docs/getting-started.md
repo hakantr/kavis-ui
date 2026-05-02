@@ -1,0 +1,214 @@
+---
+title: Getting Started
+description: Learn how to set up and use Kavis UI in your project
+order: -2
+---
+
+# Getting Started
+
+## Installation
+
+Add dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+gpui = { path = "../zed/crates/gpui" }
+gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
+kavis-ui = { git = "https://github.com/hakantr/kavis-ui" }
+# Optional, for default bundled assets
+kavis-ui-assets = { git = "https://github.com/hakantr/kavis-ui" }
+anyhow = "1.0"
+```
+
+:::tip
+The `kavis-ui-assets` crate is optional.
+
+It provides a default set of icon assets. If you want to manage your own assets, you can skip adding this dependency.
+
+See [Icons & Assets](./assets.md) for more details.
+:::
+
+## Quick Start
+
+Here's a simple example to get you started:
+
+```rust
+use gpui::*;
+use kavis_ui::{button::*, *};
+
+pub struct HelloWorld;
+
+impl Render for HelloWorld {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .v_flex()
+            .gap_2()
+            .size_full()
+            .items_center()
+            .justify_center()
+            .child("Hello, World!")
+            .child(
+                Button::new("ok")
+                    .primary()
+                    .label("Let's Go!")
+                    .on_click(|_, _, _| println!("Clicked!")),
+            )
+    }
+}
+
+fn main() {
+    let app = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
+
+    app.run(move |cx| {
+        // This must be called before using any Kavis UI features.
+        kavis_ui::init(cx);
+
+        cx.spawn(async move |cx| {
+            cx.open_window(WindowOptions::default(), |window, cx| {
+                let view = cx.new(|_| HelloWorld);
+                // This first level on the window, should be a Root.
+                cx.new(|cx| Root::new(view, window, cx))
+            })
+            .expect("Failed to open window");
+        })
+        .detach();
+    });
+}
+```
+
+:::info
+Make sure to call `kavis_ui::init(cx);` at first line inside the `app.run` closure. This initializes the Kavis UI system.
+
+This is required for theming and other global settings to work correctly.
+:::
+
+## Basic Concepts
+
+### Stateless Elements
+
+Kavis UI uses stateless [RenderOnce] elements, making them simple and predictable. State management is handled at the view level, not in individual components.
+
+The are all implemented [IntoElement] types.
+
+For example:
+
+```rs
+struct MyView;
+
+impl Render for MyView {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .child(Button::new("btn").label("Click Me"))
+            .child(Tag::secondary().child("Secondary"))
+    }
+}
+```
+
+### Stateful Components
+
+There are some stateful components like `Dropdown`, `List`, and `Table` that manage their own internal state for convenience, these components implement the [Render] trait.
+
+Those components to use are a bit different, we need create the [Entity] and hold it in the view struct.
+
+```rs
+struct MyView {
+    input: Entity<InputState>,
+}
+
+impl MyView {
+    fn new(window: &Window, cx: &mut Context<Self>) -> Self {
+        let input = cx.new(|cx| InputState::new(window, cx).default_value("Hello 世界"));
+        Self { input }
+    }
+}
+
+impl Render for MyView {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.input.clone()
+    }
+}
+```
+
+### Theming
+
+All components support theming through the built-in `Theme` system:
+
+```rust
+use kavis_ui::{ActiveTheme, Theme};
+
+// Access theme colors in your components
+cx.theme().primary
+cx.theme().background
+cx.theme().foreground
+```
+
+### Sizing
+
+Most components support multiple sizes:
+
+```rust
+Button::new("btn").small()
+Button::new("btn").medium() // default
+Button::new("btn").large()
+Button::new("btn").xsmall()
+```
+
+### Variants
+
+Components offer different visual variants:
+
+```rust
+Button::new("btn").primary()
+Button::new("btn").danger()
+Button::new("btn").warning()
+Button::new("btn").success()
+Button::new("btn").ghost()
+Button::new("btn").outline()
+```
+
+## Icons
+
+:::info
+Icons are not bundled with Kavis UI to keep the library lightweight.
+
+Continue read [Icons & Assets](./assets.md) to learn how to add icons to your project.
+:::
+
+Kavis UI has an `Icon` element, but does not include SVG files by default.
+
+The examples use [Lucide](https://lucide.dev) icons. You can use any icons you like by naming the SVG files as defined in `IconName`. Add the icons you need to your project.
+
+```rust
+use kavis_ui::{Icon, IconName};
+
+Icon::new(IconName::Check)
+Icon::new(IconName::Search).small()
+```
+
+## Next Steps
+
+Explore the component documentation to learn more about each component:
+
+- [Button](./components/button) - Interactive button component
+- [Input](./components/input) - Text input with validation
+- [Dialog](./components/dialog) - Dialog and modal windows
+- [DataTable](./components/data-table) - High-performance data tables
+- [More components...](./components/index)
+
+## Development
+
+To run the component gallery:
+
+```bash
+cargo run
+```
+
+More examples can be found in the `examples` directory:
+
+```bash
+cargo run --example <example_name>
+```
+
+[RenderOnce]: https://docs.rs/gpui/latest/gpui/trait.RenderOnce.html
+[IntoElement]: https://docs.rs/gpui/latest/gpui/trait.IntoElement.html
+[Render]: https://docs.rs/gpui/latest/gpui/trait.Render.html

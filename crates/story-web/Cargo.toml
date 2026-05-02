@@ -1,0 +1,25 @@
+[package]
+name = "kavis-ui-story-web"
+version = "0.6.0"
+publish = false
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+gpui.workspace = true
+gpui_platform.workspace = true
+kavis-ui = { path = "../ui", default-features = false }
+kavis-ui-assets.workspace = true
+kavis-ui-story = { path = "../story", default-features = false }
+
+# Web specific dependencies
+console_error_panic_hook = "0.1"
+log.workspace = true
+tracing-wasm = "0.2"
+console_log = "1.0"
+wasm-bindgen = "0.2"
+
+[lints]
+workspace = true

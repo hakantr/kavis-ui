@@ -1,0 +1,918 @@
+use std::{collections::HashMap, fmt::Display};
+
+use gpui::{Hsla, SharedString, hsla};
+use serde::{Deserialize, Deserializer, de::Error as _};
+
+use anyhow::{Error, Result, anyhow};
+
+/// Bir [`gpui::Hsla`] renk. oluşturur.
+///
+/// - h: 0.360.0
+/// - s: 0.0.100.0
+/// - l: 0.0.100.0
+#[inline]
+pub fn hsl(h: f32, s: f32, l: f32) -> Hsla {
+    hsla(h / 360., s / 100.0, l / 100.0, 1.0)
+}
+
+pub trait Renklendir: Sized {
+    /// bir yeni renk ile verilen opacity. döndürür.
+    ///
+    /// opacity 0.0 ile 1.0 arasında bir değerdir; 0.0 tamamen saydam, 1.0 tamamen opaktır.
+    fn opacity(&self, opacity: f32) -> Self;
+    /// Her kanalı verilen bölenle bölünmüş yeni bir renk döndürür.
+    ///
+    /// divisor içinde aralık 0.0. 1.0
+    fn divide(&self, divisor: f32) -> Self;
+    /// inverted renk döndürür.
+    fn invert(&self) -> Self;
+    /// inverted lightness döndürür.
+    fn invert_l(&self) -> Self;
+    /// bir yeni renk ile lightness increased ile verilen factor. döndürür.
+    ///
+    /// factor aralık: 0.0. 1.0
+    fn lighten(&self, amount: f32) -> Self;
+    /// bir yeni renk ile darkness increased ile verilen factor. döndürür.
+    ///
+    /// factor aralık: 0.0. 1.0
+    fn darken(&self, amount: f32) -> Self;
+    /// bir yeni renk ile aynı lightness ve alpha ama different hue ve saturation. döndürür.
+    fn apply(&self, base_color: Self) -> Self;
+
+    /// İki rengi karıştırır; `factor` 0.0 ile 1.0 arasında ilk rengin oranıdır.
+    fn mix(&self, other: Self, factor: f32) -> Self;
+    /// İki rengi Oklab renk uzayında karıştırır; `factor` 0.0 ile 1.0 arasında ilk rengin oranıdır.
+    ///
+    /// Bu similar için CSS `renk-mix(in oklab, renk1 factor%, renk2)`.
+    fn mix_oklab(&self, other: Self, factor: f32) -> Self;
+    /// Change `Hue` renk ile verilen içinde aralık: 0.0. 1.0
+    fn hue(&self, hue: f32) -> Self;
+    /// Change `Saturation` renk ile verilen değer içinde aralık: 0.0. 1.0
+    fn saturation(&self, saturation: f32) -> Self;
+    /// Change `Lightness` renk ile verilen değer içinde aralık: 0.0. 1.0
+    fn lightness(&self, lightness: f32) -> Self;
+
+    /// renk için bir hex metin. Örneğin, "#F8FAFC". dönüştürür.
+    fn to_hex(&self) -> String;
+    /// bir hex metin için bir renk. ayrıştırır.
+    fn parse_hex(hex: &str) -> Result<Self>;
+}
+
+/// Helper fonksiyonlar için Oklab renk boşluk conversions
+mod oklab {
+    use gpui::Rgba;
+
+    /// sRGB bileşen için doğrusal RGB dönüştürür.
+    #[inline]
+    fn to_linear(c: f32) -> f32 {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    }
+
+    /// doğrusal RGB bileşen için sRGB dönüştürür.
+    #[inline]
+    fn from_linear(c: f32) -> f32 {
+        if c <= 0.0031308 {
+            c * 12.92
+        } else {
+            1.055 * c.powf(1.0 / 2.4) - 0.055
+        }
+    }
+
+    /// RGB için Oklab renk boşluk dönüştürür.
+    #[allow(non_snake_case)]
+    pub fn rgb_to_oklab(rgb: Rgba) -> (f32, f32, f32) {
+        // sRGB to linear RGB
+        let lr = to_linear(rgb.r);
+        let lg = to_linear(rgb.g);
+        let lb = to_linear(rgb.b);
+
+        // Linear RGB to LMS
+        let l = 0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb;
+        let m = 0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb;
+        let s = 0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb;
+
+        // LMS to Oklab (using cube root)
+        let l_ = l.cbrt();
+        let m_ = m.cbrt();
+        let s_ = s.cbrt();
+
+        let L = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
+        let a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
+        let b = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
+
+        (L, a, b)
+    }
+
+    /// Oklab için RGB renk boşluk dönüştürür.
+    #[allow(non_snake_case)]
+    pub fn oklab_to_rgb(L: f32, a: f32, b: f32) -> Rgba {
+        // Oklab to LMS
+        let l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+        let m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+        let s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+
+        let l = l_ * l_ * l_;
+        let m = m_ * m_ * m_;
+        let s = s_ * s_ * s_;
+
+        // LMS to Linear RGB
+        let lr = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+        let lg = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+        let lb = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+        // Linear RGB to sRGB
+        Rgba {
+            r: from_linear(lr).clamp(0.0, 1.0),
+            g: from_linear(lg).clamp(0.0, 1.0),
+            b: from_linear(lb).clamp(0.0, 1.0),
+            a: 1.0,
+        }
+    }
+}
+
+impl Renklendir for Hsla {
+    fn opacity(&self, factor: f32) -> Self {
+        Self {
+            a: self.a * factor.clamp(0.0, 1.0),
+            ..*self
+        }
+    }
+
+    fn divide(&self, divisor: f32) -> Self {
+        Self {
+            a: divisor,
+            ..*self
+        }
+    }
+
+    fn invert(&self) -> Self {
+        Self {
+            h: 1.0 - self.h,
+            s: 1.0 - self.s,
+            l: 1.0 - self.l,
+            a: self.a,
+        }
+    }
+
+    fn invert_l(&self) -> Self {
+        Self {
+            l: 1.0 - self.l,
+            ..*self
+        }
+    }
+
+    fn lighten(&self, factor: f32) -> Self {
+        let l = self.l * (1.0 + factor.clamp(0.0, 1.0));
+
+        Hsla { l, ..*self }
+    }
+
+    fn darken(&self, factor: f32) -> Self {
+        let l = self.l * (1.0 - factor.clamp(0.0, 1.0));
+
+        Self { l, ..*self }
+    }
+
+    fn apply(&self, new_color: Self) -> Self {
+        Hsla {
+            h: new_color.h,
+            s: new_color.s,
+            l: self.l,
+            a: self.a,
+        }
+    }
+
+    /// Reference:
+    /// https://github.com/bevyengine/bevy/blob/85eceb022da0326b47ac2b0d9202c9c9f01835bb/crates/bevy_color/src/hsla.rs#L112
+    fn mix(&self, other: Self, factor: f32) -> Self {
+        let factor = factor.clamp(0.0, 1.0);
+        let inv = 1.0 - factor;
+
+        #[inline]
+        fn lerp_hue(a: f32, b: f32, t: f32) -> f32 {
+            let diff = (b - a + 180.0).rem_euclid(360.) - 180.;
+            (a + diff * t).rem_euclid(360.0)
+        }
+
+        Hsla {
+            h: lerp_hue(self.h * 360., other.h * 360., factor) / 360.,
+            s: self.s * factor + other.s * inv,
+            l: self.l * factor + other.l * inv,
+            a: self.a * factor + other.a * inv,
+        }
+    }
+
+    #[allow(non_snake_case)]
+    fn mix_oklab(&self, other: Self, factor: f32) -> Self {
+        let factor = factor.clamp(0.0, 1.0);
+        let inv = 1.0 - factor;
+
+        // Interpolate alpha first
+        let result_alpha = self.a * factor + other.a * inv;
+
+        // Handle the case where result alpha is zero
+        if result_alpha == 0.0 {
+            return Self {
+                h: 0.0,
+                s: 0.0,
+                l: 0.0,
+                a: 0.0,
+            };
+        }
+
+        // Convert both colors to RGB
+        let rgb1 = self.to_rgb();
+        let rgb2 = other.to_rgb();
+
+        // Convert to Oklab color space
+        let (l1, a1, b1) = oklab::rgb_to_oklab(rgb1);
+        let (l2, a2, b2) = oklab::rgb_to_oklab(rgb2);
+
+        // Premultiply alpha in Oklab space (using alpha-premultiplied interpolation)
+        // This matches CSS color-mix behavior
+        let alpha1 = self.a;
+        let alpha2 = other.a;
+
+        // Premultiply
+        let l1_pm = l1 * alpha1;
+        let a1_pm = a1 * alpha1;
+        let b1_pm = b1 * alpha1;
+
+        let l2_pm = l2 * alpha2;
+        let a2_pm = a2 * alpha2;
+        let b2_pm = b2 * alpha2;
+
+        // Interpolate premultiplied values
+        let L_pm = l1_pm * factor + l2_pm * inv;
+        let a_pm = a1_pm * factor + a2_pm * inv;
+        let b_pm = b1_pm * factor + b2_pm * inv;
+
+        // Unpremultiply
+        let L = L_pm / result_alpha;
+        let a = a_pm / result_alpha;
+        let b = b_pm / result_alpha;
+
+        // Convert back to RGB
+        let mut rgb = oklab::oklab_to_rgb(L, a, b);
+        rgb.a = result_alpha;
+
+        // Convert RGB to HSLA
+        rgb.into()
+    }
+
+    fn to_hex(&self) -> String {
+        let rgb = self.to_rgb();
+
+        if rgb.a < 1. {
+            return format!(
+                "#{:02X}{:02X}{:02X}{:02X}",
+                ((rgb.r * 255.) as u32),
+                ((rgb.g * 255.) as u32),
+                ((rgb.b * 255.) as u32),
+                ((self.a * 255.) as u32)
+            );
+        }
+
+        format!(
+            "#{:02X}{:02X}{:02X}",
+            ((rgb.r * 255.) as u32),
+            ((rgb.g * 255.) as u32),
+            ((rgb.b * 255.) as u32)
+        )
+    }
+
+    fn parse_hex(hex: &str) -> Result<Self> {
+        let hex = hex.trim_start_matches('#');
+        let len = hex.len();
+        if len != 6 && len != 8 {
+            return Err(anyhow::anyhow!("invalid hex color"));
+        }
+
+        let r = u8::from_str_radix(&hex[0..2], 16)? as f32 / 255.;
+        let g = u8::from_str_radix(&hex[2..4], 16)? as f32 / 255.;
+        let b = u8::from_str_radix(&hex[4..6], 16)? as f32 / 255.;
+        let a = if len == 8 {
+            u8::from_str_radix(&hex[6..8], 16)? as f32 / 255.
+        } else {
+            1.
+        };
+
+        let v = gpui::Rgba { r, g, b, a };
+        let color: Hsla = v.into();
+        Ok(color)
+    }
+
+    fn hue(&self, hue: f32) -> Self {
+        let mut color = *self;
+        color.h = hue.clamp(0., 1.);
+        color
+    }
+
+    fn saturation(&self, saturation: f32) -> Self {
+        let mut color = *self;
+        color.s = saturation.clamp(0., 1.);
+        color
+    }
+
+    fn lightness(&self, lightness: f32) -> Self {
+        let mut color = *self;
+        color.l = lightness.clamp(0., 1.);
+        color
+    }
+}
+
+pub(crate) static DEFAULT_COLORS: once_cell::sync::Lazy<ShadcnColors> =
+    once_cell::sync::Lazy::new(|| {
+        serde_json::from_str(include_str!("./default-colors.json"))
+            .expect("default-colors.json ayrıştırılamadı")
+    });
+
+type ColorScales = HashMap<usize, ShadcnColor>;
+
+mod color_scales {
+    use std::collections::HashMap;
+
+    use super::{ColorScales, ShadcnColor};
+
+    use serde::de::{Deserialize, Deserializer};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<ColorScales, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let mut map = HashMap::new();
+        for color in Vec::<ShadcnColor>::deserialize(deserializer)? {
+            map.insert(color.scale, color);
+        }
+        Ok(map)
+    }
+}
+
+/// enum representing kullanılabilir renk adlar.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum RenkAdi {
+    White,
+    Black,
+    Neutral,
+    Gray,
+    Red,
+    Orange,
+    Amber,
+    Yellow,
+    Lime,
+    Green,
+    Emerald,
+    Teal,
+    Cyan,
+    Sky,
+    Blue,
+    Indigo,
+    Violet,
+    Purple,
+    Fuchsia,
+    Pink,
+    Rose,
+}
+
+impl Display for RenkAdi {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+// Strict color name parser.
+impl TryFrom<&str> for RenkAdi {
+    type Error = anyhow::Error;
+    fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+        match value.to_lowercase().as_str() {
+            "white" => Ok(RenkAdi::White),
+            "black" => Ok(RenkAdi::Black),
+            "neutral" => Ok(RenkAdi::Neutral),
+            "gray" => Ok(RenkAdi::Gray),
+            "red" => Ok(RenkAdi::Red),
+            "orange" => Ok(RenkAdi::Orange),
+            "amber" => Ok(RenkAdi::Amber),
+            "yellow" => Ok(RenkAdi::Yellow),
+            "lime" => Ok(RenkAdi::Lime),
+            "green" => Ok(RenkAdi::Green),
+            "emerald" => Ok(RenkAdi::Emerald),
+            "teal" => Ok(RenkAdi::Teal),
+            "cyan" => Ok(RenkAdi::Cyan),
+            "sky" => Ok(RenkAdi::Sky),
+            "blue" => Ok(RenkAdi::Blue),
+            "indigo" => Ok(RenkAdi::Indigo),
+            "violet" => Ok(RenkAdi::Violet),
+            "purple" => Ok(RenkAdi::Purple),
+            "fuchsia" => Ok(RenkAdi::Fuchsia),
+            "pink" => Ok(RenkAdi::Pink),
+            "rose" => Ok(RenkAdi::Rose),
+            _ => Err(anyhow::anyhow!("Invalid color name")),
+        }
+    }
+}
+
+impl TryFrom<SharedString> for RenkAdi {
+    type Error = anyhow::Error;
+    fn try_from(value: SharedString) -> std::result::Result<Self, Self::Error> {
+        value.as_ref().try_into()
+    }
+}
+
+impl RenkAdi {
+    /// tüm kullanılabilir renk adlar. döndürür.
+    pub fn all() -> [Self; 19] {
+        [
+            RenkAdi::Neutral,
+            RenkAdi::Gray,
+            RenkAdi::Red,
+            RenkAdi::Orange,
+            RenkAdi::Amber,
+            RenkAdi::Yellow,
+            RenkAdi::Lime,
+            RenkAdi::Green,
+            RenkAdi::Emerald,
+            RenkAdi::Teal,
+            RenkAdi::Cyan,
+            RenkAdi::Sky,
+            RenkAdi::Blue,
+            RenkAdi::Indigo,
+            RenkAdi::Violet,
+            RenkAdi::Purple,
+            RenkAdi::Fuchsia,
+            RenkAdi::Pink,
+            RenkAdi::Rose,
+        ]
+    }
+
+    /// renk için verilen ölçek döndürür.
+    ///
+    /// `scale`, `[50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]` değerlerinden biri olabilir.
+    /// falls back için 500 ise out aralık.
+    pub fn scale(&self, scale: usize) -> Hsla {
+        if self == &RenkAdi::White {
+            return DEFAULT_COLORS.white.hsla;
+        }
+        if self == &RenkAdi::Black {
+            return DEFAULT_COLORS.black.hsla;
+        }
+
+        let colors = match self {
+            RenkAdi::Neutral => &DEFAULT_COLORS.neutral,
+            RenkAdi::Gray => &DEFAULT_COLORS.gray,
+            RenkAdi::Red => &DEFAULT_COLORS.red,
+            RenkAdi::Orange => &DEFAULT_COLORS.orange,
+            RenkAdi::Amber => &DEFAULT_COLORS.amber,
+            RenkAdi::Yellow => &DEFAULT_COLORS.yellow,
+            RenkAdi::Lime => &DEFAULT_COLORS.lime,
+            RenkAdi::Green => &DEFAULT_COLORS.green,
+            RenkAdi::Emerald => &DEFAULT_COLORS.emerald,
+            RenkAdi::Teal => &DEFAULT_COLORS.teal,
+            RenkAdi::Cyan => &DEFAULT_COLORS.cyan,
+            RenkAdi::Sky => &DEFAULT_COLORS.sky,
+            RenkAdi::Blue => &DEFAULT_COLORS.blue,
+            RenkAdi::Indigo => &DEFAULT_COLORS.indigo,
+            RenkAdi::Violet => &DEFAULT_COLORS.violet,
+            RenkAdi::Purple => &DEFAULT_COLORS.purple,
+            RenkAdi::Fuchsia => &DEFAULT_COLORS.fuchsia,
+            RenkAdi::Pink => &DEFAULT_COLORS.pink,
+            RenkAdi::Rose => &DEFAULT_COLORS.rose,
+            _ => unreachable!(),
+        };
+
+        if let Some(color) = colors.get(&scale) {
+            color.hsla
+        } else {
+            colors.get(&500).unwrap().hsla
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Deserialize)]
+pub(crate) struct ShadcnColors {
+    pub(crate) black: ShadcnColor,
+    pub(crate) white: ShadcnColor,
+    #[serde(with = "color_scales")]
+    pub(crate) slate: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) gray: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) zinc: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) neutral: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) stone: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) red: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) orange: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) amber: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) yellow: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) lime: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) green: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) emerald: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) teal: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) cyan: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) sky: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) blue: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) indigo: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) violet: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) purple: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) fuchsia: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) pink: ColorScales,
+    #[serde(with = "color_scales")]
+    pub(crate) rose: ColorScales,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize)]
+pub(crate) struct ShadcnColor {
+    #[serde(default)]
+    pub(crate) scale: usize,
+    #[serde(deserialize_with = "from_hsl_channel", alias = "hslChannel")]
+    pub(crate) hsla: Hsla,
+}
+
+/// Deserialize Hsla bir metin içinde biçim "210 40% 98%"
+fn from_hsl_channel<'de, D>(deserializer: D) -> Result<Hsla, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: String = Deserialize::deserialize(deserializer).unwrap();
+
+    let mut parts = s.split_whitespace();
+    if parts.clone().count() != 3 {
+        return Err(D::Error::custom(
+            "expected hslChannel has 3 parts, e.g: '210 40% 98%'",
+        ));
+    }
+
+    fn parse_number(s: &str) -> f32 {
+        s.trim_end_matches('%')
+            .parse()
+            .expect("sayı ayrıştırılamadı")
+    }
+
+    let (h, s, l) = (
+        parse_number(parts.next().unwrap()),
+        parse_number(parts.next().unwrap()),
+        parse_number(parts.next().unwrap()),
+    );
+
+    Ok(hsl(h, s, l))
+}
+
+macro_rules! color_method {
+    ($color:tt, $scale:tt) => {
+        paste::paste! {
+            #[inline]
+            #[allow(unused)]
+            pub fn [<$color _ $scale>]() -> Hsla {
+                if let Some(color) = DEFAULT_COLORS.$color.get(&($scale as usize)) {
+                    return color.hsla;
+                }
+
+                black()
+            }
+        }
+    };
+}
+
+macro_rules! color_methods {
+    ($color:tt) => {
+        paste::paste! {
+            /// renk ile ölçek sayı. döndürür.
+            ///
+            /// possible ölçek sayılar olur:
+            /// 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950
+            ///
+            /// Ölçek sayısı bulunamazsa siyah renk döndürür.
+            #[inline]
+            pub fn [<$color>](scale: usize) -> Hsla {
+                if let Some(color) = DEFAULT_COLORS.$color.get(&scale) {
+                    return color.hsla;
+                }
+
+                black()
+            }
+        }
+
+        color_method!($color, 50);
+        color_method!($color, 100);
+        color_method!($color, 200);
+        color_method!($color, 300);
+        color_method!($color, 400);
+        color_method!($color, 500);
+        color_method!($color, 600);
+        color_method!($color, 700);
+        color_method!($color, 800);
+        color_method!($color, 900);
+        color_method!($color, 950);
+    };
+}
+
+pub fn black() -> Hsla {
+    DEFAULT_COLORS.black.hsla
+}
+
+pub fn white() -> Hsla {
+    DEFAULT_COLORS.white.hsla
+}
+
+color_methods!(slate);
+color_methods!(gray);
+color_methods!(zinc);
+color_methods!(neutral);
+color_methods!(stone);
+color_methods!(red);
+color_methods!(orange);
+color_methods!(amber);
+color_methods!(yellow);
+color_methods!(lime);
+color_methods!(green);
+color_methods!(emerald);
+color_methods!(teal);
+color_methods!(cyan);
+color_methods!(sky);
+color_methods!(blue);
+color_methods!(indigo);
+color_methods!(violet);
+color_methods!(purple);
+color_methods!(fuchsia);
+color_methods!(pink);
+color_methods!(rose);
+
+/// Try için ayrıştırır renk, HEX veya [Tailwind renk](https://tailwindcss.com/docs/colors) expression.
+///
+/// # parametre `renk` olmalıdır bir metin değer listed below:
+///
+/// - `#RRGGBB` - HEX renk metin.
+/// - `#RRGGBBAA` - HEX renk metin ile alpha.
+///
+/// Or Tailwind renk biçim:
+///
+/// - `name` - renk ad `black`, `white`, veya herhangi bir diğer defined içinde `crate::renk`.
+/// - `name-scale` - renk ad ile ölçek.
+/// - `name/opacity` - renk ad ile opacity, `opacity` olmalıdır bir integer arasında 0 ve 100.
+/// - `name-scale/opacity` - renk ad ile ölçek ve opacity.
+///
+pub fn try_parse_color(color: &str) -> Result<Hsla> {
+    if color.starts_with("#") {
+        let rgba = gpui::Rgba::try_from(color)?;
+        return Ok(rgba.into());
+    }
+
+    let mut name = String::new();
+    let mut scale = None;
+    let mut opacity = None;
+    // 0: name, 1: scale, 2: opacity
+    let mut state = 0;
+    let mut part = String::new();
+
+    for c in color.chars() {
+        match c {
+            '-' if state == 0 => {
+                name = std::mem::take(&mut part);
+                state = 1;
+            }
+            '/' if state <= 1 => {
+                if state == 0 {
+                    name = std::mem::take(&mut part);
+                } else if state == 1 {
+                    scale = part.parse::<usize>().ok();
+                    part.clear();
+                }
+                state = 2;
+            }
+            _ => part.push(c),
+        }
+    }
+
+    match state {
+        0 => name = part,
+        1 => scale = part.parse::<usize>().ok(),
+        2 => opacity = part.parse::<f32>().ok(),
+        _ => {}
+    }
+
+    if name.is_empty() {
+        return Err(anyhow!("Empty color name"));
+    }
+
+    let mut hsla = match name.as_str() {
+        "black" => Ok::<Hsla, Error>(crate::black()),
+        "white" => Ok(crate::white()),
+        _ => {
+            let color_name = RenkAdi::try_from(name.as_str())?;
+            if let Some(scale) = scale {
+                Ok(color_name.scale(scale))
+            } else {
+                Ok(color_name.scale(500))
+            }
+        }
+    }?;
+
+    if let Some(opacity) = opacity {
+        if opacity > 100. {
+            return Err(anyhow!("Invalid color opacity"));
+        }
+        hsla = hsla.opacity(opacity / 100.);
+    }
+
+    Ok(hsla)
+}
+
+#[cfg(test)]
+mod tests {
+    use gpui::{rgb, rgba};
+
+    use super::*;
+
+    #[test]
+    fn test_default_colors() {
+        assert_eq!(white(), hsl(0.0, 0.0, 100.0));
+        assert_eq!(black(), hsl(0.0, 0.0, 0.0));
+
+        assert_eq!(slate_50(), hsl(210.0, 40.0, 98.0));
+        assert_eq!(slate_100(), hsl(210.0, 40.0, 96.1));
+        assert_eq!(slate_900(), hsl(222.2, 47.4, 11.2));
+
+        assert_eq!(red_50(), hsl(0.0, 85.7, 97.3));
+        assert_eq!(yellow_100(), hsl(54.9, 96.7, 88.0));
+        assert_eq!(green_200(), hsl(141.0, 78.9, 85.1));
+        assert_eq!(cyan_300(), hsl(187.0, 92.4, 69.0));
+        assert_eq!(blue_400(), hsl(213.1, 93.9, 67.8));
+        assert_eq!(indigo_500(), hsl(238.7, 83.5, 66.7));
+    }
+
+    #[test]
+    fn test_to_hex_string() {
+        let color: Hsla = rgb(0xf8fafc).into();
+        assert_eq!(color.to_hex(), "#F8FAFC");
+
+        let color: Hsla = rgb(0xfef2f2).into();
+        assert_eq!(color.to_hex(), "#FEF2F2");
+
+        let color: Hsla = rgba(0x0413fcaa).into();
+        assert_eq!(color.to_hex(), "#0413FCAA");
+    }
+
+    #[test]
+    fn test_from_hex_string() {
+        let color: Hsla = Hsla::parse_hex("#F8FAFC").unwrap();
+        assert_eq!(color, rgb(0xf8fafc).into());
+
+        let color: Hsla = Hsla::parse_hex("#FEF2F2").unwrap();
+        assert_eq!(color, rgb(0xfef2f2).into());
+
+        let color: Hsla = Hsla::parse_hex("#0413FCAA").unwrap();
+        assert_eq!(color, rgba(0x0413fcaa).into());
+    }
+
+    #[test]
+    fn test_lighten() {
+        let color = super::hsl(240.0, 5.0, 30.0);
+        let color = color.lighten(0.5);
+        assert_eq!(color.l, 0.45000002);
+        let color = color.lighten(0.5);
+        assert_eq!(color.l, 0.675);
+        let color = color.lighten(0.1);
+        assert_eq!(color.l, 0.7425);
+    }
+
+    #[test]
+    fn test_darken() {
+        let color = super::hsl(240.0, 5.0, 96.0);
+        let color = color.darken(0.5);
+        assert_eq!(color.l, 0.48);
+        let color = color.darken(0.5);
+        assert_eq!(color.l, 0.24);
+    }
+
+    #[test]
+    fn test_mix() {
+        let red = Hsla::parse_hex("#FF0000").unwrap();
+        let blue = Hsla::parse_hex("#0000FF").unwrap();
+        let green = Hsla::parse_hex("#00FF00").unwrap();
+        let yellow = Hsla::parse_hex("#FFFF00").unwrap();
+
+        assert_eq!(red.mix(blue, 0.5).to_hex(), "#FF00FF");
+        assert_eq!(green.mix(red, 0.5).to_hex(), "#FFFF00");
+        assert_eq!(blue.mix(yellow, 0.2).to_hex(), "#0098FF");
+    }
+
+    #[test]
+    fn test_mix_oklab() {
+        let red = Hsla::parse_hex("#FF0000").unwrap();
+        let blue = Hsla::parse_hex("#0000FF").unwrap();
+        let transparent = gpui::Hsla {
+            h: 0.0,
+            s: 0.0,
+            l: 0.0,
+            a: 0.0,
+        };
+
+        // Test mixing red with transparent (similar to CSS color-mix example)
+        // color-mix(in oklab, red 20%, transparent) should give red with 20% opacity
+        let result = red.mix_oklab(transparent, 0.2);
+        assert!((result.a - 0.2).abs() < 0.01); // Alpha should be 20%
+
+        // The color should remain red (hue should be preserved)
+        let rgb_result = result.to_rgb();
+        let rgb_red = red.to_rgb();
+        // Allow some tolerance due to color space conversions
+        assert!(
+            (rgb_result.r - rgb_red.r).abs() < 0.05,
+            "Red channel should be preserved"
+        );
+        assert!(rgb_result.g < 0.05, "Green channel should be near 0");
+        assert!(rgb_result.b < 0.05, "Blue channel should be near 0");
+
+        // Test basic color mixing in Oklab space
+        let purple = red.mix_oklab(blue, 0.5);
+        // Oklab mixing should produce different results than HSL mixing
+        let purple_hsl = red.mix(blue, 0.5);
+        assert_ne!(purple.to_hex(), purple_hsl.to_hex());
+
+        // Test factor boundaries (allowing small floating point errors)
+        let result_0 = red.mix_oklab(blue, 0.0);
+        let result_1 = red.mix_oklab(blue, 1.0);
+
+        // Check that result is close to expected (within 1 color unit per channel)
+        let rgb_0 = result_0.to_rgb();
+        let rgb_blue = blue.to_rgb();
+        assert!((rgb_0.r - rgb_blue.r).abs() < 0.01);
+        assert!((rgb_0.g - rgb_blue.g).abs() < 0.01);
+        assert!((rgb_0.b - rgb_blue.b).abs() < 0.01);
+
+        let rgb_1 = result_1.to_rgb();
+        let rgb_red = red.to_rgb();
+        assert!((rgb_1.r - rgb_red.r).abs() < 0.01);
+        assert!((rgb_1.g - rgb_red.g).abs() < 0.01);
+        assert!((rgb_1.b - rgb_red.b).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_color_name() {
+        assert_eq!(RenkAdi::Purple.to_string(), "Purple");
+        assert_eq!(format!("{}", RenkAdi::Green), "Green");
+        assert_eq!(format!("{:?}", RenkAdi::Yellow), "Yellow");
+
+        let color = RenkAdi::Green;
+        assert_eq!(color.scale(500).to_hex(), "#21C55E");
+        assert_eq!(color.scale(1500).to_hex(), "#21C55E");
+
+        for name in RenkAdi::all().iter() {
+            let name1: RenkAdi = name.to_string().as_str().try_into().unwrap();
+            assert_eq!(name1, *name);
+        }
+    }
+
+    #[test]
+    fn test_h_s_l() {
+        let color = hsl(260., 94., 80.);
+        assert_eq!(color.hue(200. / 360.), hsl(200., 94., 80.));
+        assert_eq!(color.saturation(74. / 100.), hsl(260., 74., 80.));
+        assert_eq!(color.lightness(74. / 100.), hsl(260., 94., 74.));
+    }
+
+    #[test]
+    fn test_try_parse_color() {
+        assert_eq!(
+            try_parse_color("#F2F200").ok(),
+            Some(hsla(0.16666667, 1., 0.4745098, 1.0))
+        );
+        assert_eq!(
+            try_parse_color("#00f21888").ok(),
+            Some(hsla(0.34986225, 1.0, 0.4745098, 0.53333336))
+        );
+        assert_eq!(try_parse_color("black").ok(), Some(crate::black()));
+        assert_eq!(try_parse_color("white-800").ok(), Some(crate::white()));
+        assert_eq!(try_parse_color("red").ok(), Some(crate::red_500()));
+        assert_eq!(try_parse_color("blue-600").ok(), Some(crate::blue_600()));
+        assert_eq!(
+            try_parse_color("pink/33").ok(),
+            Some(crate::pink_500().opacity(0.33))
+        );
+        assert_eq!(
+            try_parse_color("orange-300/66").ok(),
+            Some(crate::orange_300().opacity(0.66))
+        );
+    }
+}

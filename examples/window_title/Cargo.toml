@@ -1,0 +1,16 @@
+[package]
+name = "window_title"
+description = "An example of using kavis-ui to create a window with a custom title bar."
+version = "0.6.0"
+publish = false
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+gpui.workspace = true
+gpui_platform.workspace = true
+kavis-ui.workspace = true
+kavis-ui-assets.workspace = true
+
+[lints]
+workspace = true
