@@ -17,6 +17,7 @@ doctest = false
 [features]
 decimal = ["dep:rust_decimal"]
 inspector = ["gpui_macros/inspector", "gpui/inspector"]
+test-support = ["gpui/test-support"]
 
 # For syntax highlighting in Markdown and CodeEditor.
 tree-sitter-languages = [
@@ -96,6 +97,7 @@ tree-sitter-zig = ["dep:tree-sitter-zig"]
 [dependencies]
 anyhow.workspace = true
 gpui = { workspace = true }
+gpui_platform.workspace = true
 gpui_macros.workspace = true
 kavis-ui-macros = { workspace = true }
 icu.workspace = true

@@ -122,6 +122,7 @@ impl LengthExt for Length {
 /// Bir struct için defining edges bir öğe.
 ///
 /// Bir extend version [`gpui::Edges`] için serialize/deserialize.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, Eq, PartialEq)]
 #[repr(C)]
 pub struct Edges<T: Clone + Debug + Default + PartialEq> {
@@ -139,6 +140,7 @@ impl<T> Edges<T>
 where
     T: Clone + Debug + Default + PartialEq,
 {
+    #[allow(dead_code)]
     /// Yeni bir `Edges` örnek ile tüm edges ayarlar için aynı değer oluşturur.
     pub fn all(value: T) -> Self {
         Self {

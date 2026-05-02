@@ -1,7 +1,8 @@
-use gpui::{App, SharedString};
 use std::ops::Deref;
 
 mod async_util;
+pub mod bilesenler;
+pub mod cekirdek;
 mod element_ext;
 mod event;
 mod focus_trap;
@@ -76,6 +77,8 @@ pub mod tooltip;
 pub mod tree;
 
 pub use crate::Disableable;
+pub use bilesenler::*;
+pub use cekirdek::*;
 pub use element_ext::*;
 pub use event::InteractiveElementExt;
 pub use focus_trap::FocusTrapElement;
@@ -96,12 +99,90 @@ pub use virtual_list::{SanalListe, SanalListeKaydirmaTutamaci, h_virtual_list, v
 pub use window_border::{PencereKenarligi, window_border, window_paddings};
 pub use window_ext::PencereUzantisi;
 
+/// GPUI'nin uygulama tarafinda sik gereken API yuzeyini kavis-ui uzerinden
+/// disa aktarir.
+///
+/// `Size` gibi kavis-ui'nin kendi Turkce bilesen adlariyla cakisan GPUI
+/// tipleri root'a ayni adla cikarilmaz; onlar icin [`Boyut`] veya
+/// [`ham_gpui`] kullanilabilir.
+pub use gpui::{
+    Action, AnyElement, AnyView, AnyWindowHandle, App, AppContext, Application, Asset, AssetSource,
+    Axis, Background, Bounds, BoxShadow, ClickEvent, Context, CursorStyle, Decorations,
+    DefiniteLength, Div, DummyKeyboardMapper, Edges, Element, ElementId, Entity, EventEmitter,
+    FocusHandle, Focusable, Global, HighlightStyle, Hsla, InteractiveElement, IntoElement,
+    KeyBinding, KeyBindingContextPredicate, Length, Menu, MenuItem, MouseButton, OwnedMenu,
+    OwnedMenuItem, ParentElement, Path, PathBuilder, Pixels, Platform, Point, Render, RenderOnce,
+    ResizeEdge, Result, Rgba, SharedString, StatefulInteractiveElement, Styled, StyledText,
+    Subscription, Task, TextAlign, TextStyle, Tiling, TitlebarOptions, VisualContext, WeakEntity,
+    Window, WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea,
+    WindowDecorations, WindowHandle, WindowId, WindowOptions, black, blue, deferred, div, fill,
+    green, hsla, img, point, px, red, relative, rems, rgb, rgba, size, svg, transparent_black,
+    transparent_white, uniform_list,
+};
+
+#[cfg(feature = "test-support")]
+pub use gpui::{TestAppContext, TestDispatcher, VisualTestContext};
+
+/// Zorunlu durumlarda ham GPUI ad alanına kavis-ui içinden erişim sağlar.
+///
+/// Yeni uygulama kodunda önce Türkçe alias ve sarmalayıcılar tercih edilmeli;
+/// bu modül, henüz Türkçe karşılığı eklenmemiş düşük seviye API'ler için
+/// kaçış kapısıdır.
+pub mod ham_gpui {
+    pub use gpui::*;
+}
+
+/// `gpui::prelude` içeriklerini kavis-ui üzerinden dışa aktarır.
+pub mod onsoz {
+    pub use gpui::prelude::*;
+}
+
+/// `gpui::actions!` yerine kavis-ui üzerinden aksiyon tipi üretir.
+///
+/// GPUI'nin orijinal makrosu genişlediğinde tüketici crate içinde `gpui`
+/// adında doğrudan bir bağımlılık arar. Bu makro aynı işi `kavis_ui::Action`
+/// üzerinden yapar; böylece uygulama crate'leri yalnızca kavis-ui'yi bilir.
+#[macro_export]
+macro_rules! aksiyonlar {
+    ($namespace:path, [ $( $(#[$attr:meta])* $name:ident),* $(,)? ]) => {
+        #[allow(unused_imports)]
+        use $crate::ham_gpui as gpui;
+        $(
+            #[derive(
+                ::std::clone::Clone,
+                ::std::cmp::PartialEq,
+                ::std::default::Default,
+                ::std::fmt::Debug,
+                $crate::Action
+            )]
+            #[action(namespace = $namespace)]
+            $(#[$attr])*
+            pub struct $name;
+        )*
+    };
+    ([ $( $(#[$attr:meta])* $name:ident),* $(,)? ]) => {
+        #[allow(unused_imports)]
+        use $crate::ham_gpui as gpui;
+        $(
+            #[derive(
+                ::std::clone::Clone,
+                ::std::cmp::PartialEq,
+                ::std::default::Default,
+                ::std::fmt::Debug,
+                $crate::Action
+            )]
+            $(#[$attr])*
+            pub struct $name;
+        )*
+    };
+}
+
 rust_i18n::i18n!("locales", fallback = "en");
 
 /// Bileşenleri başlatır.
 ///
 /// Bileşenleri uygulamanızın giriş noktasında başlatmanız gerekir.
-pub fn init(cx: &mut App) {
+pub fn init(cx: &mut gpui::App) {
     theme::init(cx);
     global_state::init(cx);
     #[cfg(any(feature = "inspector", debug_assertions))]
@@ -145,7 +226,7 @@ pub(crate) fn olcum_etkin() -> bool {
 /// `GPUI_MEASUREMENTS=1` ortam değişkeni gerekir
 #[inline]
 #[track_caller]
-pub fn kosullu_olc(name: impl Into<SharedString>, if_: bool, f: impl FnOnce()) {
+pub fn kosullu_olc(name: impl Into<gpui::SharedString>, if_: bool, f: impl FnOnce()) {
     if if_ && olcum_etkin() {
         let measure = Olcum::new(name);
         f();
@@ -158,18 +239,18 @@ pub fn kosullu_olc(name: impl Into<SharedString>, if_: bool, f: impl FnOnce()) {
 /// Çalışma süresini ölçer.
 #[inline]
 #[track_caller]
-pub fn measure(name: impl Into<SharedString>, f: impl FnOnce()) {
+pub fn measure(name: impl Into<gpui::SharedString>, f: impl FnOnce()) {
     kosullu_olc(name, true, f);
 }
 
 pub struct Olcum {
-    name: SharedString,
+    name: gpui::SharedString,
     start: std::time::Instant,
 }
 
 impl Olcum {
     #[track_caller]
-    pub fn new(name: impl Into<SharedString>) -> Self {
+    pub fn new(name: impl Into<gpui::SharedString>) -> Self {
         Self {
             name: name.into(),
             start: std::time::Instant::now(),
