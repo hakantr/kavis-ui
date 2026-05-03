@@ -8,6 +8,7 @@ use crate::{
     Disableable, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
     h_flex,
     menu::{DropdownMenuPopover, PopupMenu},
+    popover::Yon,
     tooltip::ComponentTooltip,
 };
 
@@ -31,6 +32,7 @@ pub struct AcilirDugme {
     rounded: DugmeYuvarlakligi,
     anchor: Anchor,
     match_trigger_width: bool,
+    auto_flip: bool,
     tooltip: ComponentTooltip,
 }
 
@@ -54,6 +56,8 @@ impl AcilirDugme {
             anchor: Anchor::TopLeft,
             // Acilan menu varsayilan olarak dugme genisligine kilitlenir.
             match_trigger_width: true,
+            // Pencere/ekran sinirina sigmazsa anchor'i otomatik flip et.
+            auto_flip: true,
             tooltip: ComponentTooltip::default(),
         }
     }
@@ -62,6 +66,22 @@ impl AcilirDugme {
     /// Varsayilan: `true`.
     pub fn match_trigger_width(mut self, value: bool) -> Self {
         self.match_trigger_width = value;
+        self
+    }
+
+    /// Acilis yonunu Turkce ad ile ayarlar (`Yon::Asagi` veya `Yon::Yukari`).
+    ///
+    /// Yatay hiza icin [`AcilirDugme::dropdown_menu_with_anchor`] dogrudan
+    /// [`Anchor`] alir.
+    pub fn yon(mut self, yon: impl Into<Yon>) -> Self {
+        self.anchor = yon.into().into();
+        self
+    }
+
+    /// True ise pencere/ekran sinirina sigmazsa popup zit kenara otomatik flip eder.
+    /// Ornegin asagi acilim icin yer yoksa yukari acilir. Varsayilan: `true`.
+    pub fn otomatik_yon(mut self, value: bool) -> Self {
+        self.auto_flip = value;
         self
     }
 
@@ -272,7 +292,8 @@ impl RenderOnce for AcilirDugme {
                     };
                     this.child(
                         DropdownMenuPopover::new(id, self.anchor, trigger, menu)
-                            .match_trigger_width(self.match_trigger_width),
+                            .match_trigger_width(self.match_trigger_width)
+                            .auto_flip(self.auto_flip),
                     )
                 }
                 None => this.child(

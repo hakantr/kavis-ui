@@ -38,6 +38,7 @@ pub struct DropdownMenuPopover<T: Selectable + IntoElement + 'static> {
     style: StyleRefinement,
     anchor: Anchor,
     match_trigger_width: bool,
+    auto_flip: bool,
     trigger: T,
     builder: Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>,
 }
@@ -57,6 +58,7 @@ where
             style: StyleRefinement::default(),
             anchor: anchor.into(),
             match_trigger_width: false,
+            auto_flip: false,
             trigger,
             builder: Rc::new(builder),
         }
@@ -72,6 +74,13 @@ where
     /// Varsayılan: `false`.
     pub fn match_trigger_width(mut self, value: bool) -> Self {
         self.match_trigger_width = value;
+        self
+    }
+
+    /// True ise popup ekran sinirina sigmiyorsa anchor zit kenara otomatik cevrilir.
+    /// Varsayilan: `false`.
+    pub fn auto_flip(mut self, value: bool) -> Self {
+        self.auto_flip = value;
         self
     }
 
@@ -103,6 +112,7 @@ where
             .trigger_style(self.style)
             .anchor(self.anchor)
             .match_trigger_width(self.match_trigger_width)
+            .otomatik_yon(self.auto_flip)
             .content(move |_, window, cx| {
                 // Here is special logic to only create the PopupMenu once and reuse it.
                 // Because this `content` will called in every time render, so we need to store the menu

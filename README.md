@@ -112,6 +112,14 @@ make install
 make dev
 ```
 
+Birleşik GitHub Pages çıktısı için:
+
+```bash
+make build-web-dist
+```
+
+Bu yapı dokümantasyonu `/kavis-ui/`, WASM galerisini `/kavis-ui/gallery/` altında yayınlanacak şekilde `docs/.vitepress/dist` içine hazırlar.
+
 ## Karşılaştırma
 
 | Özellik | Kavis UI | Iced | egui | Qt 6 |

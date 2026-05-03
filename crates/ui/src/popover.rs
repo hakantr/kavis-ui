@@ -15,6 +15,30 @@ pub(crate) fn init(cx: &mut App) {
     cx.bind_keys([KeyBinding::new("escape", Cancel, Some(CONTEXT))])
 }
 
+/// Acilir bir bilesenin tetikleyiciye gore acilis yonu.
+///
+/// `Anchor`'in soyut "kose" semantiginin uzerine, popover'lar icin daha dogal
+/// bir "yon" yuzeyi sunar. Yatay hizalamayi gizler (default sol kenar); ozel
+/// hiza icin [`AcilirKatman::anchor`] dogrudan kullanilabilir.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum Yon {
+    /// Popup tetikleyicinin altina acilir.
+    Asagi,
+    /// Popup tetikleyicinin ustune acilir.
+    Yukari,
+}
+
+impl From<Yon> for Anchor {
+    fn from(yon: Yon) -> Self {
+        match yon {
+            // TopLeft: popup origin = trigger top-left -> popup asagiya, sol hizali.
+            Yon::Asagi => Anchor::TopLeft,
+            // BottomLeft: popup origin = trigger top-left'in ustu -> popup yukariya, sol hizali.
+            Yon::Yukari => Anchor::BottomLeft,
+        }
+    }
+}
+
 /// Bir düğme veya başka bir öğe ile tetiklenebilen açılır katman öğesi.
 #[derive(IntoElement)]
 pub struct AcilirKatman {
@@ -44,6 +68,9 @@ pub struct AcilirKatman {
     overlay_closable: bool,
     /// True ise popup içeriği tetikleyici genişliğine kilitlenir.
     match_trigger_width: bool,
+    /// True ise popup, ekran sinirina sigmiyorsa anchor'i zit kenara otomatik flip eder
+    /// (GPUI `SwitchAnchor` mod'u). False ise mevcut "kenara yapis" davranisi (margin'li).
+    auto_flip: bool,
     on_open_change: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
 }
 
@@ -63,6 +90,7 @@ impl AcilirKatman {
             appearance: true,
             overlay_closable: true,
             match_trigger_width: false,
+            auto_flip: false,
             default_open: false,
             open: None,
             on_open_change: None,
@@ -73,6 +101,25 @@ impl AcilirKatman {
     /// Varsayılan: `false`.
     pub fn match_trigger_width(mut self, value: bool) -> Self {
         self.match_trigger_width = value;
+        self
+    }
+
+    /// Acilis yonunu Turkce ad ile ayarlar.
+    ///
+    /// [`Anchor`] ile dogrudan ozel hiza belirlemek icin [`Self::anchor`] kullanilabilir.
+    pub fn yon(mut self, yon: impl Into<Yon>) -> Self {
+        self.anchor = yon.into().into();
+        self
+    }
+
+    /// True ise popup ekran sinirina sigmiyorsa anchor zit kenara otomatik cevrilir
+    /// (ornegin asagi acilim icin yer yoksa yukari acilir). Varsayilan `false`.
+    ///
+    /// Not: GPUI'nin tek `fit_mode` modeli nedeniyle bu mod, kenar margin'i
+    /// (mevcut 8px) yerine SwitchAnchor mantigi kullanir; kenara yapisma yine
+    /// gerceklesir ama margin sifir olur.
+    pub fn otomatik_yon(mut self, value: bool) -> Self {
+        self.auto_flip = value;
         self
     }
 
@@ -338,6 +385,7 @@ impl AcilirKatman {
     pub(crate) fn render_popover<E>(
         anchor: Anchor,
         position: Rc<Cell<Point<Pixels>>>,
+        auto_flip: bool,
         content: E,
         _: &mut Window,
         _: &mut App,
@@ -345,14 +393,14 @@ impl AcilirKatman {
     where
         E: IntoElement + 'static,
     {
-        deferred(
-            anchored()
-                .snap_to_window_with_margin(px(8.))
-                .anchor(anchor)
-                .position(position.get())
-                .child(div().relative().child(content)),
-        )
-        .with_priority(1)
+        // auto_flip true ise GPUI'nin `anchored()` default'u olan SwitchAnchor moduna
+        // birakilir; bu mod, popup ekrana sigmiyorsa anchor'i zit kenara cevirir.
+        // false ise mevcut "kenara yapis" davranisi (8px margin) korunur.
+        let mut element = anchored().anchor(anchor).position(position.get());
+        if !auto_flip {
+            element = element.snap_to_window_with_margin(px(8.));
+        }
+        deferred(element.child(div().relative().child(content))).with_priority(1)
     }
 
     pub(crate) fn render_popover_content(
@@ -480,6 +528,7 @@ impl RenderOnce for AcilirKatman {
         el.child(Self::render_popover(
             self.anchor,
             position,
+            self.auto_flip,
             popover_content,
             window,
             cx,
