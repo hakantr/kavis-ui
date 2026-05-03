@@ -1,28 +1,46 @@
 const API_URL = "https://api.github.com/repos/hakantr/kavis-ui";
-const IS_BUILD = process.env.NODE_ENV === "production";
+const FALLBACK = { stargazers_count: 0 };
+
+function githubHeaders() {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
+  return headers;
+}
+
+function fallback(reason) {
+  console.warn(`[repo.data] ${reason}, fallback kullanılıyor`);
+  return FALLBACK;
+}
 
 export default {
   async load() {
-    const res = await fetch(API_URL);
-    if (!res.ok) {
-      if (IS_BUILD) {
-        throw new Error(
-          `GitHub API request failed: ${res.status} ${res.statusText}`
-        );
-      }
-      console.warn(`[repo.data] GitHub API rate limited (${res.status}), using fallback`);
-      return { stargazers_count: 0 };
+    let res;
+    try {
+      res = await fetch(API_URL, { headers: githubHeaders() });
+    } catch (err) {
+      return fallback(`GitHub API isteği başarısız oldu: ${err.message}`);
     }
 
-    const data = await res.json();
+    if (!res.ok) {
+      return fallback(`GitHub API ${res.status} ${res.statusText} döndü`);
+    }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      return fallback(`GitHub API JSON yanıtı okunamadı: ${err.message}`);
+    }
+
     if (typeof data.stargazers_count !== "number") {
-      if (IS_BUILD) {
-        throw new Error(
-          `GitHub API returned unexpected data: ${JSON.stringify(data).slice(0, 200)}`
-        );
-      }
-      console.warn("[repo.data] GitHub API returned unexpected data, using fallback");
-      return { stargazers_count: 0 };
+      return fallback("GitHub API beklenen repo verisini döndürmedi");
     }
 
     return data;

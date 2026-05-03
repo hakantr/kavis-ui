@@ -47,6 +47,8 @@ jobs:
 
       - name: Build web distribution
         working-directory: kavis-ui
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./script/build-web-dist.sh
 
       - name: Setup Pages
