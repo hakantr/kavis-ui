@@ -226,17 +226,13 @@ impl RenderOnce for ListeOgesi {
             .when_some(self.suffix, |this, suffix| this.child(suffix(window, cx)))
             .map(|this| {
                 if is_selectable && (self.selected || self.secondary_selected) {
-                    // list_active is forced translucent (alpha <= 0.2) so theme `foreground`
-                    // text stays readable over it. accent is solid; pair it with accent_foreground
-                    // to guarantee contrast even on custom themes where accent diverges from
-                    // the default secondary.
-                    let (bg, fg) = if self.selected && cx.theme().list.active_highlight {
-                        (cx.theme().list_active, cx.theme().foreground)
+                    let bg = if self.selected && cx.theme().list.active_highlight {
+                        cx.theme().list_active
                     } else {
-                        (cx.theme().accent, cx.theme().accent_foreground)
+                        cx.theme().accent
                     };
 
-                    this.when(!self.secondary_selected, |this| this.bg(bg).text_color(fg))
+                    this.when(!self.secondary_selected, |this| this.bg(bg))
                         .when(cx.theme().list.active_highlight, |this| {
                             this.child(
                                 div()

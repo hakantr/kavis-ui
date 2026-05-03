@@ -7,7 +7,7 @@ use gpui::{
     AnyElement, App, ClickEvent, Context, Decorations, Hsla, InteractiveElement, IntoElement,
     MouseButton, ParentElement, Pixels, Render, RenderOnce, StatefulInteractiveElement as _,
     StyleRefinement, Styled, TitlebarOptions, Window, WindowControlArea, div,
-    prelude::FluentBuilder as _, px, white,
+    prelude::FluentBuilder as _, px,
 };
 use smallvec::SmallVec;
 
@@ -123,11 +123,7 @@ impl ControlIcon {
     #[inline]
     fn hover_fg(&self, cx: &App) -> Hsla {
         if self.is_close() {
-            // Use a fixed light foreground for the close button hover (red bg). The theme's
-            // danger_foreground is intentionally branded (a darker red) in dark mode, which
-            // does not contrast against the danger bg; cross-platform close buttons all use
-            // a light foreground on the destructive hover color.
-            white()
+            cx.theme().danger_foreground
         } else {
             cx.theme().secondary_foreground
         }

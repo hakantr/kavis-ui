@@ -329,7 +329,6 @@ impl RenderOnce for UzerineGelmeKarti {
         root.child(AcilirKatman::render_popover(
             self.anchor,
             position,
-            false,
             popover_content,
             window,
             cx,

@@ -48,6 +48,7 @@ reqwest = { git = "https://github.com/zed-industries/reqwest.git", default-featu
 ], package = "reqwest", version = "0.12.8" }
 
 anyhow = "1"
+getrandom = { version = "0.4.2", features = ["wasm_js"] }
 icu = { version = "2.2.0", features = ["compiled_data"] }
 log = "0.4"
 lsp-types = { version = "0.97.0", features = ["proposed"] }

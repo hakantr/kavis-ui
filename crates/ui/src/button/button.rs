@@ -895,35 +895,23 @@ impl DugmeVaryanti {
     }
 
     fn selected(&self, outline: bool, cx: &mut App) -> ButtonVariantStyle {
-        // Status variants (Danger/Warning/Success/Info/Custom) intentionally use translucent
-        // backgrounds in hover/active. Reusing solid `_active` bg here would put the brand
-        // color text on top of the same brand color (theme `*_foreground` overrides the brand
-        // color in dark mode, so it is not a reliable contrast source). Mirror the hover/active
-        // pattern: translucent bg over the theme background keeps brand-colored text legible.
         let bg = match self {
             Self::Default => cx.theme().input.mix_oklab(cx.theme().transparent, 0.7),
             Self::Primary => cx.theme().button_primary_active,
             Self::Secondary | Self::Ghost => cx.theme().secondary_active,
-            Self::Danger => cx.theme().danger.mix_oklab(cx.theme().transparent, 0.5),
-            Self::Warning => cx.theme().warning.mix_oklab(cx.theme().transparent, 0.5),
-            Self::Success => cx.theme().success.mix_oklab(cx.theme().transparent, 0.5),
-            Self::Info => cx.theme().info.mix_oklab(cx.theme().transparent, 0.5),
+            Self::Danger => cx.theme().danger_active,
+            Self::Warning => cx.theme().warning_active,
+            Self::Success => cx.theme().success_active,
+            Self::Info => cx.theme().info_active,
             Self::Link => cx.theme().transparent,
             Self::Text => cx.theme().transparent,
-            Self::Custom(colors) => colors.color.mix_oklab(cx.theme().transparent, 0.5),
+            Self::Custom(colors) => colors.active,
         };
 
         let border = self.border_color(bg, outline, cx);
         let fg = match self {
             Self::Link => cx.theme().link_active,
             Self::Text => cx.theme().foreground.opacity(0.7),
-            // Default/Primary/Secondary/Ghost have proper contrast foregrounds for their solid bg.
-            // Status variants use brand-colored text on the translucent bg above.
-            Self::Danger => cx.theme().danger,
-            Self::Warning => cx.theme().warning,
-            Self::Success => cx.theme().success,
-            Self::Info => cx.theme().info,
-            Self::Custom(colors) => colors.color,
             _ => self.text_color(false, cx),
         };
         let underline = self.underline(cx);
