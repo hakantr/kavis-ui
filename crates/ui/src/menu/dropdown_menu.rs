@@ -37,6 +37,7 @@ pub struct DropdownMenuPopover<T: Selectable + IntoElement + 'static> {
     id: ElementId,
     style: StyleRefinement,
     anchor: Anchor,
+    match_trigger_width: bool,
     trigger: T,
     builder: Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>,
 }
@@ -55,6 +56,7 @@ where
             id: SharedString::from(format!("dropdown-menu:{:?}", id)).into(),
             style: StyleRefinement::default(),
             anchor: anchor.into(),
+            match_trigger_width: false,
             trigger,
             builder: Rc::new(builder),
         }
@@ -63,6 +65,13 @@ where
     /// sabitleyici köşe için açılır menü açılır katman ayarlar.
     pub fn anchor(mut self, anchor: impl Into<Anchor>) -> Self {
         self.anchor = anchor.into();
+        self
+    }
+
+    /// True ise açılır menü genişliği tetikleyici öğenin genişliğine eşitlenir.
+    /// Varsayılan: `false`.
+    pub fn match_trigger_width(mut self, value: bool) -> Self {
+        self.match_trigger_width = value;
         self
     }
 
@@ -93,6 +102,7 @@ where
             .trigger(self.trigger)
             .trigger_style(self.style)
             .anchor(self.anchor)
+            .match_trigger_width(self.match_trigger_width)
             .content(move |_, window, cx| {
                 // Here is special logic to only create the PopupMenu once and reuse it.
                 // Because this `content` will called in every time render, so we need to store the menu

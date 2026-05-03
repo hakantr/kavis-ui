@@ -42,6 +42,8 @@ pub struct AcilirKatman {
     mouse_button: MouseButton,
     appearance: bool,
     overlay_closable: bool,
+    /// True ise popup içeriği tetikleyici genişliğine kilitlenir.
+    match_trigger_width: bool,
     on_open_change: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
 }
 
@@ -60,10 +62,18 @@ impl AcilirKatman {
             mouse_button: MouseButton::Left,
             appearance: true,
             overlay_closable: true,
+            match_trigger_width: false,
             default_open: false,
             open: None,
             on_open_change: None,
         }
+    }
+
+    /// True ise açılır pencere genişliği tetikleyici öğenin genişliğine eşitlenir.
+    /// Varsayılan: `false`.
+    pub fn match_trigger_width(mut self, value: bool) -> Self {
+        self.match_trigger_width = value;
+        self
     }
 
     /// Açılır katmanın sabitleme köşesini ayarlar. Varsayılan `Anchor::TopLeft` değeridir.
@@ -446,6 +456,10 @@ impl RenderOnce for AcilirKatman {
                 .track_focus(&focus_handle)
                 .key_context(CONTEXT)
                 .on_action(window.listener_for(&state, AcilirKatmanDurumu::on_action_cancel))
+                .when(self.match_trigger_width, |this| {
+                    // Tetikleyici genişliğine kilitle: container ve içeriği aynı genişlikte kalsın.
+                    this.w(trigger_bounds.size.width)
+                })
                 .when_some(self.content, |this, content| {
                     this.child(state.update(cx, |state, cx| (content)(state, window, cx)))
                 })

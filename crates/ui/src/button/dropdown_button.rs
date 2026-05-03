@@ -30,6 +30,7 @@ pub struct AcilirDugme {
     size: Size,
     rounded: DugmeYuvarlakligi,
     anchor: Anchor,
+    match_trigger_width: bool,
     tooltip: ComponentTooltip,
 }
 
@@ -49,9 +50,19 @@ impl AcilirDugme {
             variant: DugmeVaryanti::default(),
             size: Size::default(),
             rounded: DugmeYuvarlakligi::default(),
-            anchor: Anchor::TopRight,
+            // Sol kenar hizali asagi acilim — popup, dugmenin sol kenarindan baslar.
+            anchor: Anchor::TopLeft,
+            // Acilan menu varsayilan olarak dugme genisligine kilitlenir.
+            match_trigger_width: true,
             tooltip: ComponentTooltip::default(),
         }
+    }
+
+    /// Acilan menunun, dugme genisligine kilitlenip kilitlenmeyecegini belirler.
+    /// Varsayilan: `true`.
+    pub fn match_trigger_width(mut self, value: bool) -> Self {
+        self.match_trigger_width = value;
+        self
     }
 
     /// araç ipucu metin için açılır düğme ayarlar.
@@ -259,7 +270,10 @@ impl RenderOnce for AcilirDugme {
                         size: self.size,
                         variant: self.variant,
                     };
-                    this.child(DropdownMenuPopover::new(id, self.anchor, trigger, menu))
+                    this.child(
+                        DropdownMenuPopover::new(id, self.anchor, trigger, menu)
+                            .match_trigger_width(self.match_trigger_width),
+                    )
                 }
                 None => this.child(
                     button
