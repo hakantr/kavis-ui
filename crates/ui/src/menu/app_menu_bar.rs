@@ -7,7 +7,7 @@ use crate::{
     menu::PopupMenu,
 };
 use gpui::{
-    App, AppContext as _, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
+    App, AppContext, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
     InteractiveElement as _, IntoElement, KeyBinding, MouseButton, OwnedMenu, ParentElement,
     Render, SharedString, StatefulInteractiveElement, Styled, Subscription, Window, anchored,
     deferred, div, prelude::FluentBuilder, px,
@@ -32,6 +32,11 @@ pub struct AppMenuBar {
 impl AppMenuBar {
     /// Yeni bir uygulama menü çubuk oluşturur.
     pub fn new(cx: &mut App) -> Entity<Self> {
+        Self::new_in(cx)
+    }
+
+    /// Bir view/model baglami icinden uygulama menu cubugu olusturur.
+    pub fn new_in<Cx: AppContext>(cx: &mut Cx) -> Entity<Self> {
         cx.new(|cx| {
             let mut this = Self {
                 selected_index: None,

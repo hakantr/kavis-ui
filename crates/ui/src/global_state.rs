@@ -28,6 +28,12 @@ impl KureselDurum {
         }
     }
 
+    pub(crate) fn ensure_global(cx: &mut App) {
+        if !cx.has_global::<Self>() {
+            cx.set_global(Self::new());
+        }
+    }
+
     pub fn global(cx: &App) -> &Self {
         cx.global::<Self>()
     }

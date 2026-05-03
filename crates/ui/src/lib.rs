@@ -8,6 +8,7 @@ mod event;
 mod focus_trap;
 mod geometry;
 pub mod global_state;
+pub mod gpui_turkce;
 mod i18n;
 mod icon;
 mod index_path;
@@ -98,6 +99,17 @@ pub use title_bar::*;
 pub use virtual_list::{SanalListe, SanalListeKaydirmaTutamaci, h_virtual_list, v_virtual_list};
 pub use window_border::{PencereKenarligi, window_border, window_paddings};
 pub use window_ext::PencereUzantisi;
+
+/// Turkce adlandirilmis GPUI yuzeyi.
+pub mod turkce {
+    pub use crate::gpui_turkce::*;
+    pub use crate::menu::{
+        UygulamaMenuCubugu, UygulamaMenuOgesi, UygulamaMenusu, uygulama_menu_cubugu_gerekli_mi,
+        uygulama_menu_cubugu_olustur, uygulama_menu_cubugu_olustur_baglam,
+        uygulama_menu_cubugu_olustur_zorla, uygulama_menu_cubugu_olustur_zorla_baglam,
+        uygulama_menulerini_kaydet,
+    };
+}
 
 /// GPUI'nin uygulama tarafinda sik gereken API yuzeyini kavis-ui uzerinden
 /// disa aktarir.
