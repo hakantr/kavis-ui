@@ -31,7 +31,7 @@ story = { path = "crates/story" }
 
 # Pinned to the same Zed revision used by 0.232.3 for GPUI API stability.
 gpui = { path = "../zed/crates/gpui" }
-gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
+gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "wayland", "x11"] }
 gpui_web = { path = "../zed/crates/gpui_web" }
 gpui_macros = { path = "../zed/crates/gpui_macros" }
 reqwest_client = { path = "../zed/crates/reqwest_client" }

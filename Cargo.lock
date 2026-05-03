@@ -3214,7 +3214,6 @@ dependencies = [
  "windows-core 0.61.2",
  "windows-numerics 0.2.0",
  "windows-registry 0.5.3",
- "zed-scap",
 ]
 
 [[package]]

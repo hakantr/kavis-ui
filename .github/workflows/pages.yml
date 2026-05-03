@@ -34,12 +34,13 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Install wasm-bindgen-cli
-        run: cargo install wasm-bindgen-cli --version 0.2.118 --locked
-
       - name: Use Zed Git dependencies
         working-directory: kavis-ui
         run: ./script/use-zed-git-deps.sh
+
+      - name: Install wasm-bindgen-cli
+        working-directory: kavis-ui
+        run: ./script/install-wasm-bindgen-cli.sh
 
       - name: Build web distribution
         working-directory: kavis-ui

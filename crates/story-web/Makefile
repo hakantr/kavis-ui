@@ -9,7 +9,7 @@ install: ## Install all dependencies
 	@echo "Checking Rust WASM target..."
 	@rustup target add wasm32-unknown-unknown || true
 	@echo "Checking wasm-bindgen-cli..."
-	@cargo install wasm-bindgen-cli --version 0.2.118 --locked || true
+	@../../script/install-wasm-bindgen-cli.sh || true
 	@echo "Installing frontend dependencies..."
 	@cd www && bun install
 
