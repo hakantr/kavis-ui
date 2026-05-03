@@ -1,14 +1,19 @@
 use gpui::Corners;
 use gpui::{
     Anchor, App, Context, Edges, ElementId, InteractiveElement as _, IntoElement, ParentElement,
-    RenderOnce, SharedString, StyleRefinement, Styled, Window, div, prelude::FluentBuilder,
+    Pixels, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, prelude::FluentBuilder,
 };
 
 use crate::{
-    Disableable, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
+    Disableable, ElementExt as _, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
     menu::{DropdownMenu, PopupMenu},
     tooltip::ComponentTooltip,
 };
+
+#[derive(Default)]
+struct AcilirDugmeOlcuDurumu {
+    width: Pixels,
+}
 
 use super::{Dugme, DugmeVaryanti, DugmeVaryantlari, DugmeYuvarlakligi};
 
@@ -153,12 +158,38 @@ impl Selectable for AcilirDugme {
 }
 
 impl RenderOnce for AcilirDugme {
-    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let rounded = self.variant.is_ghost() && !self.selected;
+
+        let bounds_id: ElementId =
+            SharedString::from(format!("acilir-dugme-bounds:{:?}", &self.id)).into();
+        let bounds_state =
+            window.use_keyed_state(bounds_id, cx, |_, _| AcilirDugmeOlcuDurumu::default());
+
+        let wrapped_menu = self.menu.map(|builder| {
+            let bounds_state = bounds_state.clone();
+            let f: Box<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu> =
+                Box::new(move |menu, window, cx| {
+                    let width = bounds_state.read(cx).width;
+                    let menu = if width > Pixels::ZERO {
+                        menu.min_w(width)
+                    } else {
+                        menu
+                    };
+                    builder(menu, window, cx)
+                });
+            f
+        });
 
         div()
             .id(self.id)
             .h_flex()
+            .on_prepaint({
+                let bounds_state = bounds_state.clone();
+                move |bounds, _, cx| {
+                    bounds_state.update(cx, |s, _| s.width = bounds.size.width);
+                }
+            })
             .refine_style(&self.style)
             .when_some(self.button, |this, button| {
                 this.child(
@@ -184,7 +215,7 @@ impl RenderOnce for AcilirDugme {
                         .with_size(self.size)
                         .with_variant(self.variant),
                 )
-                .when_some(self.menu, |this, menu| {
+                .when_some(wrapped_menu, |this, menu| {
                     this.child(
                         Dugme::new("popup")
                             .icon(SimgeAdi::ChevronDown)
