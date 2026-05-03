@@ -45,7 +45,7 @@ impl<T> DropdownMenuPopover<T>
 where
     T: Selectable + IntoElement + 'static,
 {
-    pub(crate) fn new(
+    fn new(
         id: ElementId,
         anchor: impl Into<Anchor>,
         trigger: T,

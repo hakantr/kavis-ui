@@ -14,13 +14,10 @@ use icu::{
     },
     locale::{Locale, locale},
 };
-#[cfg(test)]
 use once_cell::sync::Lazy;
-#[cfg(test)]
 use std::sync::RwLock;
 use writeable::Writeable;
 
-#[cfg(test)]
 static LOCALE_OVERRIDE: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -42,7 +39,7 @@ impl NumberSymbols {
         );
 
         let Ok(formatter) = formatter else {
-            return Self::turkish();
+            return Self::english();
         };
 
         let group_separator =
@@ -59,15 +56,14 @@ impl NumberSymbols {
         }
     }
 
-    fn turkish() -> Self {
+    fn english() -> Self {
         Self {
-            group_separator: Some('.'),
-            decimal_separator: ',',
+            group_separator: Some(','),
+            decimal_separator: '.',
         }
     }
 }
 
-#[cfg(test)]
 pub(crate) fn set_locale_override(locale: &str) {
     let mut locale_override = LOCALE_OVERRIDE
         .write()
@@ -283,26 +279,24 @@ fn icu_date(date: NaiveDate) -> Option<Date<Gregorian>> {
 }
 
 fn current_locale_tag() -> String {
-    #[cfg(test)]
-    if let Some(locale) = test_locale_override() {
-        return locale;
-    }
-
-    system_locale_tag().unwrap_or_else(|| "tr".to_string())
-}
-
-#[cfg(test)]
-fn test_locale_override() -> Option<String> {
-    LOCALE_OVERRIDE
+    if let Some(locale) = LOCALE_OVERRIDE
         .read()
         .expect("yerel ayar geçersiz kılma kilidi zehirlenmiş olmamalı")
         .clone()
+    {
+        return locale;
+    }
+
+    let app_locale = crate::locale();
+    system_locale_tag()
+        .or_else(|| canonical_locale_tag(&app_locale))
+        .unwrap_or_else(|| "en".to_string())
 }
 
 fn locale_from_str(locale: &str) -> Locale {
     canonical_locale_tag(locale)
         .and_then(|locale| locale.parse::<Locale>().ok())
-        .unwrap_or_else(|| locale!("tr").into())
+        .unwrap_or_else(|| locale!("en").into())
 }
 
 fn canonical_locale_tag(locale: &str) -> Option<String> {
@@ -342,18 +336,18 @@ fn system_locale_tag() -> Option<String> {
 
 fn fallback_month_name(month: u32) -> &'static str {
     match month {
-        1 => "Ocak",
-        2 => "Şubat",
-        3 => "Mart",
-        4 => "Nisan",
-        5 => "Mayıs",
-        6 => "Haziran",
-        7 => "Temmuz",
-        8 => "Ağustos",
-        9 => "Eylül",
-        10 => "Ekim",
-        11 => "Kasım",
-        12 => "Aralık",
+        1 => "January",
+        2 => "February",
+        3 => "March",
+        4 => "April",
+        5 => "May",
+        6 => "June",
+        7 => "July",
+        8 => "August",
+        9 => "September",
+        10 => "October",
+        11 => "November",
+        12 => "December",
         _ => "",
     }
 }
@@ -365,13 +359,13 @@ fn normalize_short_month_name(value: &str) -> String {
 
 fn fallback_weekday_name(weekday: u32) -> &'static str {
     match weekday {
-        0 => "Paz",
-        1 => "Pzt",
-        2 => "Sal",
-        3 => "Çar",
-        4 => "Per",
-        5 => "Cum",
-        6 => "Cmt",
+        0 => "Sun",
+        1 => "Mon",
+        2 => "Tue",
+        3 => "Wed",
+        4 => "Thu",
+        5 => "Fri",
+        6 => "Sat",
         _ => "",
     }
 }
