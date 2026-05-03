@@ -40,7 +40,7 @@ in_zed_patch {
 }
 
 /^gpui_platform = \{ path = "\.\.\/zed\/crates\/gpui_platform"/ {
-    zed_dep("gpui_platform", "[\"font-kit\", \"runtime_shaders\", \"screen-capture\", \"wayland\", \"x11\"]")
+    zed_dep("gpui_platform", "[\"font-kit\", \"runtime_shaders\", \"wayland\", \"x11\"]")
     next
 }
 
