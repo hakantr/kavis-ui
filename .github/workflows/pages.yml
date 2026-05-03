@@ -26,13 +26,6 @@ jobs:
         with:
           path: kavis-ui
 
-      - name: Checkout Zed GPUI
-        uses: actions/checkout@v4
-        with:
-          repository: zed-industries/zed
-          ref: ${{ env.ZED_REV }}
-          path: zed
-
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -43,6 +36,10 @@ jobs:
 
       - name: Install wasm-bindgen-cli
         run: cargo install wasm-bindgen-cli --version 0.2.118 --locked
+
+      - name: Use Zed Git dependencies
+        working-directory: kavis-ui
+        run: ./script/use-zed-git-deps.sh
 
       - name: Build web distribution
         working-directory: kavis-ui
