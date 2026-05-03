@@ -27,6 +27,7 @@ pub struct AppMenuBar {
     menus: Vec<Entity<AppMenu>>,
     selected_index: Option<usize>,
     action_context: Option<FocusHandle>,
+    _global_observer: Option<Subscription>,
 }
 
 impl AppMenuBar {
@@ -38,17 +39,40 @@ impl AppMenuBar {
     /// Bir view/model baglami icinden uygulama menu cubugu olusturur.
     pub fn new_in<Cx: AppContext>(cx: &mut Cx) -> Entity<Self> {
         cx.new(|cx| {
+            KureselDurum::ensure_global(cx);
+            let observer =
+                cx.observe_global::<KureselDurum>(|this: &mut Self, cx| this.reload(cx));
             let mut this = Self {
                 selected_index: None,
                 action_context: None,
                 menus: Vec::new(),
+                _global_observer: Some(observer),
             };
             this.reload(cx);
             this
         })
     }
 
+    /// Menüleri yeniden yükler. [`reload`] icin Turkce ad.
+    pub fn yeniden_yukle(&mut self, cx: &mut Context<Self>) {
+        self.reload(cx);
+    }
+
+    /// Pencere baglamiyla yeniden yukler; acik menu varsa once duzgunce kapatip
+    /// onceki odagi geri verir.
+    pub fn yeniden_yukle_pencere(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.selected_index.is_some() {
+            self.set_selected_index(None, window, cx);
+        }
+        self.reload(cx);
+    }
+
     /// Menüleri uygulamadan yeniden yükler.
+    ///
+    /// Acik bir menu varken cagrildiginda secili indeks hala gecerli aralikta
+    /// ise korunur (yeni icerikle popup yeniden uretilir). Indeks taşarsa
+    /// secim ve onceki odak referansi temizlenir; bu ozel durumda odagi
+    /// duzgun geri vermek icin [`yeniden_yukle_pencere`] tercih edilmelidir.
     pub fn reload(&mut self, cx: &mut Context<Self>) {
         let menu_bar = cx.entity();
         let menus: Vec<OwnedMenu> = KureselDurum::global(cx)
@@ -61,8 +85,12 @@ impl AppMenuBar {
             .enumerate()
             .map(|(ix, menu)| AppMenu::new(ix, menu, menu_bar.clone(), cx))
             .collect();
-        self.selected_index = None;
-        self.action_context = None;
+        if let Some(ix) = self.selected_index {
+            if ix >= self.menus.len() {
+                self.selected_index = None;
+                self.action_context = None;
+            }
+        }
         cx.notify();
     }
 
@@ -143,9 +171,14 @@ pub(super) struct AppMenu {
     name: SharedString,
     menu: OwnedMenu,
     popup_menu: Option<Entity<PopupMenu>>,
+    /// Tetik dugmesine yapilan dis-tiklamayla popup'u kapattiktan hemen sonra
+    /// gelen click olayinin menuyu yeniden acmasini engellemek icin tutulur.
+    just_dismissed_at: Option<std::time::Instant>,
 
     _subscription: Option<Subscription>,
 }
+
+const TRIGGER_CLICK_GRACE: std::time::Duration = std::time::Duration::from_millis(250);
 
 impl AppMenu {
     pub(super) fn new(
@@ -161,6 +194,7 @@ impl AppMenu {
             name,
             menu: menu.clone(),
             popup_menu: None,
+            just_dismissed_at: None,
             _subscription: None,
         })
     }
@@ -211,6 +245,7 @@ impl AppMenu {
     ) {
         self._subscription.take();
         self.popup_menu.take();
+        self.just_dismissed_at = Some(std::time::Instant::now());
         self.menu_bar.update(cx, |state, cx| {
             state.on_cancel(&Cancel, window, cx);
         });
@@ -222,6 +257,12 @@ impl AppMenu {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if let Some(at) = self.just_dismissed_at.take() {
+            if at.elapsed() < TRIGGER_CLICK_GRACE {
+                return;
+            }
+        }
+
         let is_selected = self.menu_bar.read(cx).selected_index == Some(self.ix);
 
         _ = self.menu_bar.update(cx, |state, cx| {
@@ -320,6 +361,7 @@ mod tests {
                     menus: Vec::new(),
                     selected_index: None,
                     action_context: None,
+                    _global_observer: None,
                 }),
                 first_focus,
                 second_focus,

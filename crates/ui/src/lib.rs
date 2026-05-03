@@ -144,9 +144,18 @@ pub mod ham_gpui {
     pub use gpui::*;
 }
 
-/// `gpui::prelude` içeriklerini kavis-ui üzerinden dışa aktarır.
-pub mod onsoz {
+/// `gpui::prelude` icerigini ham haliyle disa aktarir.
+///
+/// Türkçe isimli prelude için bkz. [`onsoz`].
+pub mod gpui_onsoz {
     pub use gpui::prelude::*;
+}
+
+/// Sik kullanilan Turkce kavis-ui adlarini tek import ile getirir.
+///
+/// Ham GPUI prelude için bkz. [`gpui_onsoz`].
+pub mod onsoz {
+    pub use crate::gpui_turkce::onsoz::*;
 }
 
 /// `gpui::actions!` yerine kavis-ui üzerinden aksiyon tipi üretir.

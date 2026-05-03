@@ -155,6 +155,12 @@ impl UygulamaMenuOgesi {
         Self::AltMenu(menu)
     }
 
+    /// Sistem tarafindan doldurulan bir alt menu girdisi olusturur (ornek:
+    /// macOS'ta Servisler).
+    ///
+    /// **Platform notu**: Bu girdi yalnizca macOS'ta gorunur. Linux/Windows'ta
+    /// kavis-ui'in [`AppMenuBar`] cubugu sessizce atlar; bu, ilgili sistem
+    /// servisinin yalnizca macOS'ta bulunmasindandir.
     pub fn sistem_menusu(baslik: impl Into<SharedString>, tur: SistemMenusuTuru) -> Self {
         Self::SistemMenusu {
             baslik: baslik.into(),
@@ -182,33 +188,65 @@ impl UygulamaMenuOgesi {
         }
     }
 
+    /// Yalnizca [`UygulamaMenuOgesi::Aksiyon`] varyantinda etkilidir; diger
+    /// varyantlarda hata ayiklama derlemelerinde panic eder.
     pub fn isletim_sistemi_aksiyonu(mut self, aksiyon: IsletimSistemiAksiyonu) -> Self {
-        if let Self::Aksiyon {
-            isletim_sistemi_aksiyonu,
-            ..
-        } = &mut self
-        {
-            *isletim_sistemi_aksiyonu = Some(aksiyon);
+        match &mut self {
+            Self::Aksiyon {
+                isletim_sistemi_aksiyonu,
+                ..
+            } => {
+                *isletim_sistemi_aksiyonu = Some(aksiyon);
+            }
+            other => debug_assert!(
+                false,
+                "isletim_sistemi_aksiyonu yalnizca Aksiyon varyantinda kullanilabilir; \
+                 cagrildigi varyant: {}",
+                other.varyant_adi(),
+            ),
         }
         self
     }
 
+    /// Yalnizca [`UygulamaMenuOgesi::Aksiyon`] varyantinda etkilidir; diger
+    /// varyantlarda hata ayiklama derlemelerinde panic eder.
     pub fn secili(mut self, secili: bool) -> Self {
-        if let Self::Aksiyon { secili: eski, .. } = &mut self {
-            *eski = secili;
+        match &mut self {
+            Self::Aksiyon { secili: eski, .. } => *eski = secili,
+            other => debug_assert!(
+                false,
+                "secili() yalnizca Aksiyon varyantinda kullanilabilir; cagrildigi varyant: {}",
+                other.varyant_adi(),
+            ),
         }
         self
     }
 
+    /// [`UygulamaMenuOgesi::Aksiyon`] ve [`UygulamaMenuOgesi::AltMenu`]
+    /// varyantlarinda etkilidir; ayirici/sistem menusu icin hata ayiklama
+    /// derlemelerinde panic eder.
     pub fn devre_disi(mut self, devre_disi: bool) -> Self {
         match &mut self {
             Self::Aksiyon {
                 devre_disi: eski, ..
             } => *eski = devre_disi,
             Self::AltMenu(menu) => menu.devre_disi = devre_disi,
-            _ => {}
+            other => debug_assert!(
+                false,
+                "devre_disi() Ayirici/SistemMenusu uzerinde anlamsizdir; cagrildigi varyant: {}",
+                other.varyant_adi(),
+            ),
         }
         self
+    }
+
+    fn varyant_adi(&self) -> &'static str {
+        match self {
+            Self::Ayirici => "Ayirici",
+            Self::AltMenu(_) => "AltMenu",
+            Self::SistemMenusu { .. } => "SistemMenusu",
+            Self::Aksiyon { .. } => "Aksiyon",
+        }
     }
 
     pub fn gpui_menu_ogesi(&self) -> MenuItem {
@@ -282,6 +320,12 @@ pub fn uygulama_menulerini_kaydet(cx: &mut App, menuler: impl IntoIterator<Item 
 }
 
 /// Bu platformda uygulama icinde cizilen menu cubuguna ihtiyac olup olmadigini doner.
+///
+/// macOS sistem menu cubugunu kullandigi icin `false` doner. Bu durumda
+/// [`SistemMenusuTuru::Servisler`] gibi sistem-menu girdileri yine native
+/// menu cubuguna eklenir. Linux/Windows'ta kavis-ui'in [`AppMenuBar`]
+/// bileseni cizilir; sistem-menu girdileri bu platformlarda **gosterilmez**
+/// (cunku ilgili sistem servisi yoktur).
 pub fn uygulama_menu_cubugu_gerekli_mi() -> bool {
     !cfg!(target_os = "macos")
 }
@@ -343,18 +387,20 @@ mod tests {
         assert_eq!(sahipli_menu.items.len(), 3);
     }
 
-    #[test]
-    fn menu_kaydi_kuresel_duruma_da_yazilir() {
-        let mut cx = gpui::TestAppContext::single();
-        KureselDurum::ensure_global(&mut cx);
+    #[gpui::test]
+    fn menu_kaydi_kuresel_duruma_da_yazilir(cx: &mut gpui::TestAppContext) {
+        cx.update(|cx| {
+            KureselDurum::ensure_global(cx);
+            uygulama_menulerini_kaydet(
+                cx,
+                [UygulamaMenusu::yeni("Dosya").aksiyon("Vazgec", Cancel)],
+            );
 
-        uygulama_menulerini_kaydet(
-            &mut cx,
-            [UygulamaMenusu::yeni("Dosya").aksiyon("Vazgec", Cancel)],
-        );
+            let menuler = KureselDurum::global(cx).app_menus();
+            assert_eq!(menuler.len(), 1);
+            assert_eq!(menuler[0].name.as_ref(), "Dosya");
 
-        let menuler = KureselDurum::global(&cx).app_menus();
-        assert_eq!(menuler.len(), 1);
-        assert_eq!(menuler[0].name.as_ref(), "Dosya");
+            KureselDurum::global_mut(cx).set_app_menus(Vec::new());
+        });
     }
 }

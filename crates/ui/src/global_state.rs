@@ -15,7 +15,7 @@ pub struct KureselDurum {
     /// Bu küme boş değilse en az bir ertelenmiş çizim bağlamındayız.
     /// GPUI panic hatasına yol açabilecek çift ertelenmiş öğeleri önlemek için kullanılır.
     open_deferred_popovers: HashSet<ElementId>,
-    /// uygulama menüler storage
+    /// Uygulama menülerinin sahipli kopyalarının saklandığı liste.
     app_menus: Vec<OwnedMenu>,
 }
 
@@ -57,7 +57,7 @@ impl KureselDurum {
             .insert(format!("{focus_handle:?}").into());
     }
 
-    /// Unregister bir açılır katman olduğunda onu closes.
+    /// Açılır katman kapandığında ertelenmiş çizim kümesinden çıkarır.
     pub(crate) fn unregister_deferred_popover(&mut self, focus_handle: &FocusHandle) {
         let element_id: ElementId = format!("{focus_handle:?}").into();
         self.open_deferred_popovers.remove(&element_id);
