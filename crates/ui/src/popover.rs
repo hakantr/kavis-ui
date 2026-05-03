@@ -231,23 +231,75 @@ impl AcilirKatman {
         self
     }
 
+    /// Anchor'i dikey eksende cevirir (`Top*` <-> `Bottom*`). Yatay olanlar dokunulmaz.
+    pub(crate) fn flip_anchor_vertical(anchor: Anchor) -> Anchor {
+        match anchor {
+            Anchor::TopLeft => Anchor::BottomLeft,
+            Anchor::TopCenter => Anchor::BottomCenter,
+            Anchor::TopRight => Anchor::BottomRight,
+            Anchor::BottomLeft => Anchor::TopLeft,
+            Anchor::BottomCenter => Anchor::TopCenter,
+            Anchor::BottomRight => Anchor::TopRight,
+            other => other,
+        }
+    }
+
+    /// Tetikleyici/viewport olculerine gore istenen anchor'i, popup'in
+    /// gorunur kalmasini saglayacak sekilde flip eder.
+    ///
+    /// Sadece dikey flip (asagi <-> yukari) destekler; yatay tasmaya GPUI'nin
+    /// `snap_to_window_with_margin` mantigi karar verir. `auto_flip` false ise
+    /// istenen anchor degisiklikten gecirilmeden donulur.
+    pub(crate) fn choose_anchor(
+        requested: Anchor,
+        auto_flip: bool,
+        trigger_bounds: Bounds<Pixels>,
+        viewport: gpui::Size<Pixels>,
+    ) -> Anchor {
+        if !auto_flip {
+            return requested;
+        }
+
+        // Tetikleyicinin altinda ve ustundeki kullanilabilir alani olc.
+        let space_below = (viewport.height - trigger_bounds.bottom_left().y).max(px(0.));
+        let space_above = trigger_bounds.origin.y.max(px(0.));
+        // Popup boyutunu onceden bilmiyoruz; bu esik altinda "alt taraf yetersiz"
+        // sayilir. Tipik bir dropdown menu en az ~120px ister.
+        let min_needed = px(120.);
+
+        let opens_down = matches!(
+            requested,
+            Anchor::TopLeft | Anchor::TopCenter | Anchor::TopRight
+        );
+        let opens_up = matches!(
+            requested,
+            Anchor::BottomLeft | Anchor::BottomCenter | Anchor::BottomRight
+        );
+
+        if opens_down && space_below < min_needed && space_above > space_below {
+            Self::flip_anchor_vertical(requested)
+        } else if opens_up && space_above < min_needed && space_below > space_above {
+            Self::flip_anchor_vertical(requested)
+        } else {
+            requested
+        }
+    }
+
+    /// Anchor'a gore popup'in tetikleyiciye yapismasi gereken referans noktasini doner.
+    ///
+    /// `Top*` anchor'lari popup'in **ust kenarini** tetikleyicinin **alt kenarina**
+    /// hizalar (popup asagi acilir, trigger ile cakismaz).
+    ///
+    /// `Bottom*` anchor'lari popup'in **alt kenarini** tetikleyicinin **ust kenarina**
+    /// hizalar (popup yukari acilir).
     pub(crate) fn resolved_corner(anchor: Anchor, trigger_bounds: Bounds<Pixels>) -> Point<Pixels> {
         match anchor {
-            Anchor::TopLeft => trigger_bounds.origin,
-            Anchor::TopCenter => trigger_bounds.top_center(),
-            Anchor::TopRight => trigger_bounds.top_right(),
-            Anchor::BottomLeft => Point {
-                x: trigger_bounds.origin.x,
-                y: trigger_bounds.origin.y - trigger_bounds.size.height,
-            },
-            Anchor::BottomCenter => Point {
-                x: trigger_bounds.top_center().x,
-                y: trigger_bounds.origin.y - trigger_bounds.size.height,
-            },
-            Anchor::BottomRight => Point {
-                x: trigger_bounds.top_right().x,
-                y: trigger_bounds.origin.y - trigger_bounds.size.height,
-            },
+            Anchor::TopLeft => trigger_bounds.bottom_left(),
+            Anchor::TopCenter => trigger_bounds.bottom_center(),
+            Anchor::TopRight => trigger_bounds.bottom_right(),
+            Anchor::BottomLeft => trigger_bounds.origin,
+            Anchor::BottomCenter => trigger_bounds.top_center(),
+            Anchor::BottomRight => trigger_bounds.top_right(),
             // Fallback for LeftCenter/RightCenter – adjust as needed.
             _ => trigger_bounds.origin,
         }
@@ -451,36 +503,37 @@ impl RenderOnce for AcilirKatman {
         };
 
         let parent_view_id = window.current_view();
+        let viewport_size = window.viewport_size();
+        let requested_anchor = self.anchor;
+        let auto_flip = self.auto_flip;
+
+        // Render zamaninda istenen anchor'i, tetikleyicinin viewport icindeki konumuna
+        // gore flip et. Boylece popup pencere alt sinirinda kalmissa yukari, ust
+        // sinirinda kalmissa asagi acilir; popup'in tetikleyiciyi kapatmadan gosterilir.
+        let final_anchor =
+            Self::choose_anchor(requested_anchor, auto_flip, trigger_bounds, viewport_size);
 
         // Shared cell so the deferred Anchored element can read the real trigger bounds at
         // prepaint time (after trigger's on_prepaint has already fired with the correct bounds).
         let position = Rc::new(Cell::new(Self::resolved_corner(
-            self.anchor,
+            final_anchor,
             trigger_bounds,
         )));
 
-        let el = div()
-            .id(self.id)
+        // Tetikleyiciyi kendi sarmalayicisina al ve on_prepaint'i ona bagla.
+        // Boylece bounds saf trigger ile sinirli kalir; popup absolute olsa da
+        // deferred/anchored kombinasyonu outer div'in bounds'una katki yapinca
+        // trigger.bottom hesabinin popup yukseligi kadar kayma sorunu olusmaz.
+        let trigger_wrapper = div()
             .child((trigger)(open, window, cx))
-            .on_mouse_down(self.mouse_button, {
-                let state = state.clone();
-                move |_, window, cx| {
-                    cx.stop_propagation();
-                    state.update(cx, |state, cx| {
-                        // We force set open to false to toggle it correctly.
-                        // Because if the mouse down out will toggle open first.
-                        state.set_open(open, cx);
-                        state.toggle_open(window, cx);
-                    });
-                    cx.notify(parent_view_id);
-                }
-            })
             .on_prepaint({
                 let state = state.clone();
                 let position = position.clone();
-                let anchor = self.anchor;
                 move |bounds, window, cx| {
-                    position.set(Self::resolved_corner(anchor, bounds));
+                    let viewport = window.viewport_size();
+                    let chosen =
+                        Self::choose_anchor(requested_anchor, auto_flip, bounds, viewport);
+                    position.set(Self::resolved_corner(chosen, bounds));
                     let first_capture = state.update(cx, |state, _| {
                         let first = !state.trigger_bounds_captured;
                         state.trigger_bounds = bounds;
@@ -495,12 +548,29 @@ impl RenderOnce for AcilirKatman {
                 }
             });
 
+        let el = div()
+            .id(self.id)
+            .child(trigger_wrapper)
+            .on_mouse_down(self.mouse_button, {
+                let state = state.clone();
+                move |_, window, cx| {
+                    cx.stop_propagation();
+                    state.update(cx, |state, cx| {
+                        // We force set open to false to toggle it correctly.
+                        // Because if the mouse down out will toggle open first.
+                        state.set_open(open, cx);
+                        state.toggle_open(window, cx);
+                    });
+                    cx.notify(parent_view_id);
+                }
+            });
+
         if !open || !trigger_bounds_captured {
             return el;
         }
 
         let popover_content =
-            Self::render_popover_content(self.anchor, self.appearance, window, cx)
+            Self::render_popover_content(final_anchor, self.appearance, window, cx)
                 .track_focus(&focus_handle)
                 .key_context(CONTEXT)
                 .on_action(window.listener_for(&state, AcilirKatmanDurumu::on_action_cancel))
@@ -525,10 +595,13 @@ impl RenderOnce for AcilirKatman {
                 })
                 .refine_style(&self.style);
 
+        // Anchor'i biz sectik ve position'i ona gore hesapladik; GPUI'nin
+        // SwitchAnchor mantigina gerek yok. SnapToWindowWithMargin'i koruyup
+        // 8px kenar bosluguyla yatay tasmaya karsi koruma alinir.
         el.child(Self::render_popover(
-            self.anchor,
+            final_anchor,
             position,
-            self.auto_flip,
+            false,
             popover_content,
             window,
             cx,
@@ -558,9 +631,10 @@ mod tests {
     }
 
     #[test]
-    fn test_resolved_corner_top_positions() {
+    fn test_resolved_corner_aligns_to_trigger_edges() {
         use gpui::px;
 
+        // Trigger: top-left=(100,100), size=(200,50) -> bounds x:[100,300], y:[100,150].
         let bounds = Bounds {
             origin: Point {
                 x: px(100.),
@@ -572,28 +646,120 @@ mod tests {
             },
         };
 
+        // Top* anchor'lari popup'i trigger'in altina yaslar -> y = trigger.bottom = 150.
         let pos = AcilirKatman::resolved_corner(Anchor::TopLeft, bounds);
         assert_eq!(pos.x, px(100.));
-        assert_eq!(pos.y, px(100.));
+        assert_eq!(pos.y, px(150.));
 
         let pos = AcilirKatman::resolved_corner(Anchor::TopCenter, bounds);
         assert_eq!(pos.x, px(200.));
-        assert_eq!(pos.y, px(100.));
+        assert_eq!(pos.y, px(150.));
 
         let pos = AcilirKatman::resolved_corner(Anchor::TopRight, bounds);
         assert_eq!(pos.x, px(300.));
-        assert_eq!(pos.y, px(100.));
+        assert_eq!(pos.y, px(150.));
 
+        // Bottom* anchor'lari popup'i trigger'in ustune yaslar -> y = trigger.top = 100.
         let pos = AcilirKatman::resolved_corner(Anchor::BottomLeft, bounds);
         assert_eq!(pos.x, px(100.));
-        assert_eq!(pos.y, px(50.));
+        assert_eq!(pos.y, px(100.));
 
         let pos = AcilirKatman::resolved_corner(Anchor::BottomCenter, bounds);
         assert_eq!(pos.x, px(200.));
-        assert_eq!(pos.y, px(50.));
+        assert_eq!(pos.y, px(100.));
 
         let pos = AcilirKatman::resolved_corner(Anchor::BottomRight, bounds);
         assert_eq!(pos.x, px(300.));
-        assert_eq!(pos.y, px(50.));
+        assert_eq!(pos.y, px(100.));
+    }
+
+    #[test]
+    fn test_choose_anchor_flips_when_no_room_below() {
+        use gpui::px;
+
+        // Tetikleyici pencerenin alt kismina yakin: trigger.bottom = 580, viewport = 600.
+        // Alt 20px, ust 580px alan var -> asagi acilim icin yer yok, flip beklenir.
+        let trigger = Bounds {
+            origin: Point {
+                x: px(100.),
+                y: px(560.),
+            },
+            size: gpui::Size {
+                width: px(120.),
+                height: px(20.),
+            },
+        };
+        let viewport = gpui::Size {
+            width: px(800.),
+            height: px(600.),
+        };
+
+        // auto_flip=false -> istenen anchor degismeden donulur
+        assert_eq!(
+            AcilirKatman::choose_anchor(Anchor::TopLeft, false, trigger, viewport),
+            Anchor::TopLeft
+        );
+        // auto_flip=true -> flip beklenir
+        assert_eq!(
+            AcilirKatman::choose_anchor(Anchor::TopLeft, true, trigger, viewport),
+            Anchor::BottomLeft
+        );
+    }
+
+    #[test]
+    fn test_choose_anchor_does_not_flip_when_room_exists() {
+        use gpui::px;
+
+        // Tetikleyici ortada: alt ve ust tarafta yeterli alan var.
+        let trigger = Bounds {
+            origin: Point {
+                x: px(100.),
+                y: px(280.),
+            },
+            size: gpui::Size {
+                width: px(120.),
+                height: px(40.),
+            },
+        };
+        let viewport = gpui::Size {
+            width: px(800.),
+            height: px(600.),
+        };
+
+        assert_eq!(
+            AcilirKatman::choose_anchor(Anchor::TopLeft, true, trigger, viewport),
+            Anchor::TopLeft
+        );
+        assert_eq!(
+            AcilirKatman::choose_anchor(Anchor::BottomLeft, true, trigger, viewport),
+            Anchor::BottomLeft
+        );
+    }
+
+    #[test]
+    fn test_choose_anchor_flips_up_to_down_at_top() {
+        use gpui::px;
+
+        // Tetikleyici pencerenin ust kismina yakin: ust 5px, alt 575px.
+        // Yukari acilim icin yer yok -> Bottom* -> Top* flip.
+        let trigger = Bounds {
+            origin: Point {
+                x: px(100.),
+                y: px(5.),
+            },
+            size: gpui::Size {
+                width: px(120.),
+                height: px(20.),
+            },
+        };
+        let viewport = gpui::Size {
+            width: px(800.),
+            height: px(600.),
+        };
+
+        assert_eq!(
+            AcilirKatman::choose_anchor(Anchor::BottomLeft, true, trigger, viewport),
+            Anchor::TopLeft
+        );
     }
 }

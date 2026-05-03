@@ -270,6 +270,17 @@ impl PopupMenuItem {
     }
 }
 
+/// Popup menusunun arka plan/metin/kenar renklerinin manuel override paketi.
+///
+/// `None` ise PopupMenu temanin `popover`/`popover_foreground`/`border` renklerini
+/// kullanir. `Some` ise verilen renk seti uygulanir.
+#[derive(Copy, Clone, Debug)]
+pub struct PopupAppearance {
+    pub bg: gpui::Hsla,
+    pub fg: gpui::Hsla,
+    pub border: gpui::Hsla,
+}
+
 pub struct PopupMenu {
     pub(crate) focus_handle: FocusHandle,
     pub(crate) menu_items: Vec<PopupMenuItem>,
@@ -290,6 +301,8 @@ pub struct PopupMenu {
     scroll_handle: ScrollHandle,
     // This will update on render
     submenu_anchor: (Anchor, Pixels),
+    /// Tetikleyici varyantindan miras alinan goruntu seti; None ise tema default.
+    appearance: Option<PopupAppearance>,
 
     _subscriptions: Vec<Subscription>,
 }
@@ -312,8 +325,15 @@ impl PopupMenu {
             external_link_icon: true,
             size: Size::default(),
             submenu_anchor: (Anchor::TopLeft, Pixels::ZERO),
+            appearance: None,
             _subscriptions: vec![],
         }
+    }
+
+    /// Menunun arka plan/metin/kenar renklerini override eder. None ise tema default.
+    pub fn with_appearance(mut self, appearance: Option<PopupAppearance>) -> Self {
+        self.appearance = appearance;
+        self
     }
 
     pub fn build(
@@ -1321,8 +1341,18 @@ impl Render for PopupMenu {
             .on_action(cx.listener(Self::confirm))
             .on_action(cx.listener(Self::dismiss))
             .on_mouse_down_out(cx.listener(Self::on_mouse_down_out))
-            .popover_style(cx)
-            .text_color(cx.theme().popover_foreground)
+            .map(|this| match self.appearance {
+                Some(a) => this
+                    .bg(a.bg)
+                    .text_color(a.fg)
+                    .border_1()
+                    .border_color(a.border)
+                    .shadow_lg()
+                    .rounded(cx.theme().radius),
+                None => this
+                    .popover_style(cx)
+                    .text_color(cx.theme().popover_foreground),
+            })
             .relative()
             .occlude()
             .child(

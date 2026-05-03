@@ -5,9 +5,9 @@ use gpui::{
 };
 
 use crate::{
-    Disableable, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
-    h_flex,
-    menu::{DropdownMenuPopover, PopupMenu},
+    Disableable, EtkinTema as _, Renklendir as _, Selectable, SimgeAdi, Sizable, Size,
+    StyledExt as _, h_flex,
+    menu::{DropdownMenuPopover, PopupAppearance, PopupMenu},
     popover::Yon,
     tooltip::ComponentTooltip,
 };
@@ -265,12 +265,76 @@ impl RenderOnce for AcilirDugmeTetik {
     }
 }
 
+/// Tetikleyici varyantindan popup goruntu setine cevirim.
+///
+/// - Default/Ghost/Link/Text: tema default (None) — nötr popover.
+/// - Primary/Secondary: varyantin solid bg + tema `*_foreground` ile WCAG
+///   kontrasti dogrulanir; yetersizse `uyumlu_metin_rengi` yedegi devreye girer.
+/// - Status (Danger/Warning/Success/Info): translucent brand bg + brand fg
+///   (Faz 1 kontrast kuralina uyumlu).
+/// - Custom: tema default (None).
+fn popup_appearance_for_variant(variant: DugmeVaryanti, cx: &App) -> Option<PopupAppearance> {
+    use gpui::Hsla;
+    let mix_translucent = |c: Hsla| c.mix_oklab(cx.theme().transparent, 0.85);
+
+    match variant {
+        DugmeVaryanti::Default
+        | DugmeVaryanti::Ghost
+        | DugmeVaryanti::Link
+        | DugmeVaryanti::Text => None,
+        // Primary/Secondary icin oncelikle tema `*_foreground` denenir; WCAG AA
+        // kontrasti (>= 4.5:1) saglanmazsa `uyumlu_metin_rengi` yedegine dusulur.
+        // Bu sayede tema tasarimcisinin secimi baskin kalir, yalnizca yanlis
+        // override durumunda kontrast garantisi devreye girer.
+        DugmeVaryanti::Primary => {
+            let bg = cx.theme().button_primary;
+            Some(PopupAppearance {
+                bg,
+                fg: crate::akilli_yazi_rengi(bg, cx.theme().button_primary_foreground),
+                border: bg,
+            })
+        }
+        DugmeVaryanti::Secondary => {
+            let bg = cx.theme().secondary;
+            Some(PopupAppearance {
+                bg,
+                fg: crate::akilli_yazi_rengi(bg, cx.theme().secondary_foreground),
+                border: cx.theme().border,
+            })
+        }
+        DugmeVaryanti::Danger => Some(PopupAppearance {
+            bg: mix_translucent(cx.theme().danger),
+            fg: cx.theme().danger,
+            border: cx.theme().danger.mix_oklab(cx.theme().transparent, 0.6),
+        }),
+        DugmeVaryanti::Warning => Some(PopupAppearance {
+            bg: mix_translucent(cx.theme().warning),
+            fg: cx.theme().warning,
+            border: cx.theme().warning.mix_oklab(cx.theme().transparent, 0.6),
+        }),
+        DugmeVaryanti::Success => Some(PopupAppearance {
+            bg: mix_translucent(cx.theme().success),
+            fg: cx.theme().success,
+            border: cx.theme().success.mix_oklab(cx.theme().transparent, 0.6),
+        }),
+        DugmeVaryanti::Info => Some(PopupAppearance {
+            bg: mix_translucent(cx.theme().info),
+            fg: cx.theme().info,
+            border: cx.theme().info.mix_oklab(cx.theme().transparent, 0.6),
+        }),
+        // Custom varyantta button renkleri private; popup'i tema default'unda
+        // birakmak guvenli — kullanici kendi temasini korur.
+        DugmeVaryanti::Custom(_) => None,
+    }
+}
+
 impl RenderOnce for AcilirDugme {
-    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
+    fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let inner_rounded = self.variant.is_ghost() && !self.selected;
         let style = self.style;
         let id = self.id;
         let tooltip = self.tooltip;
+        let appearance = popup_appearance_for_variant(self.variant, cx);
 
         div()
             .id(id.clone())
@@ -293,7 +357,8 @@ impl RenderOnce for AcilirDugme {
                     this.child(
                         DropdownMenuPopover::new(id, self.anchor, trigger, menu)
                             .match_trigger_width(self.match_trigger_width)
-                            .auto_flip(self.auto_flip),
+                            .auto_flip(self.auto_flip)
+                            .appearance(appearance),
                     )
                 }
                 None => this.child(

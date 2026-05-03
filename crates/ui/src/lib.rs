@@ -198,7 +198,7 @@ macro_rules! aksiyonlar {
     };
 }
 
-rust_i18n::i18n!("locales", fallback = "en");
+rust_i18n::i18n!("locales", fallback = "tr");
 
 /// Bileşenleri başlatır.
 ///
@@ -233,7 +233,6 @@ pub fn locale() -> impl Deref<Target = str> {
 
 #[inline]
 pub fn set_locale(locale: &str) {
-    i18n::set_locale_override(locale);
     rust_i18n::set_locale(locale)
 }
 

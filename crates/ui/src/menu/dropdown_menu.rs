@@ -5,7 +5,12 @@ use gpui::{
     RenderOnce, SharedString, StyleRefinement, Styled, Window,
 };
 
-use crate::{Selectable, button::Dugme, menu::PopupMenu, popover::AcilirKatman};
+use crate::{
+    Selectable,
+    button::Dugme,
+    menu::{PopupAppearance, PopupMenu},
+    popover::AcilirKatman,
+};
 
 /// Bir açılır menü özellik için düğmeler ve diğer etkileşimli öğeler
 pub trait DropdownMenu: Styled + Selectable + InteractiveElement + IntoElement + 'static {
@@ -39,6 +44,8 @@ pub struct DropdownMenuPopover<T: Selectable + IntoElement + 'static> {
     anchor: Anchor,
     match_trigger_width: bool,
     auto_flip: bool,
+    /// Tetikleyici varyantindan miras alinan popup goruntu seti; None ise tema default.
+    appearance: Option<PopupAppearance>,
     trigger: T,
     builder: Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>,
 }
@@ -59,9 +66,17 @@ where
             anchor: anchor.into(),
             match_trigger_width: false,
             auto_flip: false,
+            appearance: None,
             trigger,
             builder: Rc::new(builder),
         }
+    }
+
+    /// Popup'in arka plan/metin/kenar renklerini override eder.
+    /// Genelde tetikleyici varyantindan turetilir; AcilirDugme bunu otomatik set eder.
+    pub fn appearance(mut self, appearance: Option<PopupAppearance>) -> Self {
+        self.appearance = appearance;
+        self
     }
 
     /// sabitleyici köşe için açılır menü açılır katman ayarlar.
@@ -102,6 +117,7 @@ where
 {
     fn render(self, window: &mut Window, cx: &mut gpui::App) -> impl IntoElement {
         let builder = self.builder.clone();
+        let appearance = self.appearance;
         let menu_state =
             window.use_keyed_state(self.id.clone(), cx, |_, _| DropdownMenuState::default());
 
@@ -125,7 +141,7 @@ where
                     None => {
                         let builder = builder.clone();
                         let menu = PopupMenu::build(window, cx, move |menu, window, cx| {
-                            builder(menu, window, cx)
+                            builder(menu, window, cx).with_appearance(appearance)
                         });
                         menu_state.update(cx, |state, _| {
                             state.menu = Some(menu.clone());
