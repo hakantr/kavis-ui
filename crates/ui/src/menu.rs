@@ -9,7 +9,7 @@ mod uygulama_menusu;
 
 pub use app_menu_bar::AppMenuBar;
 pub use context_menu::{ContextMenu, ContextMenuExt, ContextMenuState};
-pub use dropdown_menu::DropdownMenu;
+pub use dropdown_menu::{DropdownMenu, DropdownMenuPopover};
 pub use popup_menu::{PopupMenu, PopupMenuItem};
 pub use uygulama_menusu::{
     UygulamaMenuOgesi, UygulamaMenusu, uygulama_menu_cubugu_gerekli_mi,

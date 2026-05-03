@@ -6,7 +6,8 @@ use gpui::{
 
 use crate::{
     Disableable, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
-    menu::{DropdownMenu, PopupMenu},
+    h_flex,
+    menu::{DropdownMenuPopover, PopupMenu},
     tooltip::ComponentTooltip,
 };
 
@@ -152,23 +153,122 @@ impl Selectable for AcilirDugme {
     }
 }
 
+/// Hem ana dugme hem chevron'u tek bir tetik olarak sunar; dropdown popover'i
+/// bu birlesik tetigin uzerine baglandiginda her iki dugmeye yapilan tiklamalar
+/// ayni menuyu acar/kapatir.
+#[derive(IntoElement)]
+struct AcilirDugmeTetik {
+    button: Dugme,
+    selected: bool,
+    rounded: DugmeYuvarlakligi,
+    /// Ghost varyantta ic kose yuvarlatilsin mi.
+    inner_rounded: bool,
+    compact: bool,
+    outline: bool,
+    loading: bool,
+    disabled: bool,
+    size: Size,
+    variant: DugmeVaryanti,
+}
+
+impl Selectable for AcilirDugmeTetik {
+    fn selected(mut self, selected: bool) -> Self {
+        self.selected = selected;
+        self
+    }
+
+    fn is_selected(&self) -> bool {
+        self.selected
+    }
+}
+
+impl RenderOnce for AcilirDugmeTetik {
+    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
+        h_flex()
+            .child(
+                self.button
+                    .rounded(self.rounded)
+                    .border_corners(Corners {
+                        top_left: true,
+                        top_right: self.inner_rounded,
+                        bottom_left: true,
+                        bottom_right: self.inner_rounded,
+                    })
+                    .border_edges(Edges {
+                        left: true,
+                        top: true,
+                        right: true,
+                        bottom: true,
+                    })
+                    .loading(self.loading)
+                    .selected(self.selected)
+                    .disabled(self.disabled || self.loading)
+                    .when(self.compact, |this| this.compact())
+                    .when(self.outline, |this| this.outline())
+                    .with_size(self.size)
+                    .with_variant(self.variant),
+            )
+            .child(
+                Dugme::new("popup")
+                    .icon(SimgeAdi::ChevronDown)
+                    .rounded(self.rounded)
+                    .border_edges(Edges {
+                        left: self.inner_rounded,
+                        top: true,
+                        right: true,
+                        bottom: true,
+                    })
+                    .border_corners(Corners {
+                        top_left: self.inner_rounded,
+                        top_right: true,
+                        bottom_left: self.inner_rounded,
+                        bottom_right: true,
+                    })
+                    .selected(self.selected)
+                    .disabled(self.disabled || self.loading)
+                    .when(self.compact, |this| this.compact())
+                    .when(self.outline, |this| this.outline())
+                    .with_size(self.size)
+                    .with_variant(self.variant),
+            )
+    }
+}
+
 impl RenderOnce for AcilirDugme {
     fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
-        let rounded = self.variant.is_ghost() && !self.selected;
+        let inner_rounded = self.variant.is_ghost() && !self.selected;
+        let style = self.style;
+        let id = self.id;
+        let tooltip = self.tooltip;
 
         div()
-            .id(self.id)
+            .id(id.clone())
             .h_flex()
-            .refine_style(&self.style)
-            .when_some(self.button, |this, button| {
-                this.child(
+            .refine_style(&style)
+            .when_some(self.button, |this, button| match self.menu {
+                Some(menu) => {
+                    let trigger = AcilirDugmeTetik {
+                        button,
+                        selected: self.selected,
+                        rounded: self.rounded,
+                        inner_rounded,
+                        compact: self.compact,
+                        outline: self.outline,
+                        loading: self.loading,
+                        disabled: self.disabled,
+                        size: self.size,
+                        variant: self.variant,
+                    };
+                    this.child(DropdownMenuPopover::new(id, self.anchor, trigger, menu))
+                }
+                None => this.child(
                     button
                         .rounded(self.rounded)
                         .border_corners(Corners {
                             top_left: true,
-                            top_right: rounded,
+                            top_right: inner_rounded,
                             bottom_left: true,
-                            bottom_right: rounded,
+                            bottom_right: inner_rounded,
                         })
                         .border_edges(Edges {
                             left: true,
@@ -183,35 +283,9 @@ impl RenderOnce for AcilirDugme {
                         .when(self.outline, |this| this.outline())
                         .with_size(self.size)
                         .with_variant(self.variant),
-                )
-                .when_some(self.menu, |this, menu| {
-                    this.child(
-                        Dugme::new("popup")
-                            .icon(SimgeAdi::ChevronDown)
-                            .rounded(self.rounded)
-                            .border_edges(Edges {
-                                left: rounded,
-                                top: true,
-                                right: true,
-                                bottom: true,
-                            })
-                            .border_corners(Corners {
-                                top_left: rounded,
-                                top_right: true,
-                                bottom_left: rounded,
-                                bottom_right: true,
-                            })
-                            .selected(self.selected)
-                            .disabled(self.disabled || self.loading)
-                            .when(self.compact, |this| this.compact())
-                            .when(self.outline, |this| this.outline())
-                            .with_size(self.size)
-                            .with_variant(self.variant)
-                            .dropdown_menu_with_anchor(self.anchor, menu),
-                    )
-                })
+                ),
             })
-            .map(|this| self.tooltip.apply(this))
+            .map(|this| tooltip.apply(this))
     }
 }
 
