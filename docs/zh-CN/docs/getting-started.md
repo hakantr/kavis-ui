@@ -1,42 +1,36 @@
 ---
-title: 开始使用
-description: 学习如何在项目中安装并使用 Kavis UI。
+title: Başlarken
+description: Kavis UI'yi projeye ekleme ve ilk pencereyi açma.
 order: -2
 ---
 
-# 开始使用
+# Başlarken
 
-## 安装
-
-在 `Cargo.toml` 中添加依赖：
+## Kurulum
 
 ```toml
 [dependencies]
 gpui = { path = "../zed/crates/gpui" }
 gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
 kavis-ui = { git = "https://github.com/hakantr/kavis-ui" }
-# 可选：使用内置默认资源
 kavis-ui-assets = { git = "https://github.com/hakantr/kavis-ui" }
-anyhow = "1.0"
+anyhow = "1"
 ```
 
-:::tip
-`kavis-ui-assets` 是可选依赖。
 
-如果你希望自行管理图标与资源文件，可以不添加它。更多说明见 [资源与图标](./assets.md)。
+:::tip
+`kavis-ui-assets` isteğe bağlıdır. Kendi simge paketiniz varsa özel `AssetSource` kullanabilirsiniz.
 :::
 
-## 快速开始
-
-下面是一个最小可运行示例：
+## İlk Uygulama
 
 ```rust
 use gpui::*;
-use kavis_ui::{button::*, *};
+use kavis_ui::*;
 
-pub struct HelloWorld;
+pub struct Merhaba;
 
-impl Render for HelloWorld {
+impl Render for Merhaba {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
         div()
             .v_flex()
@@ -44,39 +38,73 @@ impl Render for HelloWorld {
             .size_full()
             .items_center()
             .justify_center()
-            .child("Hello, World!")
+            .child("Merhaba, dünya!")
             .child(
-                Button::new("ok")
+                Dugme::new("basla")
                     .primary()
-                    .label("Let's Go!")
-                    .on_click(|_, _, _| println!("Clicked!")),
+                    .label("Başla")
+                    .on_click(|_, _, _| println!("Tıklandı!")),
             )
     }
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
-
-    app.run(move |cx| {
+    gpui_platform::application().run(move |cx| {
         kavis_ui::init(cx);
 
         cx.spawn(async move |cx| {
             cx.open_window(WindowOptions::default(), |window, cx| {
-                let view = cx.new(|_| HelloWorld);
-                cx.new(|cx| Root::new(view, window, cx))
+                let view = cx.new(|_| Merhaba);
+                cx.new(|cx| KokGorunum::new(view, window, cx).bg(cx.theme().background))
             })
-            .expect("Failed to open window");
+            .expect("Pencere açılamadı");
         })
         .detach();
     });
 }
 ```
 
+
 :::info
-请确保在 `app.run` 闭包中尽早调用 `kavis_ui::init(cx);`。它会初始化主题和全局配置。
+`kavis_ui::init(cx)` çağrısı uygulama başında yapılmalıdır. Tema, dialog, sheet, popover, input ve benzeri global sistemler bu çağrıyla kurulur.
 :::
 
-## 后续阅读
+## Durumsuz Öğe
 
-- [组件总览](./components/index)
-- [资源与图标](./assets.md)
+```rust
+use gpui::*;
+use kavis_ui::*;
+
+struct Panel;
+
+impl Render for Panel {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .v_flex()
+            .gap_2()
+            .child(Dugme::new("kaydet").primary().label("Kaydet"))
+            .child(Cip::secondary().child("Hazır"))
+    }
+}
+```
+
+## Durumlu Bileşen
+
+```rust
+struct FormOrnegi {
+    input: Entity<InputState>,
+}
+
+impl FormOrnegi {
+    fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let input = cx.new(|cx| InputState::new(window, cx).default_value("Merhaba"));
+        Self { input }
+    }
+}
+
+impl Render for FormOrnegi {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        Input::new(&self.input)
+    }
+}
+```

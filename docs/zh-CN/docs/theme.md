@@ -1,50 +1,25 @@
 ---
-order: -4
+title: Tema
+description: Kavis UI tema sistemi ve renk erişimi.
 ---
 
-# 主题
+# Tema
 
-所有组件都支持内置主题系统。[ActiveTheme] trait 用于访问当前主题中的颜色值：
+Kavis UI bileşenleri global `Tema` üzerinden renk, yarıçap, gölge, yazı tipi ve kaydırma çubuğu tercihlerini okur.
 
-```rs
-use kavis_ui::{ActiveTheme as _};
+```rust
+use kavis_ui::EtkinTema;
 
-// Access theme colors in your components
-cx.theme().primary
-cx.theme().background
-cx.theme().foreground
+let arka_plan = cx.theme().background;
+let metin = cx.theme().foreground;
+let birincil = cx.theme().primary;
 ```
 
-因此，如果你希望组件使用当前主题的颜色，组件或视图就需要运行在带有 [App] 上下文的环境中。
+Temayı güncellemek için:
 
-## Theme Registry
-
-仓库在 [themes](https://github.com/hakantr/kavis-ui/tree/main/themes) 目录下内置了 20+ 主题。
-
-你可以通过 [ThemeRegistry] 来加载和监听这些主题文件：
-
-```rs
-use std::path::PathBuf;
-use gpui::{App, SharedString};
-use kavis_ui::{Theme, ThemeRegistry};
-
-pub fn init(cx: &mut App) {
-    let theme_name = SharedString::from("Ayu Light");
-    // Load and watch themes from ./themes directory
-    if let Err(err) = ThemeRegistry::watch_dir(PathBuf::from("./themes"), cx, move |cx| {
-        if let Some(theme) = ThemeRegistry::global(cx)
-            .themes()
-            .get(&theme_name)
-            .cloned()
-        {
-            Theme::global_mut(cx).apply_config(&theme);
-        }
-    }) {
-        tracing::error!("Failed to watch themes directory: {}", err);
-    }
-}
+```rust
+let mut tema = cx.theme().clone();
+tema.shadow = !tema.shadow;
+cx.set_global::<Tema>(tema);
+window.refresh();
 ```
-
-[ActiveTheme]: https://docs.rs/kavis-ui/latest/kavis_ui/theme/trait.ActiveTheme.html
-[ThemeRegistry]: https://docs.rs/kavis-ui/latest/kavis_ui/theme/struct.ThemeRegistry.html
-[App]: https://docs.rs/gpui/latest/gpui/struct.App.html

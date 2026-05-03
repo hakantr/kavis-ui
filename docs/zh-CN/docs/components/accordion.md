@@ -1,134 +1,33 @@
 ---
-title: Accordion
-description: 内部基于 collapse 实现的可折叠面板组件。
+title: Akordeon
+description: İlişkili içerikleri açılır kapanır bölümler halinde gösterir.
 ---
 
-# Accordion
+# Akordeon
 
-Accordion 是一个可折叠内容组件，允许用户展开和收起多个内容区块。它内部基于 collapse 功能实现，适合 FAQ、设置分组和分段内容展示。
+İlişkili içerikleri açılır kapanır bölümler halinde gösterir. Güncel örnekler Kavis UI'nin Türkçe `Akordeon`, `AkordeonOgesi` yüzeyini kullanır.
 
-## 导入
-
-```rust
-use kavis_ui::accordion::Accordion;
-```
-
-## 用法
-
-### 基础 Accordion
+## İçe Aktarma
 
 ```rust
-Accordion::new("my-accordion")
-    .item(|item| {
-        item.title("Section 1")
-            .child("Content for section 1")
-    })
-    .item(|item| {
-        item.title("Section 2")
-            .child("Content for section 2")
-    })
-    .item(|item| {
-        item.title("Section 3")
-            .child("Content for section 3")
-    })
+use gpui::*;
+use kavis_ui::*;
 ```
 
-### 允许同时展开多个项
+## `Akordeon`, `AkordeonOgesi`
 
-默认情况下，一次只能展开一个项。使用 `multiple()` 可以允许多个项同时展开：
+Ana tipler: `Akordeon`, `AkordeonOgesi`.
+
+## Kullanım
 
 ```rust
-Accordion::new("my-accordion")
-    .multiple(true)
-    .item(|item| item.title("Section 1").child("Content 1"))
-    .item(|item| item.title("Section 2").child("Content 2"))
+Akordeon::new("sss")
+    .item(|item| item.title("Kavis UI nedir?").open(true).child("GPUI tabanlı Rust UI kütüphanesi."))
+    .item(|item| item.title("Tema var mı?").child("Evet."))
 ```
 
-### 带边框
+## Notlar
 
-```rust
-Accordion::new("my-accordion")
-    .bordered(true)
-    .item(|item| item.title("Section 1").child("Content 1"))
-```
-
-### 不同尺寸
-
-```rust
-use kavis_ui::{Sizable as _, Size};
-
-Accordion::new("my-accordion")
-    .small()
-    .item(|item| item.title("Small Section").child("Content"))
-
-Accordion::new("my-accordion")
-    .large()
-    .item(|item| item.title("Large Section").child("Content"))
-```
-
-### 处理切换事件
-
-```rust
-Accordion::new("my-accordion")
-    .on_toggle_click(|open_indices, window, cx| {
-        println!("Open items: {:?}", open_indices);
-    })
-    .item(|item| item.title("Section 1").child("Content 1"))
-```
-
-### 禁用状态
-
-```rust
-Accordion::new("my-accordion")
-    .disabled(true)
-    .item(|item| item.title("Disabled Section").child("Content"))
-```
-
-## API 参考
-
-- [Accordion]
-- [AccordionItem]
-
-### 尺寸
-
-实现了 [Sizable] trait：
-
-- `small()`：小尺寸
-- `medium()`：中尺寸，默认值
-- `large()`：大尺寸
-- `xsmall()`：超小尺寸
-
-## 示例
-
-### 自定义图标标题
-
-```rust
-Accordion::new("my-accordion")
-    .item(|item| {
-        item.title(
-            h_flex()
-                .gap_2()
-                .child(Icon::new(IconName::Settings))
-                .child("Settings")
-        )
-        .child("Settings content here")
-    })
-```
-
-### 嵌套 Accordion
-
-```rust
-Accordion::new("outer")
-    .item(|item| {
-        item.title("Parent Section")
-            .child(
-                Accordion::new("inner")
-                    .item(|item| item.title("Child 1").child("Content"))
-                    .item(|item| item.title("Child 2").child("Content"))
-            )
-    })
-```
-
-[Accordion]: https://docs.rs/kavis-ui/latest/kavis_ui/accordion/struct.Accordion.html
-[AccordionItem]: https://docs.rs/kavis-ui/latest/kavis_ui/accordion/struct.AccordionItem.html
-[Sizable]: https://docs.rs/kavis-ui/latest/kavis_ui/trait.Sizable.html
+- Durumsuz bileşenler doğrudan `RenderOnce` öğesi olarak döndürülebilir.
+- Durum tutan bileşenlerde state `Entity<T>` içinde oluşturulur ve render sırasında bileşene verilir.
+- Kapsamlı çalışan örnek için `crates/story/src/stories/accordion_story.rs` dosyasına bakın.

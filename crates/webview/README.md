@@ -1,22 +1,15 @@
-# Wry for GPUI
+# GPUI için WebView
 
-A webview supports for GPUI, based on [Wry](https://github.com/tauri-apps/wry).
+Bu crate, [Wry](https://github.com/tauri-apps/wry) tabanlı deneysel WebView desteği sağlar.
 
-This still a experimental with limited features, please file issues for any bugs or missing features.
+- WebView, GPUI penceresinin üzerinde yerel bir yüzey olarak çizilir.
+- Destek şu anda macOS ve Windows ile sınırlıdır.
+- Karmaşık düzenlerde ayrı pencere veya popup katmanı içinde kullanılması önerilir.
 
-- The WebView will render on top of the GPUI window, any GPUI elements behind the WebView bounds will be covered.
-- Only supports macOS and Windows currently.
-
-So, we recommend using the webview in a separate window or in a Popup layer.
-
-## Run Example
-
-In the root of the repository, run:
-
-```
+```bash
 cargo run -p webview
 ```
 
-## License
+## Lisans
 
 Apache-2.0

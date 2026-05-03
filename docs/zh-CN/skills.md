@@ -1,11 +1,3 @@
----
-title: Skills
-layout: home
-description: 适用于 Kavis UI 的开发技能与实践指南。
----
+# Yetenekler
 
-<script setup>
-import Skills from '../skills.vue'
-</script>
-
-<Skills />
+Bu rota adı geriye dönük uyumluluk için korunur; içerik Türkçedir. Güncel asistan notları `CLAUDE.md` dosyasındadır.

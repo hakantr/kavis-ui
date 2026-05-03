@@ -1,11 +1,3 @@
----
-title: 贡献者
-layout: home
-description: 为 Kavis UI 做出贡献的开发者。
----
+# Katkıda Bulunanlar
 
-<script setup>
-import Contributors from '../contributors.vue'
-</script>
-
-<Contributors />
+Bu rota adı geriye dönük uyumluluk için korunur; içerik Türkçedir. Katkı süreci için `CONTRIBUTING.md` dosyasına bakın.

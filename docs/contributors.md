@@ -1,9 +1,3 @@
----
-layout: home
----
+# Katkıda Bulunanlar
 
-<script setup>
-import Contributors from './contributors.vue'
-</script>
-
-<Contributors />
+Kavis UI katkıları GitHub deposu üzerinden takip edilir. Katkı süreci için `CONTRIBUTING.md` dosyasına bakın.

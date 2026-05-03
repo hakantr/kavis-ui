@@ -8,42 +8,36 @@ import Index from './index.vue'
 
 <Index />
 
-## Simple and Intuitive API
+## Basit API
 
-Get started with just a few lines of code. Stateless components
-make it easy to build complex UIs.
-
-```rs
-Button::new("ok")
+```rust
+Dugme::new("kaydet")
     .primary()
-    .label("Click Me")
-    .on_click(|_, _, _| println!("Button clicked!"))
+    .label("Kaydet")
+    .on_click(|_, _, _| println!("Kaydedildi"))
 ```
 
-## Install Kavis UI
-
-Add the following to your `Cargo.toml`:
-
-GPUI and Kavis UI are under active development, recently GPUI have some new features not published on crates.io, so we recommend using the git version for now.
-
-The documentation on this site are based on the **Git main branch**, if you use the crates.io version, there may be some differences.
+## Kurulum
 
 ```toml
+[dependencies]
 gpui = { path = "../zed/crates/gpui" }
 gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
 kavis-ui = { git = "https://github.com/hakantr/kavis-ui" }
+kavis-ui-assets = { git = "https://github.com/hakantr/kavis-ui" }
+anyhow = "1"
 ```
 
-## Hello World
 
-The following `src/main.rs` is a simple "Hello, World!" application:
+## Merhaba Dünya
 
-```rs
+```rust
 use gpui::*;
-use kavis_ui::{button::*, *};
+use kavis_ui::*;
 
-pub struct HelloWorld;
-impl Render for HelloWorld {
+pub struct Merhaba;
+
+impl Render for Merhaba {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
         div()
             .v_flex()
@@ -51,36 +45,33 @@ impl Render for HelloWorld {
             .size_full()
             .items_center()
             .justify_center()
-            .child("Hello, World!")
+            .child("Merhaba, dünya!")
             .child(
-                Button::new("ok")
+                Dugme::new("basla")
                     .primary()
-                    .label("Let's Go!")
-                    .on_click(|_, _, _| println!("Clicked!")),
+                    .label("Başla")
+                    .on_click(|_, _, _| println!("Tıklandı!")),
             )
     }
 }
 
 fn main() {
     gpui_platform::application().run(move |cx| {
-        // This must be called before using any Kavis UI features.
         kavis_ui::init(cx);
 
         cx.spawn(async move |cx| {
             cx.open_window(WindowOptions::default(), |window, cx| {
-                let view = cx.new(|_| HelloWorld);
-                // This first level on the window, should be a Root.
-                cx.new(|cx| Root::new(view, window, cx))
+                let view = cx.new(|_| Merhaba);
+                cx.new(|cx| KokGorunum::new(view, window, cx).bg(cx.theme().background))
             })
-            .expect("Failed to open window");
+            .expect("Pencere açılamadı");
         })
         .detach();
     });
 }
 ```
 
-Run the program with the following command:
 
-```sh
-$ cargo run
+```bash
+cargo run
 ```

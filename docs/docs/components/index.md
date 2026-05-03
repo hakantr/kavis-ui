@@ -1,69 +1,39 @@
 ---
-title: Components
-order: 2
-collapsed: false
+title: Bileşenler
+description: Kavis UI bileşen kataloğu.
 ---
 
-# Components
+# Bileşenler
 
-### Basic Components
+Bu bölüm Kavis UI bileşenlerinin Türkçe API adlarıyla kısa kullanım notlarını içerir. Her sayfadaki örnekler güncel proje adlandırmasına göre düzenlenmiştir.
 
-- [Accordion](accordion) - Collapsible content panels
-- [Alert](alert) - Alert messages with different variants
-- [Avatar](avatar) - User avatars with fallback text
-- [Badge](badge) - Count badges and indicators
-- [Button](button) - Interactive buttons with multiple variants
-- [Checkbox](checkbox) - Binary selection control
-- [Collapsible](collapsible) - Expandable/collapsible content
-- [DropdownButton](dropdown_button) - Button with dropdown menu
-- [Icon](icon) - Icon display component
-- [Image](image) - Image display with fallbacks
-- [Kbd](kbd) - Keyboard shortcut display
-- [Label](label) - Text labels for form elements
-- [Pagination](pagination) - Page navigation controls
-- [Progress](progress) - Progress bars
-- [Radio](radio) - Single selection from multiple options
-- [Rating](rating) - Interactive star rating component
-- [Skeleton](skeleton) - Loading placeholders
-- [Slider](slider) - Value selection from a range
-- [Spinner](spinner) - Loading and status spinners
-- [Stepper](stepper) - Step-by-step progress indicator
-- [Switch](switch) - Toggle on/off control
-- [Tag](tag) - Labels and categories
-- [Toggle](toggle) - Toggle button states
-- [Tooltip](tooltip) - Helpful hints on hover
+## Temel
 
-### Form Components
+- [Düğme](./button)
+- [Girdi](./input)
+- [Onay Kutusu](./checkbox)
+- [Radyo](./radio)
+- [Anahtar](./switch)
+- [Etiket](./label)
+- [Rozet](./badge)
+- [Cip](./tag)
 
-- [Input](input) - An input field or a component that looks like an input field.
-- [Select](select) - A list of options for the user to pick.
-- [NumberInput](number-input) - Numeric input with increment/decrement
-- [DatePicker](date-picker) - Date selection with calendar
-- [OtpInput](otp-input) - One-time password input
-- [ColorPicker](color-picker) - Color selection interface
-- [Editor](editor) - Multi-line text editor and code editor
-- [Form](form) - Form container and layout
+## Katman ve Gezinme
 
-### Layout Components
+- [İletişim Kutusu](./dialog)
+- [Uyarı İletişim Kutusu](./alert-dialog)
+- [Açılır Katman](./popover)
+- [Sheet](./sheet)
+- [Menü](./menu)
+- [Sekmeler](./tabs)
+- [Yan Çubuk](./sidebar)
 
-- [DescriptionList](description-list) - Key-value pair display
-- [GroupBox](group-box) - Grouped content with borders
-- [Dialog](dialog) - Dialog and modal windows
-- [Notification](notification) - Toast notifications
-- [Popover](popover) - Floating content display
-- [Resizable](resizable) - Resizable panels and containers
-- [Scrollable](scrollable) - Scrollable containers
-- [Sheet](sheet) - Slide-in panel from edges
-- [Sidebar](sidebar) - Navigation sidebar
+## Veri ve İçerik
 
-### Advanced Components
-
-- [Calendar](calendar) - Calendar display and navigation
-- [Chart](chart) - Data visualization charts (Line, Bar, Area, Pie, Candlestick)
-- [List](list) - List display with items
-- [Menu](menu) - Menu and context menu and dropdown menu.
-- [Settings](settings) - Settings UI
-- [DataTable](data-table) - High-performance data tables
-- [Tabs](tabs) - Tabbed interface
-- [Tree](tree) - Hierarchical tree data display
-- [VirtualList](virtual-list) - Virtualized list for large datasets
+- [Liste](./list)
+- [Tablo](./table)
+- [Veri Tablosu](./data-table)
+- [Ağaç](./tree)
+- [Grafik](./chart)
+- [Plot](./plot)
+- [Editör](./editor)

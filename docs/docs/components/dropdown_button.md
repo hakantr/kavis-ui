@@ -1,60 +1,33 @@
 ---
-title: DropdownButton
-description: A DropdownButton is a combination of a button and a trigger button. It allows us to display a dropdown menu when the trigger is clicked, but the left Button can still respond to independent events.
+title: Açılır Düğme
+description: Düğme ile açılır menüyü birleştirir.
 ---
 
-# DropdownButton
+# Açılır Düğme
 
-A [DropdownButton] is a combination of a button and a trigger button. It allows us to display a dropdown menu when the trigger is clicked, but the left Button can still respond to independent events.
+Düğme ile açılır menüyü birleştirir. Güncel örnekler Kavis UI'nin Türkçe `AcilirDugme` yüzeyini kullanır.
 
-And more option methods of [Button] are also available for the DropdownButton, such as setting different variants using [ButtonCustomVariant], sizes using [Sizable], adding icons, loading states.
-
-## Import
+## İçe Aktarma
 
 ```rust
-use kavis_ui::button::{Button, DropdownButton};
+use gpui::*;
+use kavis_ui::*;
 ```
 
-## Usage
+## `AcilirDugme`
+
+Ana tipler: `AcilirDugme`.
+
+## Kullanım
 
 ```rust
-use gpui::Anchor;
-
-DropdownButton::new("dropdown")
-    .button(Button::new("btn").label("Click Me"))
-    .dropdown_menu(|menu, _, _| {
-        menu.menu("Option 1", Box::new(MyAction))
-            .menu("Option 2", Box::new(MyAction))
-            .separator()
-            .menu("Option 3", Box::new(MyAction))
-    })
+AcilirDugme::new("islemler")
+    .button(Dugme::new("islemler-dugme").label("İşlemler"))
+    .dropdown_menu(|menu, _, _| menu.label("Yenile").label("Kapat"))
 ```
 
-### Variants
+## Notlar
 
-Same as [Button], DropdownButton supports different variants.
-
-````rust
-DropdownButton::new("dropdown")
-    .primary()
-    .button(Button::new("btn").label("Primary"))
-    .dropdown_menu(|menu, _, _| {
-        menu.menu("Option 1", Box::new(MyAction))
-    })
-```
-
-### With custom anchor
-
-```rust
-// With custom anchor
-DropdownButton::new("dropdown")
-    .button(Button::new("btn").label("Click Me"))
-    .dropdown_menu_with_anchor(Anchor::BottomRight, |menu, _, _| {
-        menu.menu("Option 1", Box::new(MyAction))
-    })
-````
-
-[Button]: https://docs.rs/kavis-ui/latest/kavis_ui/button/struct.Button.html
-[DropdownButton]: https://docs.rs/kavis-ui/latest/kavis_ui/button/struct.DropdownButton.html
-[ButtonCustomVariant]: https://docs.rs/kavis-ui/latest/kavis_ui/button/struct.ButtonCustomVariant.html
-[Sizable]: https://docs.rs/kavis-ui/latest/kavis_ui/trait.Sizable.html
+- Durumsuz bileşenler doğrudan `RenderOnce` öğesi olarak döndürülebilir.
+- Durum tutan bileşenlerde state `Entity<T>` içinde oluşturulur ve render sırasında bileşene verilir.
+- Kapsamlı çalışan örnek için `crates/story/src/stories/dropdown_button_story.rs` dosyasına bakın.

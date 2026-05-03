@@ -1,74 +1,30 @@
 ---
-title: 图标与资源
-order: -4
+title: Simgeler ve Varlıklar
+description: Kavis UI simge varlıklarını uygulamaya bağlama.
 ---
 
-# 图标与资源
+# Simgeler ve Varlıklar
 
-Kavis UI 中的 [IconName] 和 [Icon] 提供了一套可直接在 GPUI 应用中使用的图标接口。
+`Simge` bileşeni SVG dosyalarını GPUI varlık kaynağından okur. Hazır paket için `kavis-ui-assets`, özel paket için kendi `AssetSource` uygulamanızı kullanın.
 
-但为了尽量减小应用体积，`kavis-ui` 默认 **不会内置任何图标资源**。
-
-因此仓库把图标资源拆分到了独立的 [kavis-ui-assets] crate 中。这样你可以自行决定：
-
-- 直接使用默认内置图标资源
-- 完全不引入图标资源
-- 自己维护一套 SVG 资源
-
-## 使用默认内置资源
-
-[kavis-ui-assets] 提供了一个默认的资源实现，包含 `assets/icons` 目录下的全部图标文件。
-
-如果要使用默认资源，需要在 `Cargo.toml` 中添加：
-
-```toml
-[dependencies]
-gpui = { path = "../zed/crates/gpui" }
-gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
-kavis-ui = { git = "https://github.com/hakantr/kavis-ui" }
-kavis-ui-assets = { git = "https://github.com/hakantr/kavis-ui" }
+```rust
+let app = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
 ```
 
-然后在创建 GPUI 应用时，通过 `with_assets` 注册资源源：
+Özel kaynak örneği:
 
-```rs
-use gpui::*;
-use kavis_ui_assets::Assets;
-
-let app = gpui_platform::application().with_assets(Assets);
-```
-
-完成后，你就可以像平常一样使用 `IconName` 和 `Icon`。这些图标会从默认打包资源中读取。
-
-继续阅读下面的 [使用图标](#使用图标) 小节查看实际示例。
-
-## 自定义资源
-
-如果你只想带上一小部分图标，或者希望使用项目自己的 SVG 资源，可以自己构建资源源。
-
-仓库中的 [assets] 目录包含了目前支持的全部 SVG 图标文件，文件名与 [IconName] 枚举一一对应。
-
-你可以：
-
-- 直接从 [assets] 目录拷贝需要的 SVG
-- 或按 [IconName] 的命名规则准备自己的 SVG 文件
-
-在 GPUI 应用中，通常可以结合 [rust-embed] 将这些 SVG 嵌入可执行文件，并通过 `AssetSource` 提供加载能力。
-
-```rs
+```rust
 use anyhow::anyhow;
 use gpui::*;
-use kavis_ui::{v_flex, IconName, Root};
 use rust_embed::RustEmbed;
 use std::borrow::Cow;
 
-/// An asset source that loads assets from the `./assets` folder.
 #[derive(RustEmbed)]
 #[folder = "./assets"]
 #[include = "icons/**/*.svg"]
-pub struct Assets;
+pub struct Varliklar;
 
-impl AssetSource for Assets {
+impl AssetSource for Varliklar {
     fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>> {
         if path.is_empty() {
             return Ok(None);
@@ -76,7 +32,7 @@ impl AssetSource for Assets {
 
         Self::get(path)
             .map(|f| Some(f.data))
-            .ok_or_else(|| anyhow!("could not find asset at path \"{path}\""))
+            .ok_or_else(|| anyhow!("varlık bulunamadı: {path}"))
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
@@ -87,57 +43,4 @@ impl AssetSource for Assets {
 }
 ```
 
-同样需要在创建应用时调用 `with_assets`：
-
-```rs
-fn main() {
-    // Register Assets to GPUI application.
-    let app = gpui_platform::application().with_assets(Assets);
-
-    app.run(move |cx| {
-        // We must initialize kavis_ui before using it.
-        kavis_ui::init(cx);
-
-        cx.spawn(async move |cx| {
-            cx.open_window(WindowOptions::default(), |window, cx| {
-                let view = cx.new(|_| Example);
-                // The first level on the window must be Root.
-                cx.new(|cx| Root::new(view, window, cx))
-            })
-            .expect("Failed to open window");
-        })
-        .detach();
-    });
-}
-```
-
-## 使用图标
-
-完成资源注册后，就可以在应用中直接使用图标：
-
-```rs
-pub struct Example;
-
-impl Render for Example {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-        v_flex()
-            .gap_2()
-            .size_full()
-            .items_center()
-            .justify_center()
-            .text_center()
-            .child(IconName::Inbox)
-            .child(IconName::Bot)
-    }
-}
-```
-
-## 参考资源
-
-- [Lucide Icons](https://lucide.dev/) - Kavis UI 的图标集主要基于 Lucide 开源图标库
-
-[rust-embed]: https://docs.rs/rust-embed/latest/rust_embed/
-[IconName]: https://docs.rs/kavis_ui/latest/kavis_ui/icon/enum.IconName.html
-[Icon]: https://docs.rs/kavis_ui/latest/kavis_ui/icon/struct.Icon.html
-[assets]: https://github.com/hakantr/kavis-ui/tree/main/crates/assets/assets/
-[kavis-ui-assets]: https://crates.io/crates/kavis-ui-assets
+`SimgeAdi::Inbox` gibi adlar `assets/icons/inbox.svg` dosyasıyla eşleşmelidir.

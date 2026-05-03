@@ -1,25 +1,69 @@
 ---
-title: 介绍
-description: 使用 GPUI 构建跨平台桌面应用的 Rust Kavis UI。
+title: Giriş
+description: GPUI üzerinde Rust ile masaüstü uygulamaları geliştirmek için Kavis UI tanıtımı.
 ---
 
-# Kavis UI 简介
+# Kavis UI'ye Giriş
 
-Kavis UI 是一个基于 [GPUI](https://gpui.rs) 的 Rust UI 组件库，用于构建跨平台桌面应用。
+Kavis UI, [GPUI](https://gpui.rs) üzerinde modern masaüstü uygulamaları kurmak için hazırlanmış Rust bileşen kütüphanesidir. Bileşenler, tema sistemi, sanallaştırılmış liste ve tablo, Markdown/HTML içerik, grafikler ve kod editörü altyapısı sağlar.
 
-它目前提供 60+ 组件，覆盖表单、布局、图表、编辑器、主题与高性能列表等常见桌面场景，适合直接用于复杂产品界面开发。
+## Hızlı Kurulum
 
-## 特性
-
-- **丰富**：提供 60+ 跨平台桌面 UI 组件
-- **原生风格**：设计灵感来自 macOS / Windows 控件，并结合现代 UI 风格
-- **易于使用**：大量组件采用无状态 `RenderOnce` 模式
-- **可定制**：内建 `Theme` 与 `ThemeColor` 主题系统
-- **高性能**：虚拟列表、虚拟表格和高性能编辑器已内置
-
-## 下一步
-
-- 阅读 [开始使用](./getting-started)
-- 浏览 [组件文档](./components/index)
+```toml
+[dependencies]
+gpui = { path = "../zed/crates/gpui" }
+gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "runtime_shaders", "screen-capture", "wayland", "x11"] }
+kavis-ui = { git = "https://github.com/hakantr/kavis-ui" }
+kavis-ui-assets = { git = "https://github.com/hakantr/kavis-ui" }
+anyhow = "1"
+```
 
 
+## İlk Pencere
+
+```rust
+use gpui::*;
+use kavis_ui::*;
+
+pub struct Merhaba;
+
+impl Render for Merhaba {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .v_flex()
+            .gap_2()
+            .size_full()
+            .items_center()
+            .justify_center()
+            .child("Merhaba, dünya!")
+            .child(
+                Dugme::new("basla")
+                    .primary()
+                    .label("Başla")
+                    .on_click(|_, _, _| println!("Tıklandı!")),
+            )
+    }
+}
+
+fn main() {
+    gpui_platform::application().run(move |cx| {
+        kavis_ui::init(cx);
+
+        cx.spawn(async move |cx| {
+            cx.open_window(WindowOptions::default(), |window, cx| {
+                let view = cx.new(|_| Merhaba);
+                cx.new(|cx| KokGorunum::new(view, window, cx).bg(cx.theme().background))
+            })
+            .expect("Pencere açılamadı");
+        })
+        .detach();
+    });
+}
+```
+
+
+## Bağlantılar
+
+- [GitHub deposu](https://github.com/hakantr/kavis-ui)
+- [Katkı rehberi](https://github.com/hakantr/kavis-ui/blob/main/CONTRIBUTING.md)
+- [Bileşenler](./components/index)

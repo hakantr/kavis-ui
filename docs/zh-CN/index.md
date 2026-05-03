@@ -1,7 +1,7 @@
 ---
 title: Kavis UI
 layout: home
-description: 基于 Rust + GPUI 构建卓越的桌面应用程序
+description: Rust ve GPUI ile modern masaüstü uygulamaları geliştirin
 ---
 
 <script setup>
@@ -9,3 +9,5 @@ import Index from '../index.vue'
 </script>
 
 <Index />
+
+Bu rota adı geriye dönük uyumluluk için korunur; içerik Türkçedir.

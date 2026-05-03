@@ -1,15 +1,9 @@
 # kavis-ui-docs
 
-To install dependencies:
+Bu klasör Kavis UI dokümantasyon sitesini içerir. İçerik Türkçedir; mevcut rota klasörleri geriye dönük uyumluluk için korunmuştur.
 
 ```bash
 bun install
-```
-
-To run:
-
-```bash
 bun run dev
+bun run build
 ```
-
-This project was created using `bun init` in bun v1.2.23. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

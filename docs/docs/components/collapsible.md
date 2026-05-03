@@ -1,57 +1,33 @@
 ---
-title: Collapsible
-description: An interactive element which expands/collapses.
+title: Daraltılabilir Alan
+description: İçeriği açık veya kapalı durumda gösterir.
 ---
 
-# Collapsible
+# Daraltılabilir Alan
 
-An interactive element which expands/collapses.
+İçeriği açık veya kapalı durumda gösterir. Güncel örnekler Kavis UI'nin Türkçe `Daraltilabilir` yüzeyini kullanır.
 
-## Import
-
-```rust
-use kavis_ui::collapsible::Collapsible;
-```
-
-## Usage
-
-### Basic Use
+## İçe Aktarma
 
 ```rust
-Collapsible::new()
-    .max_w_128()
-    .gap_1()
-    .open(self.open)
-    .child(
-        "This is a collapsible component. \
-        Click the header to expand or collapse the content.",
-    )
-    .content(
-        "This is the full content of the Collapsible component. \
-        It is only visible when the component is expanded. \n\
-        You can put any content you like here, including text, images, \
-        or other UI elements.",
-    )
-    .child(
-        h_flex().justify_center().child(
-            Button::new("toggle1")
-                .icon(IconName::ChevronDown)
-                .label("Show more")
-                .when(open, |this| {
-                    this.icon(IconName::ChevronUp).label("Show less")
-                })
-                .xsmall()
-                .link()
-                .on_click({
-                    cx.listener(move |this, _, _, cx| {
-                        this.open = !this.open;
-                        cx.notify();
-                    })
-                }),
-        ),
-    )
+use gpui::*;
+use kavis_ui::*;
 ```
 
-We can use `open` method to control the collapsed state. If false, the `content` method added child elements will be hidden.
+## `Daraltilabilir`
 
-[Collapsible]: https://docs.rs/kavis-ui/latest/kavis_ui/collapsible/struct.Collapsible.html
+Ana tipler: `Daraltilabilir`.
+
+## Kullanım
+
+```rust
+Daraltilabilir::new()
+    .open(true)
+    .content("Genişletilmiş içerik")
+```
+
+## Notlar
+
+- Durumsuz bileşenler doğrudan `RenderOnce` öğesi olarak döndürülebilir.
+- Durum tutan bileşenlerde state `Entity<T>` içinde oluşturulur ve render sırasında bileşene verilir.
+- Kapsamlı çalışan örnek için `crates/story/src/stories/collapsible_story.rs` dosyasına bakın.

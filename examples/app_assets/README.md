@@ -1,34 +1,23 @@
-## Icon assets in Kavis UI
+# Kavis UI'de Simge Varlıkları
 
-The [IconName](https://github.com/hakantr/kavis-ui/blob/6998708b817024c2ac0f1ea164d74ddfc024e124/crates/ui/src/icon.rs#L9) is a enum that defined a bunch of icon names, because some internal components in Kavis UI will use them.
+`Simge` ve `SimgeAdi` SVG dosyalarını GPUI varlık kaynağından okur. Ana `kavis-ui` crate'i bütün simgeleri varsayılan olarak gömmez; uygulama kendi `AssetSource` tipini kaydedebilir veya `kavis-ui-assets` crate'ini kullanabilir.
 
-You can see, we have a lot of svg icon files in the `assets/icons` folder, but we are not embed all of the icon files in the library by default. This for keep the library size small.
+## Klasör Düzeni
 
-So you must have your own icon files to use the `Icon` component in Kavis UI.
-
-You can download the icon files from [here](https://lucide.dev/) or use your own icon files as you wish, just use the same filename as the icon name (match with the `IconName` defined) you want to use.
-
-For example your assets folder:
-
-```
+```text
 app_root
   assets
     icons
-      close.svg
-      menu.svg
-      ...
+      bot.svg
+      inbox.svg
   src
     main.rs
   Cargo.toml
 ```
 
-You also can just copy the svg files you want from the `assets/icons` folder in Kavis UI repo to your own assets folder.
+## Özel Varlık Kaynağı
 
-## How to use
-
-You need define a `Assets` struct with rust-embed to register assets to GPUI application.
-
-```rs
+```rust
 use anyhow::anyhow;
 use gpui::*;
 use rust_embed::RustEmbed;
@@ -37,13 +26,17 @@ use std::borrow::Cow;
 #[derive(RustEmbed)]
 #[folder = "./assets"]
 #[include = "icons/**/*.svg"]
-pub struct Assets;
+pub struct Varliklar;
 
-impl AssetSource for Assets {
+impl AssetSource for Varliklar {
     fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>> {
+        if path.is_empty() {
+            return Ok(None);
+        }
+
         Self::get(path)
             .map(|f| Some(f.data))
-            .ok_or_else(|| anyhow!("could not find asset at path \"{path}\""))
+            .ok_or_else(|| anyhow!("varlık bulunamadı: {path}"))
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
@@ -52,31 +45,11 @@ impl AssetSource for Assets {
             .collect())
     }
 }
-
-fn main() {
-    // Call with_assets to register assets
-    let app = gpui_platform::application().with_assets(Assets);
-
-    // ...
-}
 ```
 
-## Use default bundled assets.
+## Uygulamada Kullanım
 
-The `kavis-ui-assets` crate provide a default bundled assets implementation that include all the icon files in the `assets/icons` folder.
-
-If you don't want to manage your own icon files, you can just use the default bundled assets.
-
-Just add `kavis-ui-assets` as a dependency in your `Cargo.toml`:
-
-```toml
-[dependencies]
-kavis-ui = "*"
-kavis-ui-assets = "*"
-```
-
-And then use it in your application:
-
-```rs
-let app = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
+```rust
+let app = gpui_platform::application().with_assets(Varliklar);
+let hazir_paket = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
 ```
