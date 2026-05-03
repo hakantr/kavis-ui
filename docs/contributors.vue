@@ -41,19 +41,19 @@ import { data } from "./data/contributors.data";
 const { localeIndex } = useData();
 const isZh = computed(() => localeIndex.value === "zh-CN");
 const contributors = data;
-const title = computed(() => (isZh.value ? "贡献者" : "Contributors"));
+const title = computed(() => (isZh.value ? "贡献者" : "Katkıda Bulunanlar"));
 const description = computed(() =>
     isZh.value
         ? "感谢所有为这个项目做出贡献的开发者。"
-        : "Thanks to all the people who have contributed to this project!",
+        : "Bu projeye katkı veren herkese teşekkürler.",
 );
 const moreText = computed(() =>
-    isZh.value ? "这里没有展示全部贡献者，完整列表请查看 GitHub 上的 " : "More contributors not shown here. See the full ",
+    isZh.value ? "这里没有展示全部贡献者，完整列表请查看 GitHub 上的 " : "Burada tüm katkıda bulunanlar gösterilmiyor. Tam liste için GitHub üzerindeki ",
 );
 const contributorsLinkText = computed(() =>
-    isZh.value ? "贡献者列表" : "Contributors",
+    isZh.value ? "贡献者列表" : "katkıda bulunanlar listesine",
 );
-const suffixText = computed(() => (isZh.value ? "。" : " on GitHub."));
+const suffixText = computed(() => (isZh.value ? "。" : " bakın."));
 </script>
 
 <style lang="scss" scoped>

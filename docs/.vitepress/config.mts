@@ -23,27 +23,29 @@ function createSidebar(scanStartPath: string, rootGroupText: string) {
   ]) as any;
 }
 
-const enSidebar = createSidebar("/docs/", "Introduction");
+const trSidebar = createSidebar("/docs/", "Giriş");
 const zhSidebar = createSidebar("/zh-CN/docs/", "文档");
 
-function createFooter(prefix = "", locale: "en" | "zh" = "en") {
-  const contributorsText = locale === "zh" ? "贡献者" : "Contributors";
-  const skillsText = "Skills";
-  const reportBugText = locale === "zh" ? "报告问题" : "Report Bug";
-  const discussionText = locale === "zh" ? "讨论" : "Discussion";
+function createFooter(prefix = "", locale: "tr" | "zh" = "tr") {
+  const contributorsText = locale === "zh" ? "贡献者" : "Katkıda Bulunanlar";
+  const skillsText = locale === "zh" ? "技能" : "Yetenekler";
+  const reportBugText = locale === "zh" ? "报告问题" : "Sorun Bildir";
+  const discussionText = locale === "zh" ? "讨论" : "Tartışmalar";
+  const galleryText = locale === "zh" ? "画廊" : "Galeri";
+  const iconResourcesText =
+    locale === "zh" ? "图标资源" : "Simge kaynakları";
   const message =
     locale === "zh"
       ? `Kavis UI 是一个基于 Apache-2.0 许可证的开源项目，
         由 <a href='https://longbridge.com' target='_blank'>Longbridge</a> 开发。`
-      : `Kavis UI is an open source project under the Apache-2.0 License,
-        developed by <a href='https://longbridge.com' target='_blank'>Longbridge</a>.`;
+      : `Kavis UI, Apache-2.0 lisansı altında yayımlanan açık kaynaklı bir projedir.`;
 
   return {
     message,
     copyright: `
       <a href="https://gpui.rs">GPUI</a>
       |
-      <a href="/kavis-ui/gallery/" target="_blank">Gallery</a>
+      <a href="/kavis-ui/gallery/" target="_blank">${galleryText}</a>
       |
       <a href="/kavis-ui${prefix}/contributors">${contributorsText}</a>
       |
@@ -55,28 +57,30 @@ function createFooter(prefix = "", locale: "en" | "zh" = "en") {
       |
       <a href="https://github.com/hakantr/kavis-ui/discussions" target="_blank">${discussionText}</a>
       <br />
-      Icon resources are used <a href="https://lucide.dev" target="_blank">Lucide</a>,
+      ${iconResourcesText}: <a href="https://lucide.dev" target="_blank">Lucide</a>,
       <a href="https://isocons.app" target="_blank">Isocons</a>.
     `,
   };
 }
 
-function createNav(prefix = "", locale: "en" | "zh" = "en") {
-  const homeText = locale === "zh" ? "首页" : "Home";
-  const gettingStartedText = locale === "zh" ? "开始使用" : "Getting Started";
-  const componentsText = locale === "zh" ? "组件" : "Components";
-  const resourcesText = locale === "zh" ? "资源" : "Resources";
-  const contributorsText = locale === "zh" ? "贡献者" : "Contributors";
-  const releasesText = locale === "zh" ? "版本发布" : "Releases";
-  const issuesText = "Issues";
-  const discussionText = locale === "zh" ? "讨论" : "Discussion";
+function createNav(prefix = "", locale: "tr" | "zh" = "tr") {
+  const homeText = locale === "zh" ? "首页" : "Ana Sayfa";
+  const gettingStartedText = locale === "zh" ? "开始使用" : "Başlarken";
+  const componentsText = locale === "zh" ? "组件" : "Bileşenler";
+  const resourcesText = locale === "zh" ? "资源" : "Kaynaklar";
+  const contributorsText = locale === "zh" ? "贡献者" : "Katkıda Bulunanlar";
+  const releasesText = locale === "zh" ? "版本发布" : "Sürümler";
+  const issuesText = locale === "zh" ? "问题" : "Sorunlar";
+  const discussionText = locale === "zh" ? "讨论" : "Tartışmalar";
+  const galleryText = locale === "zh" ? "画廊" : "Galeri";
+  const apiDocText = locale === "zh" ? "API 文档" : "API Dokümanı";
 
   return [
     { text: homeText, link: `${prefix}/` || "/" },
     { text: gettingStartedText, link: `${prefix}/docs/getting-started` || "/docs/getting-started" },
     { text: componentsText, link: `${prefix}/docs/components` || "/docs/components" },
-    { text: "Gallery", link: "/gallery/", target: "_blank" },
-    { text: "API Doc", link: "https://docs.rs/kavis-ui" },
+    { text: galleryText, link: "/gallery/", target: "_blank" },
+    { text: apiDocText, link: "https://docs.rs/kavis-ui" },
     {
       text: resourcesText,
       items: [
@@ -123,7 +127,7 @@ const config: UserConfig = {
   title: "Kavis UI",
   base: "/kavis-ui/",
   description:
-    "Rust GUI components for building fantastic cross-platform desktop application by using GPUI.",
+    "GPUI kullanarak çapraz platform masaüstü uygulamaları geliştirmek için Rust GUI bileşenleri.",
   cleanUrls: true,
   head: [
     [
@@ -149,17 +153,30 @@ const config: UserConfig = {
   themeConfig: sharedThemeConfig,
   locales: {
     root: {
-      label: "English",
-      lang: "en-US",
+      label: "Türkçe",
+      lang: "tr-TR",
       themeConfig: {
         ...sharedThemeConfig,
-        langMenuLabel: "Languages",
-        nav: createNav("", "en"),
-        sidebar: enSidebar,
-        footer: createFooter("", "en"),
+        langMenuLabel: "Diller",
+        returnToTopLabel: "Yukarı dön",
+        sidebarMenuLabel: "Menü",
+        darkModeSwitchLabel: "Görünüm",
+        lightModeSwitchTitle: "Açık moda geç",
+        darkModeSwitchTitle: "Koyu moda geç",
+        outline: {
+          label: "Bu Sayfada",
+        },
+        docFooter: {
+          prev: "Önceki",
+          next: "Sonraki",
+        },
+        nav: createNav("", "tr"),
+        sidebar: trSidebar,
+        footer: createFooter("", "tr"),
         editLink: {
           pattern:
             "https://github.com/hakantr/kavis-ui/edit/main/docs/:path",
+          text: "Bu sayfayı düzenle",
         },
       },
     },
@@ -196,4 +213,3 @@ const config: UserConfig = {
 };
 
 export default defineConfig(config);
-

@@ -29,12 +29,12 @@ const isZh = computed(() => localeIndex.value === "zh-CN");
 const skills = data;
 const expandedSkills = ref(new Set());
 const title = computed(() =>
-    isZh.value ? "Kavis UI 技能" : "Kavis UI Skills",
+    isZh.value ? "Kavis UI 技能" : "Kavis UI Yetenekleri",
 );
 const description = computed(() =>
     isZh.value
         ? "这里汇总了适用于 Kavis UI 的开发技能、约定和最佳实践。"
-        : "Skills available for working with Kavis UI. These skills provide guidance and best practices for building GPUI applications.",
+        : "Kavis UI ile çalışırken kullanılan geliştirme notları, kurallar ve GPUI uygulamaları için önerilen pratikler.",
 );
 
 function toggleSkill(skillId) {
@@ -50,7 +50,7 @@ function isExpanded(skillId) {
 }
 
 function getPreview(content) {
-    // Get first paragraph or first 200 characters
+    // İlk paragrafı veya ilk 200 karakteri kullan.
     const lines = content.split("\n").filter((line) => line.trim());
     if (lines.length > 0) {
         const firstLine = lines[0].trim();
@@ -63,43 +63,43 @@ function getPreview(content) {
 }
 
 function formatMarkdown(content) {
-    // Simple markdown to HTML conversion for basic formatting
+    // Temel biçimlendirme için sade Markdown -> HTML dönüşümü.
     let html = content;
 
-    // Code blocks (must come before inline code)
+    // Kod blokları satır içi koddan önce işlenmelidir.
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/gim, (match, lang, code) => {
         const language = lang ? ` class="language-${lang}"` : "";
         return `<pre><code${language}>${escapeHtml(code.trim())}</code></pre>`;
     });
 
-    // Inline code
+    // Satır içi kod.
     html = html.replace(/`([^`\n]+)`/gim, "<code>$1</code>");
 
-    // Headers
+    // Başlıklar.
     html = html.replace(/^#### (.*$)/gim, "<h4>$1</h4>");
     html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
     html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
     html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
 
-    // Bold and italic
+    // Kalın ve italik.
     html = html.replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>");
     html = html.replace(/\*(.*?)\*/gim, "<em>$1</em>");
 
-    // Lists
+    // Listeler.
     html = html.replace(/^\- (.*$)/gim, "<li>$1</li>");
     html = html.replace(/^(\d+)\. (.*$)/gim, "<li>$2</li>");
 
-    // Wrap consecutive list items in ul/ol
+    // Ardışık liste öğelerini liste kapsayıcısına al.
     html = html.replace(/(<li>.*<\/li>\n?)+/gim, (match) => {
         return "<ul>" + match + "</ul>";
     });
 
-    // Paragraphs (split by double newlines)
+    // Paragraflar çift satır sonuna göre ayrılır.
     const paragraphs = html.split(/\n\n+/);
     html = paragraphs
         .map((p) => {
             p = p.trim();
-            if (!p || p.startsWith("<")) return p; // Already formatted
+            if (!p || p.startsWith("<")) return p; // Zaten biçimlendirilmiş.
             return "<p>" + p + "</p>";
         })
         .join("\n\n");
@@ -108,7 +108,7 @@ function formatMarkdown(content) {
 }
 
 function escapeHtml(text) {
-    // Simple HTML escaping for SSR compatibility
+    // SSR uyumluluğu için sade HTML kaçışlama.
     return text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")

@@ -61,7 +61,7 @@ function normalizeLink(link: string, addPath: boolean, path: string, addExt: boo
     v-if="!screenMenu && localeItems.length"
     class="LanguageSwitcher"
     icon="vpi-languages"
-    :label="theme.langMenuLabel || 'Change language'"
+    :label="theme.langMenuLabel || 'Dil değiştir'"
   >
     <div class="items">
       <VPLink
@@ -79,7 +79,7 @@ function normalizeLink(link: string, addPath: boolean, path: string, addExt: boo
   <div v-else-if="localeItems.length" class="LanguageSwitcherScreen">
     <p class="title">
       <span class="vpi-languages icon" />
-      {{ theme.langMenuLabel || "Languages" }}
+      {{ theme.langMenuLabel || "Diller" }}
     </p>
     <ul class="list">
       <li v-for="locale in localeItems" :key="locale.text" class="item">

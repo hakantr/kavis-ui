@@ -3,7 +3,7 @@
         <h1>Kavis UI</h1>
         <div class="banner-description">
             {{ bannerPrefix }}
-            <a href="https://gpui.rs" target="_blank">GPUI</a><span v-if="!isZh">.</span>
+            <a href="https://gpui.rs" target="_blank">GPUI</a>
             {{ bannerSuffix }}
         </div>
         <div class="actions">
@@ -115,14 +115,14 @@ const componentsHref = computed(() =>
 const bannerPrefix = computed(() =>
     isZh.value
         ? "基于 Rust + "
-        : "Rust GUI components for building fantastic cross-platform desktop application by using ",
+        : "Rust + ",
 );
 const bannerSuffix = computed(() =>
-    isZh.value ? " 构建卓越的桌面应用程序" : "",
+    isZh.value ? " 构建卓越的桌面应用程序" : " ile güçlü çapraz platform masaüstü uygulamaları geliştirin.",
 );
-const getStartedText = computed(() => (isZh.value ? "开始使用" : "Get Started"));
-const componentsText = computed(() => (isZh.value ? "组件" : "Components"));
-const versionLabel = computed(() => (isZh.value ? "版本：" : "Version:"));
+const getStartedText = computed(() => (isZh.value ? "开始使用" : "Başlarken"));
+const componentsText = computed(() => (isZh.value ? "组件" : "Bileşenler"));
+const versionLabel = computed(() => (isZh.value ? "版本：" : "Sürüm:"));
 const features = computed(() =>
     isZh.value
         ? {
@@ -153,34 +153,34 @@ const features = computed(() =>
           }
         : {
               componentCount: {
-                  title: "60+ Components",
+                  title: "60+ Bileşen",
                   description:
-                      "Comprehensive library of cross-platform desktop UI components for building feature-rich applications.",
+                      "Zengin özellikli uygulamalar kurmak için kapsamlı çapraz platform masaüstü UI bileşenleri.",
               },
               performance: {
-                  title: "High Performance",
+                  title: "Yüksek Performans",
                   description:
-                      "Virtualized Table and List components for smooth rendering of large datasets with minimal memory footprint.",
+                      "Büyük veri kümelerini düşük bellek kullanımıyla akıcı çizmek için sanallaştırılmış tablo ve liste bileşenleri.",
               },
               theme: {
-                  title: "Themeable",
+                  title: "Temalanabilir",
                   description:
-                      "Built-in theme system with with 20+ themes, and dark mode out of the box.",
+                      "Yerleşik tema sistemi, 20+ tema ve hazır açık/koyu mod desteği.",
               },
               layout: {
-                  title: "Flexible Layouts",
+                  title: "Esnek Düzenler",
                   description:
-                      "Dock layout for panel arrangements, resizable panels, and freeform layouts for any application structure.",
+                      "Panel yerleşimleri, yeniden boyutlandırılabilir paneller ve farklı uygulama yapıları için serbest düzenler.",
               },
               chart: {
-                  title: "Data Visualization",
+                  title: "Veri Görselleştirme",
                   description:
-                      "Built-in chart components for visualizing data with Line, Bar, Area, and Pie charts.",
+                      "Çizgi, bar, alan ve pasta grafiklerle veri göstermek için yerleşik grafik bileşenleri.",
               },
               editor: {
-                  title: "Code Editor",
+                  title: "Kod Editörü",
                   description:
-                      "High-performance code editor with LSP support, syntax highlighting, powered by Tree-sitter and Rope.",
+                      "Tree-sitter ve Rope tabanlı, LSP ve sözdizimi vurgulama destekli yüksek performanslı kod editörü.",
               },
           },
 );
