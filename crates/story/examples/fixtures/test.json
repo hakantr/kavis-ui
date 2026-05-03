@@ -1,7 +1,7 @@
 [
   {
     "name": "Kavis UI",
-    "description": "UI components for building fantastic desktop application by using GPUI.",
+    "description": "GPUI ile güçlü masaüstü uygulamaları oluşturmak için UI bileşenleri.",
     "license": "Apache-2.0",
     "keywords": ["UI", "desktop", "application"],
     "stars": 3000,

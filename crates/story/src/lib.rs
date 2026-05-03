@@ -804,9 +804,6 @@ fn localized_story_description(description: &'static str) -> &'static str {
             "Akordeon, açılıp kapanmak için dahili olarak katlanabilir yapıyı kullanır."
         }
         "The resizable panels." => "Yeniden boyutlandırılabilir paneller.",
-        "UI components for building fantastic desktop application by using GPUI." => {
-            "GPUI ile masaüstü uygulamaları oluşturmak için UI bileşenleri."
-        }
         "Use to display details with a tidy layout." => {
             "Ayrıntıları düzenli bir yerleşimle göstermek için kullanılır."
         }

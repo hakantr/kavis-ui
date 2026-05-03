@@ -5,7 +5,7 @@ use gpui::{
 };
 use kavis_ui::{EtkinTema, divider::Ayirici, h_flex, label::Etiket, v_flex};
 
-const DESCRIPTION: &str = "Kavis UI is a Rust GUI components for building fantastic cross-platform desktop application by using GPUI.";
+const DESCRIPTION: &str = "Kavis UI, GPUI ile güçlü çapraz platform masaüstü uygulamaları geliştirmek için Rust GUI bileşenleri sunar.";
 
 pub struct DividerStory {
     focus_handle: gpui::FocusHandle,
@@ -17,7 +17,7 @@ impl super::Story for DividerStory {
     }
 
     fn description() -> &'static str {
-        "A divider that can be either vertical or horizontal."
+        "Dikey veya yatay kullanılabilen ayırıcı."
     }
 
     fn new_view(window: &mut Window, cx: &mut App) -> Entity<impl Render> {
@@ -44,34 +44,34 @@ impl Render for DividerStory {
         v_flex()
             .gap_6()
             .child(
-                section("Horizontal Dividers").child(
+                section("Yatay Ayırıcılar").child(
                     v_flex()
                         .gap_4()
                         .w_full()
                         .mt_4()
                         .child(Ayirici::horizontal())
-                        .child(Ayirici::horizontal().label("With Etiket"))
+                        .child(Ayirici::horizontal().label("Etiketli"))
                         .child(Ayirici::horizontal_dashed())
-                        .child(Ayirici::horizontal_dashed().label("Dashed With Etiket")),
+                        .child(Ayirici::horizontal_dashed().label("Kesikli ve Etiketli")),
                 ),
             )
             .child(
-                section("Vertical Dividers").child(
+                section("Dikey Ayırıcılar").child(
                     h_flex()
                         .gap_4()
                         .h(px(100.))
                         .child(Ayirici::vertical())
-                        .child(Ayirici::vertical().label("Solid"))
+                        .child(Ayirici::vertical().label("Düz"))
                         .child(Ayirici::vertical_dashed())
-                        .child(Ayirici::vertical_dashed().label("Dashed")),
+                        .child(Ayirici::vertical_dashed().label("Kesikli")),
                 ),
             )
             .child(
-                section("Combination Dividers").child(
+                section("Birleşik Ayırıcılar").child(
                     v_flex()
                         .gap_y_4()
                         .child(
-                            v_flex().gap_y_2().child("Hello Kavis UI").child(
+                            v_flex().gap_y_2().child("Merhaba Kavis UI").child(
                                 Etiket::new(DESCRIPTION)
                                     .text_color(cx.theme().muted_foreground)
                                     .text_sm(),

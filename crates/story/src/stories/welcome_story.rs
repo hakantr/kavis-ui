@@ -24,11 +24,11 @@ impl WelcomeStory {
 
 impl Story for WelcomeStory {
     fn title() -> &'static str {
-        "Introduction"
+        "Giriş"
     }
 
     fn description() -> &'static str {
-        "UI components for building fantastic desktop application by using GPUI."
+        "GPUI ile güçlü masaüstü uygulamaları oluşturmak için UI bileşenleri."
     }
 
     fn new_view(window: &mut Window, cx: &mut App) -> Entity<impl Render> {
