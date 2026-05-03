@@ -1,0 +1,151 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Galeri (kavis-ui-story)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/kavis-ui-story",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": {
+      "RUST_BACKTRACE": "1",
+      "RUST_LOG": "info,kavis_ui=debug"
+    },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "kavis-ui-story"]
+    }
+  },
+  {
+    "label": "Galeri — inspector özelliği",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/kavis-ui-story",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": {
+      "RUST_BACKTRACE": "1",
+      "RUST_LOG": "info,kavis_ui=debug"
+    },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "kavis-ui-story", "--features", "inspector"]
+    }
+  },
+  {
+    "label": "Örnek: hello_world",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/hello_world",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "hello_world"]
+    }
+  },
+  {
+    "label": "Örnek: input",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/input",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "input"]
+    }
+  },
+  {
+    "label": "Örnek: dialog_overlay",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/dialog_overlay",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "dialog_overlay"]
+    }
+  },
+  {
+    "label": "Örnek: focus_trap",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/focus_trap",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "focus_trap"]
+    }
+  },
+  {
+    "label": "Örnek: tooltip_top_edge",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/tooltip_top_edge",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "tooltip_top_edge"]
+    }
+  },
+  {
+    "label": "Örnek: system_monitor",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/system_monitor",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "system_monitor"]
+    }
+  },
+  {
+    "label": "Örnek: window_title",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/window_title",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "window_title"]
+    }
+  },
+  {
+    "label": "Örnek: webview",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/webview",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": [],
+    "env": { "RUST_BACKTRACE": "1" },
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--package", "webview"]
+    }
+  },
+  {
+    "label": "kavis-ui testleri (cargo test)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "cargo",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": ["test", "--package", "kavis-ui", "--", "--test-threads", "1"],
+    "env": { "RUST_BACKTRACE": "1" }
+  }
+]
