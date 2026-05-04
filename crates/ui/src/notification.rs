@@ -317,7 +317,7 @@ impl Render for Bildirim {
             .gap_3()
             .refine_style(&self.style)
             .when_some(icon, |this, icon| {
-                this.child(div().absolute().py_3p5().left_4().child(icon))
+                this.child(div().absolute().top(px(18.)).left_4().child(icon))
             })
             .child(
                 v_flex()

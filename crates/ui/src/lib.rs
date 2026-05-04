@@ -63,6 +63,7 @@ pub mod rating;
 pub mod resizable;
 pub mod scroll;
 pub mod select;
+pub mod separator;
 pub mod setting;
 pub mod sheet;
 pub mod sidebar;

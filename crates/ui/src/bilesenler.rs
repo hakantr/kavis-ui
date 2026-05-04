@@ -27,6 +27,7 @@ pub use crate::popover::*;
 pub use crate::progress::*;
 pub use crate::radio::*;
 pub use crate::select::*;
+pub use crate::separator::*;
 pub use crate::sheet::*;
 pub use crate::sidebar::*;
 pub use crate::slider::*;

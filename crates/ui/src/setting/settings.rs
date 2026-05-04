@@ -8,7 +8,7 @@ use crate::{
     input::{Input, InputState},
     resizable::{h_resizable, resizable_panel},
     setting::{AyarGrubu, AyarSayfasi},
-    sidebar::{YanCubuk, YanCubukMenuOgesi, YanCubukMenusu},
+    sidebar::{YanCubuk, YanCubukDaralma, YanCubukMenuOgesi, YanCubukMenusu},
 };
 use rust_i18n::t;
 
@@ -163,7 +163,7 @@ impl Ayarlar {
             .w(relative(1.))
             .border_0()
             .refine_style(&self.sidebar_style)
-            .collapsible(false)
+            .collapsible(YanCubukDaralma::None)
             .collapsed(false)
             .header(
                 div()

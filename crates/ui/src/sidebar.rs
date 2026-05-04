@@ -26,6 +26,180 @@ pub use menu::*;
 
 const DEFAULT_WIDTH: Pixels = px(255.);
 const COLLAPSED_WIDTH: Pixels = px(48.);
+const SIDEBAR_TRANSITION_DURATION: Duration = Duration::from_millis(200);
+
+/// [`YanCubuk`] daraltıldığında nasıl davranacağını belirler.
+///
+/// - [`YanCubukDaralma::Icon`] yan çubuğu simge genişliğine indirir.
+/// - [`YanCubukDaralma::Offcanvas`] yan çubuğu düzen dışına kaydırır ve genişliği serbest bırakır.
+/// - [`YanCubukDaralma::None`] daraltma durumunu yok sayar.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum YanCubukDaralma {
+    /// Yan çubuğu simge genişliğine indir.
+    #[default]
+    Icon,
+    /// Yan çubuğu tamamen düzen dışına kaydır.
+    Offcanvas,
+    /// Daraltmayı devre dışı bırak.
+    None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum SidebarWrapperLayout {
+    None,
+    Static { width: Pixels },
+    Animated { target_width: Pixels },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct SidebarLayout {
+    icon_collapsed: bool,
+    offcanvas_collapsed: bool,
+    align_child_to_end: bool,
+    wrapper: SidebarWrapperLayout,
+}
+
+impl SidebarLayout {
+    fn new(
+        collapsible: YanCubukDaralma,
+        collapsed: bool,
+        expanded_width: Option<Pixels>,
+        side: Side,
+    ) -> Self {
+        let collapsed = collapsed && collapsible != YanCubukDaralma::None;
+        let wrapper = match collapsible {
+            YanCubukDaralma::None => SidebarWrapperLayout::None,
+            YanCubukDaralma::Icon => match expanded_width {
+                Some(expanded_width) => SidebarWrapperLayout::Animated {
+                    target_width: if collapsed {
+                        COLLAPSED_WIDTH
+                    } else {
+                        expanded_width
+                    },
+                },
+                None => SidebarWrapperLayout::None,
+            },
+            YanCubukDaralma::Offcanvas => match (expanded_width, collapsed) {
+                (Some(_), true) => SidebarWrapperLayout::Animated {
+                    target_width: px(0.),
+                },
+                (Some(expanded_width), false) => SidebarWrapperLayout::Animated {
+                    target_width: expanded_width,
+                },
+                (None, true) => SidebarWrapperLayout::Static { width: px(0.) },
+                (None, false) => SidebarWrapperLayout::None,
+            },
+        };
+        let align_child_to_end = match collapsible {
+            YanCubukDaralma::Offcanvas => side.is_left(),
+            _ => side.is_right(),
+        };
+
+        Self {
+            icon_collapsed: collapsed && collapsible == YanCubukDaralma::Icon,
+            offcanvas_collapsed: collapsed && collapsible == YanCubukDaralma::Offcanvas,
+            align_child_to_end,
+            wrapper,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct SidebarAnimationState {
+    from_width: Pixels,
+    target_width: Pixels,
+    render_child: bool,
+    hide_scheduled: bool,
+    hide_request: u64,
+}
+
+impl SidebarAnimationState {
+    fn new(target_width: Pixels, render_child: bool) -> Self {
+        Self {
+            from_width: target_width,
+            target_width,
+            render_child,
+            hide_scheduled: false,
+            hide_request: 0,
+        }
+    }
+
+    fn needs_update(&self, target_width: Pixels, offcanvas_collapsed: bool) -> bool {
+        let child_state_changed = if offcanvas_collapsed {
+            self.render_child && !self.hide_scheduled
+        } else {
+            !self.render_child || self.hide_scheduled
+        };
+
+        self.target_width != target_width || child_state_changed
+    }
+
+    fn update_target(&mut self, target_width: Pixels, offcanvas_collapsed: bool) -> Option<u64> {
+        if self.target_width != target_width {
+            self.from_width = self.target_width;
+            self.target_width = target_width;
+        }
+
+        if offcanvas_collapsed {
+            if self.render_child && !self.hide_scheduled {
+                self.hide_scheduled = true;
+                self.hide_request = self.hide_request.wrapping_add(1);
+                Some(self.hide_request)
+            } else {
+                None
+            }
+        } else {
+            self.render_child = true;
+            if self.hide_scheduled {
+                self.hide_request = self.hide_request.wrapping_add(1);
+            }
+            self.hide_scheduled = false;
+            None
+        }
+    }
+
+    fn finish_hide(&mut self, request: u64) -> bool {
+        if self.render_child
+            && self.hide_scheduled
+            && self.hide_request == request
+            && self.target_width == px(0.)
+        {
+            self.render_child = false;
+            self.hide_scheduled = false;
+            true
+        } else {
+            false
+        }
+    }
+}
+
+fn sidebar_wrapper(
+    id: impl Into<ElementId>,
+    align_child_to_end: bool,
+) -> impl ParentElement + IntoElement + Styled {
+    div()
+        .id(id)
+        .flex()
+        .h_full()
+        .flex_shrink_0()
+        .overflow_hidden()
+        .when(align_child_to_end, |this| this.justify_end())
+}
+
+fn sidebar_expanded_width(style: &StyleRefinement) -> Option<Pixels> {
+    match style.size.width {
+        Some(Length::Definite(DefiniteLength::Absolute(AbsoluteLength::Pixels(px)))) => Some(px),
+        Some(_) => None,
+        None => Some(DEFAULT_WIDTH),
+    }
+}
+
+fn sidebar_animation_id(id: &ElementId, from: Pixels, to: Pixels) -> ElementId {
+    ElementId::NamedInteger(
+        format!("{id}-anim-w").into(),
+        (from.as_f32().to_bits() as u64) << 32 | to.as_f32().to_bits() as u64,
+    )
+}
 
 pub trait YanCubukOgesi: Daraltilabilir + Clone {
     fn render(
@@ -48,7 +222,7 @@ pub struct YanCubuk<E: YanCubukOgesi + 'static> {
     footer: Option<AnyElement>,
     /// taraf sidebar
     side: Side,
-    collapsible: bool,
+    collapsible: YanCubukDaralma,
     collapsed: bool,
     ust_bosluk: Pixels,
     alt_bosluk: Pixels,
@@ -64,7 +238,7 @@ impl<E: YanCubukOgesi> YanCubuk<E> {
             header: None,
             footer: None,
             side: Side::Left,
-            collapsible: true,
+            collapsible: YanCubukDaralma::Icon,
             collapsed: false,
             ust_bosluk: px(0.0),
             alt_bosluk: px(0.0),
@@ -88,8 +262,8 @@ impl<E: YanCubukOgesi> YanCubuk<E> {
         self
     }
 
-    /// Yan çubuğun daraltılabilir olup olmadığını ayarlar. Varsayılan: true.
-    pub fn collapsible(mut self, collapsible: bool) -> Self {
+    /// Yan çubuğun nasıl daralacağını ayarlar.
+    pub fn collapsible(mut self, collapsible: YanCubukDaralma) -> Self {
         self.collapsible = collapsible;
         self
     }
@@ -223,7 +397,10 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
             list_state.reset(content_len);
         }
 
-        let collapsed = self.collapsed;
+        // Özel width piksel değilse animasyon yerine özgün yerleşim korunur.
+        let expanded_width = sidebar_expanded_width(&self.style);
+        let layout =
+            SidebarLayout::new(self.collapsible, self.collapsed, expanded_width, self.side);
 
         // YanCubuk content renders at its target width immediately.
         // A wrapper div animates clip-width for smooth transitions
@@ -247,7 +424,9 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
                 this.w(DEFAULT_WIDTH)
             })
             .refine_style(&self.style)
-            .when(self.collapsed, |this| this.w(COLLAPSED_WIDTH).gap_2())
+            .when(layout.icon_collapsed, |this| {
+                this.w(COLLAPSED_WIDTH).gap_2()
+            })
             .when_some(self.header.take(), |this, header| {
                 this.child(
                     h_flex()
@@ -255,7 +434,7 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
                         .pt_3()
                         .px_3()
                         .gap_2()
-                        .when(self.collapsed, |this| this.pt_2().px_2())
+                        .when(layout.icon_collapsed, |this| this.pt_2().px_2())
                         .child(header),
                 )
             })
@@ -266,7 +445,7 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
                         .size_full()
                         .px_3()
                         .gap_y_3()
-                        .when(self.collapsed, |this| this.p_2())
+                        .when(layout.icon_collapsed, |this| this.p_2())
                         .child(
                             list(list_state.clone(), {
                                 move |ix, window, cx| {
@@ -279,7 +458,7 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
                                         .when_some(group, |this, group| {
                                             this.child(
                                                 group
-                                                    .collapsed(self.collapsed)
+                                                    .collapsed(layout.icon_collapsed)
                                                     .render(ix, window, cx)
                                                     .into_any_element(),
                                             )
@@ -301,64 +480,132 @@ impl<E: YanCubukOgesi> RenderOnce for YanCubuk<E> {
                         .pb_3()
                         .px_3()
                         .gap_2()
-                        .when(self.collapsed, |this| this.pt_2().px_2())
+                        .when(layout.icon_collapsed, |this| this.pt_2().px_2())
                         .child(footer),
                 )
             });
 
-        if !self.collapsible {
-            return sidebar.into_any_element();
-        }
-
-        // Determine effective expanded width from user's custom style or default.
-        let expanded_width = match self.style.size.width {
-            Some(Length::Definite(DefiniteLength::Absolute(AbsoluteLength::Pixels(px)))) => px,
-            Some(_) => {
-                return sidebar.into_any_element();
+        let target_width = match layout.wrapper {
+            SidebarWrapperLayout::None => return sidebar.into_any_element(),
+            SidebarWrapperLayout::Static { width } => {
+                return sidebar_wrapper(format!("{}-anim", id), layout.align_child_to_end)
+                    .w(width)
+                    .when(!layout.offcanvas_collapsed, |this| this.child(sidebar))
+                    .into_any_element();
             }
-            None => DEFAULT_WIDTH,
+            SidebarWrapperLayout::Animated { target_width } => target_width,
         };
 
-        // Store animation widths in keyed state so they remain stable across
-        // re-renders (GPUI re-renders the whole tree on each animation frame).
-        // Only update when `collapsed` actually changes.
-        let prev_collapsed =
-            window.use_keyed_state(format!("{}-prev-col", id), cx, |_, _| collapsed);
-        let anim_widths = window.use_keyed_state(format!("{}-anim-w", id), cx, |_, _| {
-            // First render: from == to, no visible animation
-            let w = if collapsed {
-                COLLAPSED_WIDTH
-            } else {
-                expanded_width
-            };
-            (w, w)
+        // Hedef width artık collapse modundan ve özel width'ten türediği için
+        // sadece collapsed değişimini izlemek yeterli değil. Offcanvas kapanırken
+        // içerik animasyon sonuna kadar mount kalır, sonra tab sırasından çıkar.
+        let animation_state = window.use_keyed_state(format!("{}-anim-w", id), cx, |_, _| {
+            SidebarAnimationState::new(target_width, !layout.offcanvas_collapsed)
         });
 
-        if *prev_collapsed.read(cx) != collapsed {
-            let (new_from, new_to) = if collapsed {
-                (expanded_width, COLLAPSED_WIDTH)
-            } else {
-                (COLLAPSED_WIDTH, expanded_width)
-            };
-            anim_widths.update(cx, |v, _| *v = (new_from, new_to));
-            prev_collapsed.update(cx, |v, _| *v = collapsed);
+        let hide_request = if animation_state
+            .read(cx)
+            .needs_update(target_width, layout.offcanvas_collapsed)
+        {
+            animation_state.update(cx, |state, _| {
+                state.update_target(target_width, layout.offcanvas_collapsed)
+            })
+        } else {
+            None
+        };
+        if let Some(hide_request) = hide_request {
+            cx.spawn({
+                let animation_state = animation_state.clone();
+                async move |cx| {
+                    cx.background_executor()
+                        .timer(SIDEBAR_TRANSITION_DURATION)
+                        .await;
+                    _ = animation_state.update(cx, |state, cx| {
+                        if state.finish_hide(hide_request) {
+                            cx.notify();
+                        }
+                    });
+                }
+            })
+            .detach();
         }
-        let (from_w, to_w) = *anim_widths.read(cx);
+        let animation_state = *animation_state.read(cx);
+        let from_w = animation_state.from_width;
+        let to_w = animation_state.target_width;
 
-        let wrapper = div()
-            .id(format!("{}-anim", id))
-            .h_full()
-            .flex_shrink_0()
-            .overflow_hidden()
-            .child(sidebar);
+        let wrapper = sidebar_wrapper(format!("{}-anim", id), layout.align_child_to_end)
+            .when(animation_state.render_child, |this| this.child(sidebar));
 
-        Transition::new(Duration::from_millis(200))
+        Transition::new(SIDEBAR_TRANSITION_DURATION)
             .ease(ease_in_out_cubic)
             .width(from_w, to_w)
-            .apply(
-                wrapper,
-                ElementId::NamedInteger("sidebar-w".into(), collapsed as u64),
-            )
+            .apply(wrapper, sidebar_animation_id(&id, from_w, to_w))
             .into_any_element()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn layout(
+        collapsible: YanCubukDaralma,
+        collapsed: bool,
+        expanded_width: Option<Pixels>,
+        side: Side,
+    ) -> SidebarLayout {
+        SidebarLayout::new(collapsible, collapsed, expanded_width, side)
+    }
+
+    #[test]
+    fn icon_modu_daralinca_simge_genisligi_kullanir() {
+        let layout = layout(YanCubukDaralma::Icon, true, Some(px(240.)), Side::Left);
+
+        assert!(layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert_eq!(
+            layout.wrapper,
+            SidebarWrapperLayout::Animated {
+                target_width: COLLAPSED_WIDTH,
+            }
+        );
+    }
+
+    #[test]
+    fn offcanvas_daralinca_genisligi_sifira_animasyonlar() {
+        let layout = layout(YanCubukDaralma::Offcanvas, true, Some(px(240.)), Side::Left);
+
+        assert!(!layout.icon_collapsed);
+        assert!(layout.offcanvas_collapsed);
+        assert!(layout.align_child_to_end);
+        assert_eq!(
+            layout.wrapper,
+            SidebarWrapperLayout::Animated {
+                target_width: px(0.),
+            }
+        );
+    }
+
+    #[test]
+    fn none_modu_daralma_durumunu_yok_sayar() {
+        let layout = layout(YanCubukDaralma::None, true, Some(px(240.)), Side::Right);
+
+        assert!(!layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert!(layout.align_child_to_end);
+        assert_eq!(layout.wrapper, SidebarWrapperLayout::None);
+    }
+
+    #[test]
+    fn animasyon_durumu_offcanvas_kapanisi_bitene_kadar_icerigi_tutar() {
+        let mut state = SidebarAnimationState::new(px(240.), true);
+
+        let request = state.update_target(px(0.), true);
+
+        assert_eq!(request, Some(1));
+        assert!(state.render_child);
+        assert!(state.finish_hide(1));
+        assert!(!state.render_child);
+        assert!(!state.hide_scheduled);
     }
 }

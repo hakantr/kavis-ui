@@ -1,0 +1,121 @@
+# kavis-ui / gpui-component 2026-05-04 Merge Map
+
+Bu not, `../gpui-component` reposundaki 2026-05-04 tarihli upstream değişiklikleri `kavis-ui` içine uyarlarken alınan kararları kaydeder. Gelecekte benzer karşılaştırmalarda önce bu harita okunmalı, sonra upstream diff incelenmelidir.
+
+## Kaynak Commitler
+
+- `09409026` - `highlighter: add inline markdown syntax highlighting (#2333)`
+- `3d69b147` - `sidebar: Support shadcn collapsible modes (#2329)`
+- `49b4ad41` - `separator: Rename Divider to Separator (#2335)`
+- `5355ce29` - `notification: Align status icon to the title (#2334)`
+
+## Uygulanan Dosya Haritası
+
+| Upstream alanı | kavis-ui karşılığı | Not |
+| --- | --- | --- |
+| `crates/ui/src/sidebar.rs` | `crates/ui/src/sidebar.rs` | Shadcn collapse modları Türkçe API ile taşındı. |
+| `SidebarCollapsible` | `YanCubukDaralma` | `Icon`, `Offcanvas`, `None` varyantları var. |
+| `.collapsible(true/false)` | `.collapsible(YanCubukDaralma::...)` | Geri uyumluluk iptal edildi; bool kabul edilmiyor. |
+| `crates/story/src/stories/sidebar_story.rs` | `crates/story/src/stories/sidebar_story.rs` | Story yeni collapse mode seçicisine geçirildi. |
+| `ButtonGroup` | `DugmeGrubu` | Story kontrolü için kullanıldı. |
+| `Selectable` trait | `Secilebilir as _` | `.selected(...)` çağrıları için import edildi. |
+| `Divider` -> `Separator` | `Ayirici` korunuyor, `separator` alias eklendi | Türkçe ana API bozulmadı, upstream İngilizce isim için köprü var. |
+| `DescriptionList::divider()` | `DescriptionList::separator()` alias | `separator()` çağrısı `divider()`a yönlenir. |
+| `notification` icon alignment | `Bildirim` ikon wrapper | `.top(px(18.)).left_4()` ile başlık hizasına alındı. |
+| Markdown inline injections | `SozdizimiVurgulayici` injection layers | Inline markdown katmanları ayrı parse ediliyor. |
+
+## Sidebar Kararları
+
+- Yeni enum: `YanCubukDaralma::{Icon, Offcanvas, None}`.
+- Varsayılan davranış: `Icon`.
+- `Icon`: collapse durumunda sidebar genişliği `48px` olur ve içerik `Daraltilabilir::collapsed(true)` görür.
+- `Offcanvas`: collapse durumunda wrapper genişliği `0px`e animasyonlanır; içerik animasyon bitene kadar mounted kalır, sonra çıkarılır.
+- `None`: `collapsed` bilgisi yok sayılır; wrapper animasyonu kullanılmaz.
+- Sağ/sol taraf hizalama offcanvas ve icon modlarında ayrı ele alınır.
+- Özel width piksel değilse animasyon yerine eski doğal layout korunur.
+
+## İptal Edilen Yaklaşımlar
+
+- İlk taslakta `.collapsible(bool)` için `impl From<bool> for YanCubukDaralma` ve `pub type SidebarCollapsible = YanCubukDaralma` vardı.
+- Kullanıcı geri uyumluluk gerekmediğini belirttiği için bu uyumluluk katmanı kaldırıldı.
+- Eski `.collapsible(false)` çağrıları `YanCubukDaralma::None` olarak düzeltildi.
+- Bool uyumluluğunu doğrulayan test kaldırıldı.
+
+## Story / Story Web Uyarlaması
+
+- `SidebarStory` state içine `collapsible: YanCubukDaralma` eklendi.
+- Story üst kontrol alanına `DugmeGrubu::new("collapsible-mode")` eklendi.
+- Modlar: `Icon`, `Offcanvas`, `None`.
+- `None` modunda `YanCubukGecisDugmesi` ve yanındaki `Ayirici` render edilmiyor.
+- Header/footer içerik gizleme koşulu raw `collapsed` yerine `icon_collapsed` ile yapıldı.
+- Main content layout `size_full()` yerine `h_full().flex_1().min_w_0().overflow_hidden()` oldu.
+- `story-web` kırılımı için ayrıca `cargo check -p kavis-ui-story-web` çalıştırıldı ve geçti.
+
+## Highlighter Uyarlaması
+
+- `injections_query` artık `Option<Arc<Query>>`.
+- `injection_layers: Vec<InjectionLayer>` eklendi.
+- `InjectionLayer` alanları: `language_name`, `ranges`, `byte_range`, `tree`.
+- `InjectionParseData` içine `language_capture_index` ve `old_layers` eklendi.
+- `compute_injection_layers`, `parse_injection_layers`, `should_parse_injection_layer` akışı eklendi.
+- Markdown inline için gereksiz layer üretmemek adına trigger kontrolü var.
+- Markdown inline highlights:
+  - `emphasis`
+  - `emphasis.strong`
+  - `strikethrough`
+  - `text.literal`
+- `default-theme.json` light/dark syntax stillerine `emphasis`, `emphasis.strong`, `strikethrough` eklendi.
+- `YaziTipiStili::Strikethrough` eklendi ve GPUI `StrikethroughStyle`a dönüştürülüyor.
+
+## Separator / Divider Notu
+
+- Upstream İngilizce API `Divider` -> `Separator` ad değişimine gitti.
+- kavis-ui tarafında mevcut Türkçe ad `Ayirici` olduğu için tam dosya rename yapılmadı.
+- Eklenen köprü:
+  - Yeni dosya: `crates/ui/src/separator.rs`
+  - Re-export: `Separator = Ayirici`, `SeparatorStyle = AyiriciStili`
+  - `lib.rs`: `pub mod separator;`
+  - `bilesenler.rs`: `pub use crate::separator::*;`
+  - `description_list.rs`: `separator()` alias
+- Gelecekte İngilizce örnek kod upstreamden doğrudan taşınırsa `separator` modülü importları kurtarır.
+
+## Test ve Kontrol Komutları
+
+Bu merge sonunda geçen komutlar:
+
+```bash
+cargo fmt
+cargo check -p kavis-ui
+cargo test -p kavis-ui highlighter --lib --features tree-sitter-markdown
+cargo test -p kavis-ui sidebar --lib
+cargo check -p kavis-ui-story
+cargo check -p kavis-ui-story-web
+git diff --check
+```
+
+## Gelecek Merge Kontrol Listesi
+
+1. Upstream tarih filtresini netleştir:
+   - `git log --date=short --pretty=format:%h%x09%ad%x09%s`
+2. Her commit için önce upstream diff oku:
+   - `git show --stat <sha>`
+   - `git show <sha> -- <ilgili-dosya>`
+3. kavis-ui adlandırma eşleşmesini çıkar:
+   - `Sidebar` -> `YanCubuk`
+   - `Button` -> `Dugme`
+   - `ButtonGroup` -> `DugmeGrubu`
+   - `Selectable` -> `Secilebilir`
+   - `Divider` -> `Ayirici` veya `separator` alias
+4. Eski kullanım taraması yap:
+   - `.collapsible(true/false)`
+   - `divider::`
+   - `DividerStory`
+5. Story ve story-web ayrı ayrı derle.
+6. Eğer kullanıcı geri uyumluluk istemiyorsa compatibility adapter ekleme.
+7. Geniş davranış değişikliklerinde küçük unit test ekle; UI story davranışı için compile check ile yetinme, gerekirse görsel/runtime kontrol planla.
+
+## Riskler
+
+- `Offcanvas` modunda içerik animasyon sonrası unmount edilir; focus/tab order davranışı ileride runtime testle doğrulanmalı.
+- `separator` için dosya/Story rename yapılmadı; yalnızca alias eklendi. Upstreamle birebir isim uyumu istenirse `divider_story.rs` ve story listesi ayrıca ele alınmalı.
+- Highlighter injection akışı daha karmaşık hale geldi; yeni dil injectionları eklenirse `should_parse_injection_layer` sadece markdown inline özelinde kalmalı.

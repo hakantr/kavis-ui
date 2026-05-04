@@ -25,8 +25,8 @@ const LARGE_NODE_THRESHOLD: usize = 8 * 1024;
 pub struct SozdizimiVurgulayici {
     language: SharedString,
     query: Option<Query>,
-    /// `#set! injection.combined` içeren injection desenleri için ayrı sorgu.
-    combined_injections_query: Option<Arc<Query>>,
+    /// Enjeksiyon katmanlarını ayrıştırmak için kullanılan tam injection sorgusu.
+    injections_query: Option<Arc<Query>>,
     injection_queries: HashMap<SharedString, Query>,
 
     locals_pattern_index: usize,
@@ -35,7 +35,6 @@ pub struct SozdizimiVurgulayici {
     non_local_variable_patterns: Vec<bool>,
     injection_content_capture_index: Option<u32>,
     injection_language_capture_index: Option<u32>,
-    combined_injection_content_capture_index: Option<u32>,
     local_scope_capture_index: Option<u32>,
     local_def_capture_index: Option<u32>,
     local_def_value_capture_index: Option<u32>,
@@ -47,14 +46,17 @@ pub struct SozdizimiVurgulayici {
     /// son ayrıştırılmış ağaç.
     tree: Option<Agac>,
 
-    /// Ayrıştırılmış injection ağaçları (dil -> aralıklı ağaç).
+    /// Ayrıştırılmış injection ağaçları.
     /// Bunlar günceller() içinde bir kez oluşturulur ve match_styles() içinde birçok kez sorgulanır.
-    injection_layers: HashMap<SharedString, InjectionLayer>,
+    injection_layers: Vec<InjectionLayer>,
 }
 
 /// Ayrıştırılmış bir enjeksiyon katmanı.
 /// Stores ayrıştırılmış ağaç ve aralıklar onu kapsar.
 pub(crate) struct InjectionLayer {
+    pub(crate) language_name: SharedString,
+    pub(crate) ranges: Vec<tree_sitter::Range>,
+    pub(crate) byte_range: Range<usize>,
     pub(crate) tree: Agac,
 }
 
@@ -62,8 +64,15 @@ pub(crate) struct InjectionLayer {
 pub(crate) struct InjectionParseData {
     pub(crate) query: Arc<Query>,
     pub(crate) content_capture_index: Option<u32>,
+    pub(crate) language_capture_index: Option<u32>,
     /// Artımlı yeniden ayrıştırma için eski injection ağaçları.
-    pub(crate) old_layers: HashMap<SharedString, Agac>,
+    pub(crate) old_layers: Vec<ReusableInjectionLayer>,
+}
+
+pub(crate) struct ReusableInjectionLayer {
+    pub(crate) language_name: SharedString,
+    pub(crate) ranges: Vec<tree_sitter::Range>,
+    pub(crate) tree: Agac,
 }
 
 struct TextProvider<'a>(&'a Rope);
@@ -202,22 +211,22 @@ impl<'a> sum_tree::Dimension<'a, HighlightSummary> for Range<usize> {
 impl SozdizimiVurgulayici {
     /// Yeni bir SozdizimiVurgulayici için HTML oluşturur.
     pub fn new(lang: &str) -> Self {
-        match Self::build_combined_injections_query(&lang) {
+        match Self::build_for_language(&lang) {
             Ok(result) => result,
             Err(err) => {
                 tracing::warn!(
                     "SozdizimiVurgulayici başlatılamadı, `text` kullanılacak: {}",
                     err
                 );
-                Self::build_combined_injections_query("text").unwrap()
+                Self::build_for_language("text").unwrap()
             }
         }
     }
 
-    /// Oluşturur combined injections sorgu için verilen dil.
+    /// Verilen dil için vurgulayıcıyı oluşturur.
     ///
     /// https://github.com/ağaç-sitter/ağaç-sitter/blob/v0.25.5/vurgulama/src/lib.rs#L336
-    fn build_combined_injections_query(lang: &str) -> Result<Self> {
+    fn build_for_language(lang: &str) -> Result<Self> {
         let Some(config) = DilKaydi::singleton().language(&lang) else {
             return Err(anyhow!(
                 "language {:?} is not registered in `DilKaydi`",
@@ -256,41 +265,19 @@ impl SozdizimiVurgulayici {
             }
         }
 
-        // Separate combined injection patterns into their own query.
-        // Combined injections (e.g., PHP's HTML text nodes) collect all matching
-        // ranges and parse them as a single document, so that opening/closing
-        // tags across injection boundaries are correctly matched.
-        let combined_injections_query = if !config.injections.is_empty() {
-            if let Ok(mut ciq) = Query::new(&config.language, &config.injections) {
-                let mut has_combined_query = false;
-                for pattern_index in 0..locals_pattern_index {
-                    let settings = query.property_settings(pattern_index);
-                    if settings.iter().any(|s| &*s.key == "injection.combined") {
-                        has_combined_query = true;
-                        query.disable_pattern(pattern_index);
-                    } else {
-                        ciq.disable_pattern(pattern_index);
-                    }
-                }
-                if has_combined_query {
-                    Some(Arc::new(ciq))
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
+        let injections_query = if !config.injections.is_empty() {
+            Query::new(&config.language, &config.injections)
+                .ok()
+                .map(Arc::new)
         } else {
             None
         };
 
-        let combined_injection_content_capture_index =
-            combined_injections_query.as_ref().and_then(|q| {
-                q.capture_names()
-                    .iter()
-                    .position(|name| *name == "injection.content")
-                    .map(|i| i as u32)
-            });
+        // Enjeksiyonlar ayrı katmanlarda hesaplandığı için ana vurgulama
+        // sorgusundan injection capture'larını yaymayız.
+        for pattern_index in 0..locals_pattern_index {
+            query.disable_pattern(pattern_index);
+        }
 
         // Find all of the highlighting patterns that are disabled for nodes that
         // have been identified as local variables.
@@ -304,8 +291,18 @@ impl SozdizimiVurgulayici {
             .collect();
 
         // Store the numeric ids for all of the special captures.
-        let mut injection_content_capture_index = None;
-        let mut injection_language_capture_index = None;
+        let injection_content_capture_index = injections_query.as_ref().and_then(|q| {
+            q.capture_names()
+                .iter()
+                .position(|name| *name == "injection.content")
+                .map(|i| i as u32)
+        });
+        let injection_language_capture_index = injections_query.as_ref().and_then(|q| {
+            q.capture_names()
+                .iter()
+                .position(|name| *name == "injection.language")
+                .map(|i| i as u32)
+        });
         let mut local_def_capture_index = None;
         let mut local_def_value_capture_index = None;
         let mut local_ref_capture_index = None;
@@ -313,8 +310,6 @@ impl SozdizimiVurgulayici {
         for (i, name) in query.capture_names().iter().enumerate() {
             let i = Some(i as u32);
             match *name {
-                "injection.content" => injection_content_capture_index = i,
-                "injection.language" => injection_language_capture_index = i,
                 "local.definition" => local_def_capture_index = i,
                 "local.definition-value" => local_def_value_capture_index = i,
                 "local.reference" => local_ref_capture_index = i,
@@ -346,7 +341,7 @@ impl SozdizimiVurgulayici {
         Ok(Self {
             language: config.name.clone(),
             query: Some(query),
-            combined_injections_query,
+            injections_query,
             injection_queries,
 
             locals_pattern_index,
@@ -354,7 +349,6 @@ impl SozdizimiVurgulayici {
             non_local_variable_patterns,
             injection_content_capture_index,
             injection_language_capture_index,
-            combined_injection_content_capture_index,
             local_scope_capture_index,
             local_def_capture_index,
             local_def_value_capture_index,
@@ -362,7 +356,7 @@ impl SozdizimiVurgulayici {
             text: Rope::new(),
             parser,
             tree: None,
-            injection_layers: HashMap::new(),
+            injection_layers: Vec::new(),
         })
     }
 
@@ -457,21 +451,26 @@ impl SozdizimiVurgulayici {
         let new_tree = new_tree.unwrap();
         self.tree = Some(new_tree.clone());
         self.text = text.clone();
-        self.parse_combined_injections(&new_tree);
+        self.parse_injection_layers(&new_tree);
         true
     }
 
     /// Enjeksiyon katmanlarını arka plan threadinde hesaplamak için gereken veriyi döndürür.
-    /// Bu dilde birleştirilmiş injection yoksa `None` döndürür.
+    /// Bu dilde injection yoksa `None` döndürür.
     pub(crate) fn injection_parse_data(&self) -> Option<InjectionParseData> {
-        let query = self.combined_injections_query.clone()?;
+        let query = self.injections_query.clone()?;
         Some(InjectionParseData {
             query,
-            content_capture_index: self.combined_injection_content_capture_index,
+            content_capture_index: self.injection_content_capture_index,
+            language_capture_index: self.injection_language_capture_index,
             old_layers: self
                 .injection_layers
                 .iter()
-                .map(|(k, v)| (k.clone(), v.tree.clone()))
+                .map(|layer| ReusableInjectionLayer {
+                    language_name: layer.language_name.clone(),
+                    ranges: layer.ranges.clone(),
+                    tree: layer.tree.clone(),
+                })
                 .collect(),
         })
     }
@@ -483,73 +482,139 @@ impl SozdizimiVurgulayici {
         data: InjectionParseData,
         tree: &Agac,
         text: &Rope,
-    ) -> HashMap<SharedString, InjectionLayer> {
+    ) -> Vec<InjectionLayer> {
         let root_node = tree.root_node();
         let mut cursor = QueryCursor::new();
         let mut matches = cursor.matches(&data.query, root_node, TextProvider(text));
 
         let mut combined_ranges: HashMap<SharedString, Vec<tree_sitter::Range>> = HashMap::new();
+        let old_layer_trees: HashMap<_, _> = data
+            .old_layers
+            .iter()
+            .map(|layer| {
+                (
+                    (layer.language_name.clone(), range_key(&layer.ranges)),
+                    &layer.tree,
+                )
+            })
+            .collect();
+        let mut new_layers = Vec::new();
         while let Some(query_match) = matches.next() {
             let mut language_name: Option<SharedString> = None;
-            if let Some(prop) = data
-                .query
-                .property_settings(query_match.pattern_index)
-                .iter()
-                .find(|prop| prop.key.as_ref() == "injection.language")
-            {
-                language_name = prop
-                    .value
-                    .as_ref()
-                    .map(|v| SharedString::from(v.to_string()));
+            let mut combined = false;
+            for prop in data.query.property_settings(query_match.pattern_index) {
+                match prop.key.as_ref() {
+                    "injection.language" => {
+                        language_name = prop
+                            .value
+                            .as_ref()
+                            .map(|v| SharedString::from(v.to_string()));
+                    }
+                    "injection.combined" => combined = true,
+                    _ => {}
+                }
             }
+
+            // Yakalanmış dil adları (ör. Markdown code fence) ayrı ele alınmalı.
+            // Bu katman sabit dilli injection'lara odaklanır: markdown_inline gibi.
+            if language_name.is_none()
+                && query_match
+                    .captures
+                    .iter()
+                    .any(|cap| Some(cap.index) == data.language_capture_index)
+            {
+                continue;
+            }
+
             let Some(language_name) = language_name else {
                 continue;
             };
-            for capture in query_match
+
+            let mut ranges = query_match
                 .captures
                 .iter()
                 .filter(|cap| Some(cap.index) == data.content_capture_index)
-            {
-                combined_ranges
-                    .entry(language_name.clone())
-                    .or_default()
-                    .push(capture.node.range());
-            }
-        }
+                .map(|capture| capture.node.range())
+                .collect::<Vec<_>>();
 
-        let mut new_layers = HashMap::new();
-        for (language_name, ranges) in combined_ranges {
             if ranges.is_empty() {
                 continue;
             }
-            let Some(config) = DilKaydi::singleton().language(&language_name) else {
-                continue;
-            };
-            let mut parser = Parser::new();
-            if parser.set_language(&config.language).is_err() {
+            sort_ranges(&mut ranges);
+            if !should_parse_injection_layer(&language_name, &ranges, text) {
                 continue;
             }
-            if parser.set_included_ranges(&ranges).is_err() {
-                continue;
+
+            if combined {
+                combined_ranges
+                    .entry(language_name.clone())
+                    .or_default()
+                    .extend(ranges);
+            } else {
+                let old_tree = old_layer_trees
+                    .get(&(language_name.clone(), range_key(&ranges)))
+                    .copied();
+                if let Some(layer) =
+                    Self::parse_injection_layer(&language_name, ranges, old_tree, text)
+                {
+                    new_layers.push(layer);
+                }
             }
-            let old_tree = data.old_layers.get(&language_name);
-            let Some(new_tree) = parser.parse_with_options(
-                &mut |offset, _| {
-                    if offset >= text.len() {
-                        ""
-                    } else {
-                        let (chunk, chunk_byte_ix) = text.chunk(offset);
-                        &chunk[offset - chunk_byte_ix..]
-                    }
-                },
-                old_tree,
-                None,
-            ) else {
-                continue;
-            };
-            new_layers.insert(language_name, InjectionLayer { tree: new_tree });
         }
+
+        for (language_name, mut ranges) in combined_ranges {
+            if ranges.is_empty() {
+                continue;
+            }
+            sort_ranges(&mut ranges);
+            if !should_parse_injection_layer(&language_name, &ranges, text) {
+                continue;
+            }
+            let old_tree = old_layer_trees
+                .get(&(language_name.clone(), range_key(&ranges)))
+                .copied();
+            if let Some(layer) = Self::parse_injection_layer(&language_name, ranges, old_tree, text)
+            {
+                new_layers.push(layer);
+            }
+        }
+        new_layers.sort_by_key(|layer| layer.byte_range.start);
         new_layers
+    }
+
+    /// Verilen aralıklarda sabit dilli tek bir injection katmanı ayrıştırır.
+    /// Aralıklar aynı kaldığında eski ağacı yeniden kullanarak artımlı güncellemeyi korur.
+    fn parse_injection_layer(
+        language_name: &SharedString,
+        ranges: Vec<tree_sitter::Range>,
+        old_tree: Option<&Agac>,
+        text: &Rope,
+    ) -> Option<InjectionLayer> {
+        let config = DilKaydi::singleton().language(language_name)?;
+        let mut parser = Parser::new();
+        parser.set_language(&config.language).ok()?;
+        parser.set_included_ranges(&ranges).ok()?;
+
+        let new_tree = parser.parse_with_options(
+            &mut |offset, _| {
+                if offset >= text.len() {
+                    ""
+                } else {
+                    let (chunk, chunk_byte_ix) = text.chunk(offset);
+                    &chunk[offset - chunk_byte_ix..]
+                }
+            },
+            old_tree,
+            None,
+        )?;
+
+        let byte_range = ranges_byte_range(&ranges)?;
+        Some(InjectionLayer {
+            language_name: language_name.clone(),
+            ranges,
+            byte_range,
+            tree: new_tree,
+        })
     }
 
     /// bir ağaç olan idi ayrıştırılmış üzerinde bir arka plan threadinde çalıştırılabilir. uygular.
@@ -560,7 +625,7 @@ impl SozdizimiVurgulayici {
         &mut self,
         tree: Agac,
         text: &Rope,
-        injection_layers: HashMap<SharedString, InjectionLayer>,
+        injection_layers: Vec<InjectionLayer>,
     ) {
         // Only apply if the text still matches what was parsed.
         if !self.text.eq(text) {
@@ -571,12 +636,11 @@ impl SozdizimiVurgulayici {
         self.injection_layers = injection_layers;
     }
 
-    /// Tüm birleştirilmiş injectionları ayrıştırır ve ardından ana ağacı günceller.
+    /// Injection katmanlarını ana ağaç güncellendikten sonra ayrıştırır.
     /// Desen: güncellemede bir kez ayrıştırılır, çizimde birçok kez sorgulanır.
-    /// Tüm birleştirilmiş injectionları ayrıştırır ve ardından ana ağacı günceller.
-    /// Desen: güncellemede bir kez ayrıştırılır, çizimde birçok kez sorgulanır.
-    fn parse_combined_injections(&mut self, tree: &Agac) {
+    fn parse_injection_layers(&mut self, tree: &Agac) {
         let Some(data) = self.injection_parse_data() else {
+            self.injection_layers.clear();
             return;
         };
         self.injection_layers = Self::compute_injection_layers(data, tree, &self.text.clone());
@@ -596,9 +660,16 @@ impl SozdizimiVurgulayici {
         let root_node = tree.root_node();
         let source = &self.text;
 
-        // Query pre-parsed injection layers.
-        for (language_name, layer) in &self.injection_layers {
-            let Some(query) = self.injection_queries.get(language_name) else {
+        // Önceden ayrıştırılmış injection katmanlarını sorgula.
+        for layer in &self.injection_layers {
+            if layer.byte_range.end <= range.start {
+                continue;
+            }
+            if layer.byte_range.start >= range.end {
+                break;
+            }
+
+            let Some(query) = self.injection_queries.get(&layer.language_name) else {
                 continue;
             };
 
@@ -608,17 +679,11 @@ impl SozdizimiVurgulayici {
             let mut matches =
                 query_cursor.matches(query, layer.tree.root_node(), TextProvider(&self.text));
 
-            let mut last_end = 0usize;
             while let Some(m) = matches.next() {
                 for cap in m.captures {
                     let node_range = cap.node.start_byte()..cap.node.end_byte();
 
-                    if node_range.start < last_end {
-                        continue;
-                    }
-
                     if let Some(highlight_name) = query.capture_names().get(cap.index as usize) {
-                        last_end = node_range.end;
                         highlights.push(HighlightItem::new(
                             node_range,
                             SharedString::from(highlight_name.to_string()),
@@ -885,6 +950,50 @@ fn collect_query_nodes_inner<'a>(
     out.push(node);
 }
 
+fn sort_ranges(ranges: &mut [tree_sitter::Range]) {
+    ranges.sort_unstable_by(|a, b| {
+        a.start_byte
+            .cmp(&b.start_byte)
+            .then_with(|| a.end_byte.cmp(&b.end_byte))
+    });
+}
+
+fn range_key(ranges: &[tree_sitter::Range]) -> Vec<(usize, usize)> {
+    ranges
+        .iter()
+        .map(|range| (range.start_byte, range.end_byte))
+        .collect()
+}
+
+fn ranges_byte_range(ranges: &[tree_sitter::Range]) -> Option<Range<usize>> {
+    let start = ranges.iter().map(|range| range.start_byte).min()?;
+    let end = ranges.iter().map(|range| range.end_byte).max()?;
+    Some(start..end)
+}
+
+fn should_parse_injection_layer(
+    language_name: &SharedString,
+    ranges: &[tree_sitter::Range],
+    text: &Rope,
+) -> bool {
+    if language_name.as_ref() != "markdown_inline" {
+        return true;
+    }
+
+    ranges
+        .iter()
+        .any(|range| markdown_inline_range_has_trigger(text, range.start_byte..range.end_byte))
+}
+
+fn markdown_inline_range_has_trigger(text: &Rope, range: Range<usize>) -> bool {
+    text.slice(range).bytes().any(|byte| {
+        matches!(
+            byte,
+            b'*' | b'_' | b'`' | b'[' | b']' | b'(' | b')' | b'<' | b'>' | b'!' | b'~' | b'$'
+        )
+    })
+}
+
 /// Merge diğer stil (Diğer üzerinde üst)
 fn merge_highlight_style(style: &mut HighlightStyle, other: &HighlightStyle) {
     if let Some(color) = other.color {
@@ -921,6 +1030,54 @@ mod tests {
         let mut style = HighlightStyle::default();
         style.color = Some(color);
         style
+    }
+
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn markdown_highlights(markdown: &str) -> Vec<HighlightItem> {
+        let rope = Rope::from_str(markdown);
+        let mut highlighter = SozdizimiVurgulayici::new("markdown");
+        highlighter.update(None, &rope, None);
+        highlighter.match_styles(0..markdown.len())
+    }
+
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn markdown_injection_layer_count(markdown: &str) -> usize {
+        let rope = Rope::from_str(markdown);
+        let mut highlighter = SozdizimiVurgulayici::new("markdown");
+        highlighter.update(None, &rope, None);
+        highlighter.injection_layers.len()
+    }
+
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn has_highlight_covering(
+        highlights: &[HighlightItem],
+        source: &str,
+        text: &str,
+        highlight_name: &str,
+    ) -> bool {
+        let start = source.find(text).expect("text should exist in source");
+        let end = start + text.len();
+        highlights.iter().any(|item| {
+            item.name.as_ref() == highlight_name
+                && item.range.start <= start
+                && item.range.end >= end
+        })
+    }
+
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_highlight_theme() -> VurguTemasi {
+        serde_json::from_value(serde_json::json!({
+            "name": "test",
+            "appearance": "dark",
+            "style": {
+                "syntax": {
+                    "strikethrough": {
+                        "font_style": "strikethrough"
+                    }
+                }
+            }
+        }))
+        .expect("test theme should parse")
     }
 
     #[track_caller]
@@ -969,6 +1126,51 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_strong_emphasis() {
+        let markdown = "This has **bold** text.";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "bold", "emphasis.strong"),
+            "bold text should be highlighted as strong emphasis"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_strikethrough_style_depends_on_theme() {
+        let markdown = "This has ~~deleted~~ text.";
+        let rope = Rope::from_str(markdown);
+        let mut highlighter = SozdizimiVurgulayici::new("markdown");
+        highlighter.update(None, &rope, None);
+        let theme = test_highlight_theme();
+
+        let styles = highlighter.styles(&(0..markdown.len()), &theme);
+        let start = markdown.find("deleted").unwrap();
+        let end = start + "deleted".len();
+
+        assert!(
+            styles.iter().any(|(range, style)| {
+                range.start <= start && range.end >= end && style.strikethrough.is_some()
+            }),
+            "strikethrough Markdown should use the theme's strikethrough style"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_plain_inline_skips_injection_layer() {
+        let markdown = "Duz metinde inline markdown isareti yok.";
+
+        assert_eq!(
+            markdown_injection_layer_count(markdown),
+            0,
+            "plain Markdown text should not create a markdown_inline layer"
+        );
+    }
+
+    #[test]
     #[cfg(feature = "tree-sitter-languages")]
     fn test_php_combined_injection_closing_tags() {
         let php_code = r#"<?php
@@ -989,11 +1191,6 @@ $x = 1;
         let rope = Rope::from_str(php_code);
         let mut highlighter = SozdizimiVurgulayici::new("php");
         highlighter.update(None, &rope, None);
-
-        assert!(
-            highlighter.combined_injections_query.is_some(),
-            "PHP should have combined injections query"
-        );
 
         let full_range = 0..php_code.len();
         let highlights = highlighter.match_styles(full_range);

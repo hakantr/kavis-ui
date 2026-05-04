@@ -6,15 +6,16 @@ use kavis_ui::ham_gpui::{
 };
 
 use kavis_ui::{
-    Boyutlandirilabilir, EtkinTema, Side, Simge, SimgeAdi,
+    Boyutlandirilabilir, EtkinTema, Secilebilir as _, Side, Simge, SimgeAdi,
     badge::Rozet,
     breadcrumb::{GezintiYolu, GezintiYoluOgesi},
+    button::{Dugme, DugmeGrubu},
     divider::Ayirici,
     h_flex,
     menu::AcilirMenuTetikleyici,
     sidebar::{
-        YanCubuk, YanCubukAltligi, YanCubukBasligi, YanCubukGecisDugmesi, YanCubukGrubu,
-        YanCubukMenuOgesi, YanCubukMenusu,
+        YanCubuk, YanCubukAltligi, YanCubukBasligi, YanCubukDaralma, YanCubukGecisDugmesi,
+        YanCubukGrubu, YanCubukMenuOgesi, YanCubukMenusu,
     },
     switch::Anahtar,
     v_flex,
@@ -30,6 +31,7 @@ pub struct SidebarStory {
     last_active_item: Item,
     active_subitem: Option<SubItem>,
     collapsed: bool,
+    collapsible: YanCubukDaralma,
     side: Side,
     click_to_toggle_submenu: bool,
     show_dynamic_children: bool,
@@ -51,6 +53,7 @@ impl SidebarStory {
             last_active_item: Item::Playground,
             active_subitem: None,
             collapsed: false,
+            collapsible: YanCubukDaralma::Icon,
             side: Side::Left,
             focus_handle: cx.focus_handle(),
             checked: false,
@@ -60,37 +63,80 @@ impl SidebarStory {
     }
 
     fn render_content(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        v_flex().gap_3().child(
-            h_flex()
-                .gap_3()
-                .child(
-                    Anahtar::new("side")
-                        .label("Kenar çubuğunu sağa al")
-                        .checked(self.side.is_right())
-                        .on_click(cx.listener(|this, checked: &bool, _, cx| {
-                            this.side = if *checked { Side::Right } else { Side::Left };
-                            cx.notify();
-                        })),
-                )
-                .child(
-                    Anahtar::new("click-to-toggle")
-                        .checked(self.click_to_toggle_submenu)
-                        .label("Oturum gruplarını tıklamayla aç/kapat")
-                        .on_click(cx.listener(|this, checked: &bool, _, cx| {
-                            this.click_to_toggle_submenu = *checked;
-                            cx.notify();
-                        })),
-                )
-                .child(
-                    Anahtar::new("dynamic-children")
-                        .checked(self.show_dynamic_children)
-                        .label("Bağlı çalışma ağacı alt öğelerini göster")
-                        .on_click(cx.listener(|this, checked: &bool, _, cx| {
-                            this.show_dynamic_children = *checked;
+        v_flex()
+            .w_full()
+            .gap_3()
+            .child(
+                h_flex().w_full().items_center().child(
+                    DugmeGrubu::new("collapsible-mode")
+                        .outline()
+                        .compact()
+                        .flex_shrink_0()
+                        .child(
+                            Dugme::new("collapsible-icon")
+                                .label("Icon")
+                                .selected(self.collapsible == YanCubukDaralma::Icon),
+                        )
+                        .child(
+                            Dugme::new("collapsible-offcanvas")
+                                .label("Offcanvas")
+                                .selected(self.collapsible == YanCubukDaralma::Offcanvas),
+                        )
+                        .child(
+                            Dugme::new("collapsible-none")
+                                .label("None")
+                                .selected(self.collapsible == YanCubukDaralma::None),
+                        )
+                        .on_click(cx.listener(|this, selecteds: &Vec<usize>, _, cx| {
+                            let Some(selected) = selecteds.first().copied() else {
+                                return;
+                            };
+
+                            this.collapsible = match selected {
+                                0 => YanCubukDaralma::Icon,
+                                1 => YanCubukDaralma::Offcanvas,
+                                2 => YanCubukDaralma::None,
+                                _ => return,
+                            };
                             cx.notify();
                         })),
                 ),
-        )
+            )
+            .child(
+                h_flex()
+                    .w_full()
+                    .items_center()
+                    .gap_3()
+                    .gap_y_2()
+                    .flex_wrap()
+                    .child(
+                        Anahtar::new("side")
+                            .label("Kenar çubuğunu sağa al")
+                            .checked(self.side.is_right())
+                            .on_click(cx.listener(|this, checked: &bool, _, cx| {
+                                this.side = if *checked { Side::Right } else { Side::Left };
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        Anahtar::new("click-to-toggle")
+                            .checked(self.click_to_toggle_submenu)
+                            .label("Oturum gruplarını tıklamayla aç/kapat")
+                            .on_click(cx.listener(|this, checked: &bool, _, cx| {
+                                this.click_to_toggle_submenu = *checked;
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        Anahtar::new("dynamic-children")
+                            .checked(self.show_dynamic_children)
+                            .label("Bağlı çalışma ağacı alt öğelerini göster")
+                            .on_click(cx.listener(|this, checked: &bool, _, cx| {
+                                this.show_dynamic_children = *checked;
+                                cx.notify();
+                            })),
+                    ),
+            )
     }
 
     fn switch_checked_handler(
@@ -290,6 +336,9 @@ impl Render for SidebarStory {
                 Item::Travel,
             ],
         ];
+        let collapsible = self.collapsible;
+        let icon_collapsed = self.collapsed && collapsible == YanCubukDaralma::Icon;
+        let toggle_collapsed = self.collapsed && collapsible != YanCubukDaralma::None;
 
         h_flex()
             .rounded(cx.theme().radius)
@@ -300,6 +349,7 @@ impl Render for SidebarStory {
             .child(
                 YanCubuk::new("sidebar-story")
                     .side(self.side)
+                    .collapsible(collapsible)
                     .collapsed(self.collapsed)
                     .w(px(220.))
                     .gap_0()
@@ -315,17 +365,17 @@ impl Render for SidebarStory {
                                     .text_color(cx.theme().success_foreground)
                                     .size_8()
                                     .flex_shrink_0()
-                                    .when(!self.collapsed, |this| {
+                                    .when(!icon_collapsed, |this| {
                                         this.child(Simge::new(SimgeAdi::GalleryVerticalEnd))
                                     })
-                                    .when(self.collapsed, |this| {
+                                    .when(icon_collapsed, |this| {
                                         this.size_4()
                                             .bg(cx.theme().transparent)
                                             .text_color(cx.theme().foreground)
                                             .child(Simge::new(SimgeAdi::GalleryVerticalEnd))
                                     }),
                             )
-                            .when(!self.collapsed, |this| {
+                            .when(!icon_collapsed, |this| {
                                 this.child(
                                     v_flex()
                                         .gap_0()
@@ -338,7 +388,7 @@ impl Render for SidebarStory {
                                         .child(div().child("1.0 Çalışma Alanı").text_xs()),
                                 )
                             })
-                            .when(!self.collapsed, |this| {
+                            .when(!icon_collapsed, |this| {
                                 this.child(
                                     Simge::new(SimgeAdi::ChevronsUpDown)
                                         .size_4()
@@ -451,35 +501,41 @@ impl Render for SidebarStory {
                                 h_flex()
                                     .gap_2()
                                     .child(SimgeAdi::CircleUser)
-                                    .when(!self.collapsed, |this| this.child("Paralel Ajanlar")),
+                                    .when(!icon_collapsed, |this| this.child("Paralel Ajanlar")),
                             )
-                            .when(!self.collapsed, |this| {
+                            .when(!icon_collapsed, |this| {
                                 this.child(Simge::new(SimgeAdi::ChevronsUpDown).size_4())
                             }),
                     ),
             )
             .child(
                 v_flex()
-                    .size_full()
+                    .h_full()
+                    .flex_1()
+                    .min_w_0()
+                    .overflow_hidden()
                     .gap_4()
                     .p_4()
                     .child(
                         h_flex()
                             .items_center()
                             .gap_3()
-                            .when(self.side.is_right(), |this| {
-                                this.flex_row_reverse().justify_between()
-                            })
-                            .child(
-                                YanCubukGecisDugmesi::new()
-                                    .side(self.side)
-                                    .collapsed(self.collapsed)
-                                    .on_click(cx.listener(|this, _, _, cx| {
-                                        this.collapsed = !this.collapsed;
-                                        cx.notify();
-                                    })),
+                            .when(
+                                self.side.is_right() && collapsible != YanCubukDaralma::None,
+                                |this| this.flex_row_reverse().justify_between(),
                             )
-                            .child(Ayirici::vertical().h_4())
+                            .when(collapsible != YanCubukDaralma::None, |this| {
+                                this.child(
+                                    YanCubukGecisDugmesi::new()
+                                        .side(self.side)
+                                        .collapsed(toggle_collapsed)
+                                        .on_click(cx.listener(|this, _, _, cx| {
+                                            this.collapsed = !this.collapsed;
+                                            cx.notify();
+                                        })),
+                                )
+                                .child(Ayirici::vertical().h_4())
+                            })
                             .child(
                                 GezintiYolu::new()
                                     .child("Çalışma Alanı")

@@ -3,7 +3,7 @@
 //!
 //! Not: diagnostics.rs WASM üzerinde kullanılabilir; yalnızca sözdizimi vurgulama yer tutucu gerektirir.
 
-use crate::ham_gpui::{HighlightStyle, SharedString};
+use crate::ham_gpui::{HighlightStyle, SharedString, StrikethroughStyle, UnderlineStyle, px};
 use std::ops::Range;
 use std::time::Duration;
 
@@ -99,6 +99,7 @@ pub enum YaziTipiStili {
     Normal,
     Italic,
     Underline,
+    Strikethrough,
 }
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, JsonSchema, Serialize, Deserialize)]
@@ -124,7 +125,7 @@ pub struct TemaStili {
 
 impl From<TemaStili> for HighlightStyle {
     fn from(style: TemaStili) -> Self {
-        HighlightStyle {
+        let mut highlight = HighlightStyle {
             color: style.color,
             font_weight: style.font_weight.map(|w| match w {
                 YaziKalinligiIcerigi::Thin => crate::ham_gpui::FontWeight::THIN,
@@ -141,9 +142,28 @@ impl From<TemaStili> for HighlightStyle {
                 YaziTipiStili::Normal => crate::ham_gpui::FontStyle::Normal,
                 YaziTipiStili::Italic => crate::ham_gpui::FontStyle::Italic,
                 YaziTipiStili::Underline => crate::ham_gpui::FontStyle::Normal,
+                YaziTipiStili::Strikethrough => crate::ham_gpui::FontStyle::Normal,
             }),
             ..Default::default()
+        };
+
+        match style.font_style {
+            Some(YaziTipiStili::Underline) => {
+                highlight.underline = Some(UnderlineStyle {
+                    thickness: px(1.),
+                    ..Default::default()
+                });
+            }
+            Some(YaziTipiStili::Strikethrough) => {
+                highlight.strikethrough = Some(StrikethroughStyle {
+                    thickness: px(1.),
+                    ..Default::default()
+                });
+            }
+            _ => {}
         }
+
+        highlight
     }
 }
 

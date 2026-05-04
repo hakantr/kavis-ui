@@ -1,4 +1,6 @@
-use crate::ham_gpui::{App, FontWeight, HighlightStyle, Hsla, SharedString};
+use crate::ham_gpui::{
+    App, FontWeight, HighlightStyle, Hsla, SharedString, StrikethroughStyle, UnderlineStyle, px,
+};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -13,7 +15,7 @@ use crate::{
     highlighter::{Language, languages},
 };
 
-pub(super) const HIGHLIGHT_NAMES: [&str; 40] = [
+pub(super) const HIGHLIGHT_NAMES: [&str; 41] = [
     "attribute",
     "boolean",
     "comment",
@@ -46,6 +48,7 @@ pub(super) const HIGHLIGHT_NAMES: [&str; 40] = [
     "string.regex",
     "string.special",
     "string.special.symbol",
+    "strikethrough",
     "tag",
     "tag.doctype",
     "text.literal",
@@ -135,6 +138,7 @@ pub struct SozdizimiRenkleri {
     pub string_special: Option<TemaStili>,
     #[serde(rename = "string.special.symbol")]
     pub string_special_symbol: Option<TemaStili>,
+    pub strikethrough: Option<TemaStili>,
     pub tag: Option<TemaStili>,
     #[serde(rename = "tag.doctype")]
     pub tag_doctype: Option<TemaStili>,
@@ -155,6 +159,7 @@ pub enum YaziTipiStili {
     Normal,
     Italic,
     Underline,
+    Strikethrough,
 }
 
 impl From<YaziTipiStili> for crate::ham_gpui::FontStyle {
@@ -163,6 +168,7 @@ impl From<YaziTipiStili> for crate::ham_gpui::FontStyle {
             YaziTipiStili::Normal => crate::ham_gpui::FontStyle::Normal,
             YaziTipiStili::Italic => crate::ham_gpui::FontStyle::Italic,
             YaziTipiStili::Underline => crate::ham_gpui::FontStyle::Normal,
+            YaziTipiStili::Strikethrough => crate::ham_gpui::FontStyle::Normal,
         }
     }
 }
@@ -206,12 +212,30 @@ pub struct TemaStili {
 
 impl From<TemaStili> for HighlightStyle {
     fn from(style: TemaStili) -> Self {
-        HighlightStyle {
+        let mut highlight = HighlightStyle {
             color: style.color,
             font_weight: style.font_weight.map(Into::into),
             font_style: style.font_style.map(Into::into),
             ..Default::default()
+        };
+
+        match style.font_style {
+            Some(YaziTipiStili::Underline) => {
+                highlight.underline = Some(UnderlineStyle {
+                    thickness: px(1.),
+                    ..Default::default()
+                });
+            }
+            Some(YaziTipiStili::Strikethrough) => {
+                highlight.strikethrough = Some(StrikethroughStyle {
+                    thickness: px(1.),
+                    ..Default::default()
+                });
+            }
+            _ => {}
         }
+
+        highlight
     }
 }
 
@@ -254,6 +278,7 @@ impl SozdizimiRenkleri {
             "string.regex" => self.string_regex,
             "string.special" => self.string_special,
             "string.special.symbol" => self.string_special_symbol,
+            "strikethrough" => self.strikethrough,
             "tag" => self.tag,
             "tag.doctype" => self.tag_doctype,
             "text.literal" => self.text_literal,

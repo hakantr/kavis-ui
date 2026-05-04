@@ -63,3 +63,7 @@ make dev
 ## Dokümantasyon
 
 Markdown içerik Türkçedir. Ana dokümantasyon ağacı `docs/docs` altında tutulur.
+
+## Upstream Birleştirme Notları
+
+`../gpui-component` karşılaştırmalarına devam etmeden önce ilgili merge haritasını oku. 2026-05-04 uyarlaması için yol haritası `docs/gpui-component-2026-05-04-merge-map.md` dosyasındadır.

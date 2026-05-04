@@ -213,6 +213,11 @@ impl AciklamaListesi {
         self
     }
 
+    /// Bir ayırıcı için liste ekler.
+    pub fn separator(self) -> Self {
+        self.divider()
+    }
+
     fn group_item_rows(items: Vec<AciklamaOgesi>, columns: usize) -> Vec<Vec<AciklamaOgesi>> {
         let mut rows = vec![];
         let mut current_span = 0;
