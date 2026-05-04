@@ -4,7 +4,7 @@ use crate::{
     button::{Dugme, DugmeVaryantlari},
     global_state::KureselDurum,
     h_flex,
-    menu::PopupMenu,
+    menu::AcilirMenu,
 };
 use gpui::{
     App, AppContext, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
@@ -169,7 +169,7 @@ pub(super) struct AppMenu {
     ix: usize,
     name: SharedString,
     menu: OwnedMenu,
-    popup_menu: Option<Entity<PopupMenu>>,
+    popup_menu: Option<Entity<AcilirMenu>>,
     /// Tetik dugmesine yapilan dis-tiklamayla popup'u kapattiktan hemen sonra
     /// gelen click olayinin menuyu yeniden acmasini engellemek icin tutulur.
     just_dismissed_at: Option<std::time::Instant>,
@@ -202,12 +202,12 @@ impl AppMenu {
         &mut self,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> Entity<PopupMenu> {
+    ) -> Entity<AcilirMenu> {
         let action_context = self.menu_bar.read(cx).action_context.clone();
         let popup_menu = match self.popup_menu.as_ref() {
             None => {
                 let items = self.menu.items.clone();
-                let popup_menu = PopupMenu::build(window, cx, |menu, window, cx| {
+                let popup_menu = AcilirMenu::build(window, cx, |menu, window, cx| {
                     menu.with_menu_items(items, window, cx)
                 });
                 popup_menu.update(cx, |menu, cx| {
@@ -237,7 +237,7 @@ impl AppMenu {
 
     fn handle_dismiss(
         &mut self,
-        _: &Entity<PopupMenu>,
+        _: &Entity<AcilirMenu>,
         _: &DismissEvent,
         window: &mut Window,
         cx: &mut Context<Self>,

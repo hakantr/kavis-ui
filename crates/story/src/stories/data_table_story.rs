@@ -19,7 +19,7 @@ use kavis_ui::{
     h_flex,
     input::{Input, InputEvent, InputState},
     label::Etiket,
-    menu::{DropdownMenu, PopupMenu},
+    menu::{AcilirMenu, AcilirMenuTetikleyici},
     spinner::DonerGosterge,
     table::{
         Column, ColumnFixed, ColumnGroup, ColumnSort, TabloDurumu, TabloOlayi, TabloTemsilcisi,
@@ -440,10 +440,10 @@ impl TabloTemsilcisi for StockTableDelegate {
     fn context_menu(
         &mut self,
         row_ix: usize,
-        menu: PopupMenu,
+        menu: AcilirMenu,
         _window: &mut Window,
         _: &mut Context<TabloDurumu<Self>>,
-    ) -> PopupMenu {
+    ) -> AcilirMenu {
         menu.menu(
             format!("Seçili Satır: {}", row_ix),
             Box::new(OpenDetail(row_ix)),
@@ -1172,7 +1172,7 @@ impl Render for DataTableStory {
                             .outline()
                             .small()
                             .label(format!("boyut: {:?}", self.size))
-                            .dropdown_menu(move |menu, _, _| {
+                            .acilir_menu(move |menu, _, _| {
                                 menu.menu_with_check(
                                     "Büyük",
                                     size == BilesenBoyutu::Buyuk,

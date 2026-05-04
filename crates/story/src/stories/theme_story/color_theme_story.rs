@@ -4,7 +4,7 @@ use kavis_ui::{
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
     input::{Input, InputEvent, InputState},
-    menu::PopupMenuItem,
+    menu::AcilirMenuOgesi,
     scroll::KaydirilabilirOge,
     select::{Secim, SecimDurumu, SecimOgesi, SecimOlayi},
     sidebar::{YanCubuk, YanCubukMenuOgesi, YanCubukMenusu},
@@ -416,12 +416,12 @@ impl ThemeColorsStory {
                                 let expand_all = expand_all.clone();
                                 let collapse_all = collapse_all.clone();
                                 move |menu, _, _| {
-                                    menu.item(PopupMenuItem::new("Tümünü Genişlet").on_click({
+                                    menu.item(AcilirMenuOgesi::new("Tümünü Genişlet").on_click({
                                         let expand_all = expand_all.clone();
                                         move |ev, window, cx| (expand_all)(ev, window, cx)
                                     }))
                                     .item(
-                                        PopupMenuItem::new("Tümünü Daralt").on_click({
+                                        AcilirMenuOgesi::new("Tümünü Daralt").on_click({
                                             let collapse_all = collapse_all.clone();
                                             move |ev, window, cx| (collapse_all)(ev, window, cx)
                                         }),
@@ -459,7 +459,7 @@ impl ThemeColorsStory {
                                         let menu_view = color_view.clone();
                                         if is_filtering {
                                             menu.item(
-                                                PopupMenuItem::new("Tüm Değerleri Göster")
+                                                AcilirMenuOgesi::new("Tüm Değerleri Göster")
                                                     .on_click(move |_, _, cx| {
                                                         menu_view.update(cx, |this, cx| {
                                                             this.filter_by_value = None;
@@ -470,7 +470,7 @@ impl ThemeColorsStory {
                                             )
                                         } else {
                                             menu.item(
-                                                PopupMenuItem::new("Değere Göre Filtrele")
+                                                AcilirMenuOgesi::new("Değere Göre Filtrele")
                                                     .on_click(move |_, _, cx| {
                                                         menu_view.update(cx, |this, cx| {
                                                             this.filter_by_value =

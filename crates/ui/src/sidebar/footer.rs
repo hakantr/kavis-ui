@@ -3,7 +3,7 @@ use gpui::{
     prelude::FluentBuilder as _,
 };
 
-use crate::{Daraltilabilir, EtkinTema as _, Secilebilir, h_flex, menu::DropdownMenu};
+use crate::{Daraltilabilir, EtkinTema as _, Secilebilir, h_flex, menu::AcilirMenuTetikleyici};
 
 /// Footer için [`super::YanCubuk`].
 #[derive(IntoElement)]
@@ -64,7 +64,7 @@ impl InteractiveElement for YanCubukAltligi {
     }
 }
 
-impl DropdownMenu for YanCubukAltligi {}
+impl AcilirMenuTetikleyici for YanCubukAltligi {}
 
 impl RenderOnce for YanCubukAltligi {
     fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl gpui::IntoElement {

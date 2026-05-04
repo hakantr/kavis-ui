@@ -16,7 +16,7 @@ use crate::{
     popover::AcilirKatman,
     slider::{Kaydirici, KaydiriciDurumu, KaydiriciOlayi},
     tab::{Sekme, SekmeCubugu},
-    tooltip::{AracIpucu, ManagedTooltipExt as _},
+    tooltip::{AracIpucu, YonetilenAracIpucuUzantisi as _},
     v_flex,
 };
 

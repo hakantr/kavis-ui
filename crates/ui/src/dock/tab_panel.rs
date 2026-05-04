@@ -13,7 +13,7 @@ use crate::{
     button::{Dugme, DugmeVaryantlari as _},
     dock::PanelInfo,
     h_flex,
-    menu::{DropdownMenu, PopupMenu},
+    menu::{AcilirMenu, AcilirMenuTetikleyici},
     tab::{Sekme, SekmeCubugu},
     v_flex,
 };
@@ -123,14 +123,14 @@ impl Panel for SekmePaneli {
         self.visible_panels(cx).next().is_some()
     }
 
-    fn dropdown_menu(
+    fn acilir_menu(
         &mut self,
-        menu: PopupMenu,
+        menu: AcilirMenu,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> PopupMenu {
+    ) -> AcilirMenu {
         if let Some(panel) = self.active_panel(cx) {
-            panel.dropdown_menu(menu, window, cx)
+            panel.acilir_menu(menu, window, cx)
         } else {
             menu
         }
@@ -493,13 +493,13 @@ impl SekmePaneli {
                     .xsmall()
                     .ghost()
                     .tab_stop(false)
-                    .dropdown_menu({
+                    .acilir_menu({
                         let zoomable = state.zoomable.map_or(false, |v| v.menu_visible());
                         let closable = state.closable;
 
                         move |menu, window, cx| {
                             view.update(cx, |this, cx| {
-                                this.dropdown_menu(menu, window, cx)
+                                this.acilir_menu(menu, window, cx)
                                     .separator()
                                     .menu_with_disabled(
                                         if zoomed {

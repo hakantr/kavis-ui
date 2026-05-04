@@ -1,14 +1,14 @@
 use std::{ops::Range, rc::Rc, time::Duration};
 
 use crate::{
-    ElementExt, EtkinTema, SanalListeKaydirmaTutamaci, Simge, SimgeAdi, StilBoyutlandirma as _,
+    EtkinTema, OgeUzantisi, SanalListeKaydirmaTutamaci, Simge, SimgeAdi, StilBoyutlandirma as _,
     StilUzantisi,
     actions::{
         Cancel, SelectDown, SelectFirst, SelectLast, SelectNextColumn, SelectPageDown,
         SelectPageUp, SelectPrevColumn, SelectUp,
     },
     h_flex,
-    menu::{ContextMenuExt, PopupMenu},
+    menu::{AcilirMenu, ContextMenuExt},
     scroll::{KaydirilabilirMaske, KaydirmaCubugu},
     v_flex,
 };
@@ -2161,7 +2161,7 @@ where
             .child(self.render_table_header(left_columns_count, window, cx))
             .context_menu({
                 let view = cx.entity().clone();
-                move |this, window: &mut Window, cx: &mut Context<PopupMenu>| {
+                move |this, window: &mut Window, cx: &mut Context<AcilirMenu>| {
                     if let Some(row_ix) = view.read(cx).right_clicked_row {
                         view.update(cx, |menu, cx| {
                             menu.delegate_mut().context_menu(row_ix, this, window, cx)

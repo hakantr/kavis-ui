@@ -10,7 +10,7 @@ use gpui::{
 use crate::button::{Dugme, DugmeVaryantlari as _};
 use crate::input::clear_button;
 use crate::input::element::{LINE_NUMBER_RIGHT_MARGIN, RIGHT_MARGIN};
-use crate::menu::PopupMenu;
+use crate::menu::AcilirMenu;
 use crate::scroll::KaydirmaCubugu;
 use crate::spinner::DonerGosterge;
 use crate::{BilesenBoyutu, SimgeAdi};
@@ -54,7 +54,7 @@ pub struct Input {
     ///
     /// Ayarlanırsa yerleşik bağlam menüsünü geçersiz kılar.
     context_menu_builder:
-        Option<Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>>,
+        Option<Rc<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu>>,
 }
 
 impl Boyutlandirilabilir for Input {
@@ -164,7 +164,7 @@ impl Input {
     /// bağlam menü için girdi ayarlar.
     pub fn context_menu(
         mut self,
-        f: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {
         self.context_menu_builder = Some(Rc::new(f));
         self

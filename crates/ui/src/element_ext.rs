@@ -34,7 +34,7 @@ impl AnyChildElement {
 }
 
 /// Bir özellik için extend [`gpui::öğe`] ile ek işlev.
-pub trait ElementExt: ParentElement + Sized {
+pub trait OgeUzantisi: ParentElement + Sized {
     /// Bir prepaint geri çağrı için öğe ekler.
     ///
     /// Öğe çizildikten sonra sınırlarını almak için yardımcı yöntem.
@@ -57,4 +57,4 @@ pub trait ElementExt: ParentElement + Sized {
     }
 }
 
-impl<T: ParentElement> ElementExt for T {}
+impl<T: ParentElement> OgeUzantisi for T {}

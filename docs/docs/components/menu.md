@@ -5,7 +5,7 @@ description: Popup, bağlam ve uygulama menüsü altyapısını kapsar.
 
 # Menü
 
-Popup, bağlam ve uygulama menüsü altyapısını kapsar. Güncel örnekler Kavis UI'nin Türkçe `PopupMenu`, `PopupMenuItem`, `UygulamaMenusu` yüzeyini kullanır.
+Popup, bağlam ve uygulama menüsü altyapısını kapsar. Güncel örnekler Kavis UI'nin Türkçe `AcilirMenu`, `AcilirMenuOgesi`, `UygulamaMenusu` yüzeyini kullanır.
 
 ## İçe Aktarma
 
@@ -14,16 +14,16 @@ use gpui::*;
 use kavis_ui::*;
 ```
 
-## `PopupMenu`, `PopupMenuItem`, `UygulamaMenusu`
+## `AcilirMenu`, `AcilirMenuOgesi`, `UygulamaMenusu`
 
-Ana tipler: `PopupMenu`, `PopupMenuItem`, `UygulamaMenusu`.
+Ana tipler: `AcilirMenu`, `AcilirMenuOgesi`, `UygulamaMenusu`.
 
 ## Kullanım
 
 ```rust
 AcilirDugme::new("dosya")
     .button(Dugme::new("dosya-dugme").label("Dosya"))
-    .dropdown_menu(|menu, _, _| menu.label("Yeni").label("Çıkış"))
+    .acilir_menu(|menu, _, _| menu.label("Yeni").label("Çıkış"))
 ```
 
 ## Notlar

@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    ElementExt, EtkinTema, Simge, SimgeAdi, h_flex,
+    EtkinTema, OgeUzantisi, Simge, SimgeAdi, h_flex,
     history::{History, HistoryItem},
     scroll::{KaydirmaCubugu, KaydirmaCubuguGosterimi},
     v_flex,

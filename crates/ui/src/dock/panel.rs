@@ -1,4 +1,4 @@
-use crate::{button::Dugme, dock::SekmePaneli, menu::PopupMenu};
+use crate::{button::Dugme, dock::SekmePaneli, menu::AcilirMenu};
 use gpui::{
     AnyElement, AnyView, App, AppContext as _, Context, Entity, EntityId, EventEmitter,
     FocusHandle, Focusable, Global, Hsla, IntoElement, Render, SharedString, WeakEntity, Window,
@@ -134,12 +134,12 @@ pub trait Panel: EventEmitter<PanelEvent> + Render + Focusable {
     fn on_removed(&mut self, window: &mut Window, cx: &mut Context<Self>) {}
 
     /// Panele ek açılır menü sağlar. Varsayılan `None`.
-    fn dropdown_menu(
+    fn acilir_menu(
         &mut self,
-        this: PopupMenu,
+        this: AcilirMenu,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> PopupMenu {
+    ) -> AcilirMenu {
         this
     }
 
@@ -179,7 +179,7 @@ pub trait PanelView: 'static + Send + Sync {
     fn set_zoomed(&self, zoomed: bool, window: &mut Window, cx: &mut App);
     fn on_added_to(&self, tab_panel: WeakEntity<SekmePaneli>, window: &mut Window, cx: &mut App);
     fn on_removed(&self, window: &mut Window, cx: &mut App);
-    fn dropdown_menu(&self, menu: PopupMenu, window: &mut Window, cx: &mut App) -> PopupMenu;
+    fn acilir_menu(&self, menu: AcilirMenu, window: &mut Window, cx: &mut App) -> AcilirMenu;
     fn toolbar_buttons(&self, window: &mut Window, cx: &mut App) -> Option<Vec<Dugme>>;
     fn view(&self) -> AnyView;
     fn focus_handle(&self, cx: &App) -> FocusHandle;
@@ -247,8 +247,8 @@ impl<T: Panel> PanelView for Entity<T> {
         self.update(cx, |this, cx| this.on_removed(window, cx));
     }
 
-    fn dropdown_menu(&self, menu: PopupMenu, window: &mut Window, cx: &mut App) -> PopupMenu {
-        self.update(cx, |this, cx| this.dropdown_menu(menu, window, cx))
+    fn acilir_menu(&self, menu: AcilirMenu, window: &mut Window, cx: &mut App) -> AcilirMenu {
+        self.update(cx, |this, cx| this.acilir_menu(menu, window, cx))
     }
 
     fn toolbar_buttons(&self, window: &mut Window, cx: &mut App) -> Option<Vec<Dugme>> {

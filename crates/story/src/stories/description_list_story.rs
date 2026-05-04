@@ -3,7 +3,7 @@ use gpui::{
     Action, App, AppContext, Axis, Context, Entity, FocusHandle, Focusable, IntoElement,
     ParentElement, Render, Styled, Window,
 };
-use kavis_ui::{AxisExt, h_flex, menu::DropdownMenu as _};
+use kavis_ui::{AxisExt, h_flex, menu::AcilirMenuTetikleyici as _};
 use kavis_ui::{
     BilesenBoyutu, Boyutlandirilabilir as _,
     button::Dugme,
@@ -152,7 +152,7 @@ impl Render for DescriptionListStory {
                             .small()
                             .outline()
                             .label(format!("boyut: {:?}", self.size))
-                            .dropdown_menu({
+                            .acilir_menu({
                                 let size = self.size;
                                 move |menu, _, _| {
                                     menu.menu_with_check(

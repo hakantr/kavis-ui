@@ -5,7 +5,7 @@ use crate::{
     Renklendir as _, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
     button::DugmeSimgesi,
     h_flex,
-    tooltip::{AracIpucu, ManagedTooltipExt as _},
+    tooltip::{AracIpucu, YonetilenAracIpucuUzantisi as _},
 };
 use gpui::{
     AnyElement, App, ClickEvent, Corners, Div, Edges, ElementId, Hsla, InteractiveElement,
@@ -226,7 +226,7 @@ impl Dugme {
         Self {
             id: id.clone(),
             // ID must be set after div is created;
-            // `dropdown_menu` uses this id to create the popup menu.
+            // `acilir_menu` uses this id to create the popup menu.
             base: div().flex_shrink_0().id(id),
             style: StyleRefinement::default(),
             icon: None,

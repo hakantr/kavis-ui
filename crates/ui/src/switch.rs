@@ -1,6 +1,6 @@
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Side, StilUzantisi,
-    h_flex, text::Text, tooltip::ComponentTooltip,
+    h_flex, text::Text, tooltip::BilesenAracIpucu,
 };
 use gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement, IntoElement,
@@ -21,7 +21,7 @@ pub struct Anahtar {
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
     size: BilesenBoyutu,
     color: Option<Hsla>,
-    tooltip: ComponentTooltip,
+    tooltip: BilesenAracIpucu,
 }
 
 impl Anahtar {
@@ -38,7 +38,7 @@ impl Anahtar {
             label_side: Side::Right,
             size: BilesenBoyutu::Orta,
             color: None,
-            tooltip: ComponentTooltip::default(),
+            tooltip: BilesenAracIpucu::default(),
         }
     }
 

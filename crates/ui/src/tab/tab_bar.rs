@@ -12,9 +12,9 @@ use smallvec::SmallVec;
 use super::{Sekme, SekmeVaryanti};
 use crate::animation::{Lerp, ease_in_out_cubic};
 use crate::button::{Dugme, DugmeVaryantlari as _};
-use crate::menu::{DropdownMenu as _, PopupMenuItem};
+use crate::menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _};
 use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, ElementExt, EtkinTema, Secilebilir, Simge, SimgeAdi,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema, OgeUzantisi, Secilebilir, Simge, SimgeAdi,
     StilUzantisi, h_flex,
 };
 
@@ -488,15 +488,15 @@ impl RenderOnce for SekmeCubugu {
                         .xsmall()
                         .ghost()
                         .icon(SimgeAdi::ChevronDown)
-                        .dropdown_menu(move |mut this, _, _| {
+                        .acilir_menu(move |mut this, _, _| {
                             this = this.scrollable(true);
                             for (ix, (label, icon, disabled)) in item_metas.iter().enumerate() {
                                 let base = if let Some(label) = label.clone() {
-                                    PopupMenuItem::new(label)
+                                    AcilirMenuOgesi::new(label)
                                 } else if let Some(icon) = icon.clone() {
-                                    PopupMenuItem::element(move |_, _| icon.clone())
+                                    AcilirMenuOgesi::element(move |_, _| icon.clone())
                                 } else {
-                                    PopupMenuItem::new(t!("Yerlesim.Unnamed"))
+                                    AcilirMenuOgesi::new(t!("Yerlesim.Unnamed"))
                                 };
                                 this = this.item(
                                     base.checked(selected_index == Some(ix))

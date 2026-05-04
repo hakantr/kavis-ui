@@ -11,7 +11,7 @@ use kavis_ui::{
     dock::{Panel, PanelControl, PanelEvent, PanelInfo, PanelState, TitleStyle, register_panel},
     group_box::{GrupKutusu, GrupKutusuVaryantlari as _},
     h_flex,
-    menu::PopupMenu,
+    menu::AcilirMenu,
     notification::Bildirim,
     scroll::{KaydirilabilirOge as _, KaydirmaCubuguGosterimi},
     text::markdown,
@@ -1002,12 +1002,12 @@ impl Panel for StoryContainer {
         }
     }
 
-    fn dropdown_menu(
+    fn acilir_menu(
         &mut self,
-        menu: PopupMenu,
+        menu: AcilirMenu,
         _window: &mut Window,
         _cx: &mut Context<Self>,
-    ) -> PopupMenu {
+    ) -> AcilirMenu {
         menu.menu("Bilgi", Box::new(ShowPanelInfo))
     }
 

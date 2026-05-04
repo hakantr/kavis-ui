@@ -9,13 +9,13 @@ use crate::{
     EtkinTema as _,
     global_state::KureselDurum,
     input::{self, InputState, popovers::ContextMenu},
-    menu::PopupMenu,
+    menu::AcilirMenu,
 };
 
 /// Context menü için fare sağ clicks.
 pub(crate) struct InputContextMenu {
     editor: Entity<InputState>,
-    menu: Entity<PopupMenu>,
+    menu: Entity<AcilirMenu>,
     mouse_position: Point<Pixels>,
     open: bool,
 
@@ -59,9 +59,9 @@ impl InputState {
             this.mouse_position = event.position;
             this.menu.update(cx, |menu, cx| {
                 let new_menu = if let Some(builder) = &self.context_menu_builder {
-                    builder(PopupMenu::new(cx), window, cx)
+                    builder(AcilirMenu::new(cx), window, cx)
                 } else {
-                    PopupMenu::new(cx)
+                    AcilirMenu::new(cx)
                         .when(is_code_editor, |m| {
                             m.menu_with_enable(
                                 t!("Input.Go to Definition"),
@@ -105,7 +105,7 @@ impl InputContextMenu {
         cx: &mut App,
     ) -> Entity<Self> {
         cx.new(|cx| {
-            let menu = cx.new(|cx| PopupMenu::new(cx).small());
+            let menu = cx.new(|cx| AcilirMenu::new(cx).small());
 
             let _subscriptions = vec![cx.subscribe_in(&menu, window, {
                 move |this: &mut Self, _, _: &DismissEvent, window, cx| {

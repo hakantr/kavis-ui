@@ -11,7 +11,7 @@ use kavis_ui::{
     breadcrumb::{GezintiYolu, GezintiYoluOgesi},
     divider::Ayirici,
     h_flex,
-    menu::DropdownMenu,
+    menu::AcilirMenuTetikleyici,
     sidebar::{
         YanCubuk, YanCubukAltligi, YanCubukBasligi, YanCubukGecisDugmesi, YanCubukGrubu,
         YanCubukMenuOgesi, YanCubukMenusu,
@@ -345,7 +345,7 @@ impl Render for SidebarStory {
                                         .flex_shrink_0(),
                                 )
                             })
-                            .dropdown_menu(|menu, _, _| {
+                            .acilir_menu(|menu, _, _| {
                                 menu.menu(
                                     "Zed 1.0",
                                     Box::new(SelectCompany(SharedString::from("zed-1-0"))),

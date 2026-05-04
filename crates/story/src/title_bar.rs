@@ -11,7 +11,7 @@ use kavis_ui::{
     badge::Rozet,
     button::{Dugme, DugmeVaryantlari as _},
     label::Etiket,
-    menu::{AppMenuBar, DropdownMenu as _},
+    menu::{AcilirMenuTetikleyici as _, AppMenuBar},
     scroll::KaydirmaCubuguGosterimi,
 };
 
@@ -174,7 +174,7 @@ impl Render for FontSizeSelector {
                     .small()
                     .ghost()
                     .icon(SimgeAdi::Settings2)
-                    .dropdown_menu(move |this, _, cx| {
+                    .acilir_menu(move |this, _, cx| {
                         this.scrollable(true)
                             .check_side(Side::Right)
                             .max_h(px(480.))

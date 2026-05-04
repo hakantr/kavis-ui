@@ -6,7 +6,7 @@ use kavis_ui::{
     EtkinTema as _, Side, SimgeAdi, StilUzantisi,
     button::Dugme,
     h_flex,
-    menu::{ContextMenuExt, DropdownMenu as _, PopupMenuItem},
+    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _, ContextMenuExt},
     v_flex,
 };
 use serde::Deserialize;
@@ -134,12 +134,12 @@ impl Render for MenuStory {
                         Dugme::new("popup-menu-1")
                             .outline()
                             .label("Düzenle")
-                            .dropdown_menu(move |this, window, cx| {
+                            .acilir_menu(move |this, window, cx| {
                                 this.min_w(250.)
                                     .link("Hakkında", "https://github.com/hakantr/kavis-ui")
                                     .check_side(check_side.unwrap_or(Side::Left))
                                     .separator()
-                                    .item(PopupMenuItem::new("Tıklamayı Yakala").on_click(
+                                    .item(AcilirMenuOgesi::new("Tıklamayı Yakala").on_click(
                                         window.listener_for(&view, |this, _, _, cx| {
                                             this.message =
                                                 "Tıklama yakalama öğesine tıkladınız".to_string();
@@ -160,7 +160,7 @@ impl Render for MenuStory {
                                     .menu_with_icon("Ara", SimgeAdi::Search, Box::new(SearchAll))
                                     .separator()
                                     .item(
-                                        PopupMenuItem::element(|_, cx| {
+                                        AcilirMenuOgesi::element(|_, cx| {
                                             v_flex().child("Özel Eleman").child(
                                                 div()
                                                     .text_xs()
@@ -327,7 +327,7 @@ impl Render for MenuStory {
                         Dugme::new("dropdown-menu-scrollable-1")
                             .outline()
                             .label("Kaydırılabilir Menü (100 öğe)")
-                            .dropdown_menu_with_anchor(Anchor::TopRight, move |this, _, _| {
+                            .acilir_menu_capa_ile(Anchor::TopRight, move |this, _, _| {
                                 let mut this = this
                                     .scrollable(true)
                                     .max_h(px(300.))
@@ -349,7 +349,7 @@ impl Render for MenuStory {
                         Dugme::new("dropdown-menu-scrollable-2")
                             .outline()
                             .label("Kaydırılabilir Menü (5 öğe)")
-                            .dropdown_menu_with_anchor(Anchor::TopRight, move |this, _, _| {
+                            .acilir_menu_capa_ile(Anchor::TopRight, move |this, _, _| {
                                 let mut this = this
                                     .scrollable(true)
                                     .max_h(px(300.))

@@ -8,7 +8,7 @@ use gpui::{
 };
 
 use crate::{
-    ElementExt, EtkinTema,
+    EtkinTema, OgeUzantisi,
     async_util::{Receiver, Sender, unbounded},
     highlighter::VurguTemasi,
     input::{self, Copy},

@@ -9,7 +9,7 @@ use smallvec::{SmallVec, smallvec};
 
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Simge, StilUzantisi,
-    h_flex, tooltip::ComponentTooltip,
+    h_flex, tooltip::BilesenAracIpucu,
 };
 
 #[derive(Default, Copy, Debug, Clone, PartialEq, Eq, Hash)]
@@ -44,7 +44,7 @@ pub struct Gecis {
     border_edges: Edges<bool>,
     children: SmallVec<[AnyElement; 1]>,
     on_click: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
-    tooltip: ComponentTooltip,
+    tooltip: BilesenAracIpucu,
 }
 
 impl Gecis {
@@ -66,7 +66,7 @@ impl Gecis {
             border_edges: Edges::all(true),
             children: smallvec![],
             on_click: None,
-            tooltip: ComponentTooltip::default(),
+            tooltip: BilesenAracIpucu::default(),
         }
     }
 

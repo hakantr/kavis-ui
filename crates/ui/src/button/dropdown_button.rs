@@ -6,10 +6,10 @@ use gpui::{
 };
 
 use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, ElementExt as _, Secilebilir,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, OgeUzantisi as _, Secilebilir,
     SimgeAdi, StilUzantisi as _,
-    menu::{DropdownMenu, PopupMenu},
-    tooltip::ComponentTooltip,
+    menu::{AcilirMenu, AcilirMenuTetikleyici},
+    tooltip::BilesenAracIpucu,
 };
 
 #[derive(Default)]
@@ -92,7 +92,7 @@ impl Secilebilir for AcilirDugmeTetikleyici {
     }
 }
 
-impl DropdownMenu for AcilirDugmeTetikleyici {}
+impl AcilirMenuTetikleyici for AcilirDugmeTetikleyici {}
 
 impl RenderOnce for AcilirDugmeTetikleyici {
     fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
@@ -117,8 +117,9 @@ pub struct AcilirDugme {
     id: ElementId,
     style: StyleRefinement,
     button: Option<Dugme>,
-    menu:
-        Option<Box<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static>>,
+    menu: Option<
+        Box<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static>,
+    >,
     selected: bool,
     disabled: bool,
     // The button props
@@ -129,7 +130,7 @@ pub struct AcilirDugme {
     size: BilesenBoyutu,
     rounded: DugmeYuvarlakligi,
     anchor: Anchor,
-    tooltip: ComponentTooltip,
+    tooltip: BilesenAracIpucu,
 }
 
 impl AcilirDugme {
@@ -149,7 +150,7 @@ impl AcilirDugme {
             size: BilesenBoyutu::default(),
             rounded: DugmeYuvarlakligi::default(),
             anchor: Anchor::TopRight,
-            tooltip: ComponentTooltip::default(),
+            tooltip: BilesenAracIpucu::default(),
         }
     }
 
@@ -166,19 +167,19 @@ impl AcilirDugme {
     }
 
     /// açılır menü düğme ayarlar.
-    pub fn dropdown_menu(
+    pub fn acilir_menu(
         mut self,
-        menu: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        menu: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {
         self.menu = Some(Box::new(menu));
         self
     }
 
     /// açılır menü düğme ile sabitleyici köşe ayarlar.
-    pub fn dropdown_menu_with_anchor(
+    pub fn acilir_menu_capa_ile(
         mut self,
         anchor: impl Into<Anchor>,
-        menu: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        menu: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {
         self.menu = Some(Box::new(menu));
         self.anchor = anchor.into();
@@ -266,7 +267,7 @@ impl RenderOnce for AcilirDugme {
 
         let wrapped_menu = self.menu.map(|builder| {
             let bounds_state = bounds_state.clone();
-            let f: Box<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu> =
+            let f: Box<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu> =
                 Box::new(move |menu, window, cx| {
                     let width = bounds_state.read(cx).width;
                     let menu = if width > Pixels::ZERO {
@@ -337,7 +338,7 @@ impl RenderOnce for AcilirDugme {
         div()
             .id(self.id)
             .map(|this| match wrapped_menu {
-                Some(menu) => this.child(trigger.dropdown_menu_with_anchor(self.anchor, menu)),
+                Some(menu) => this.child(trigger.acilir_menu_capa_ile(self.anchor, menu)),
                 None => this.child(trigger),
             })
             .map(|this| self.tooltip.apply(this))
@@ -361,7 +362,7 @@ mod tests {
             .disabled(false)
             .selected(false)
             .rounded(DugmeYuvarlakligi::Medium)
-            .dropdown_menu_with_anchor(Anchor::BottomLeft, |menu, _, _| menu);
+            .acilir_menu_capa_ile(Anchor::BottomLeft, |menu, _, _| menu);
 
         assert!(dropdown.button.is_some());
         assert_eq!(dropdown.variant, DugmeVaryanti::Primary);

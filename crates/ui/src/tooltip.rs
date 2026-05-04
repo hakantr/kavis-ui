@@ -359,7 +359,7 @@ pub(crate) struct AracIpucuIcerigi {
 /// Manages araç ipucu lifecycle: gecikme, grace period, animations, ve çizim.
 ///
 /// Bir tek örnek lives içinde [`KokGorunum`] başına pencere. bileşenler kaydeder üzerine gelme
-/// [`ManagedTooltipExt::managed_tooltip`] üzerinden bu kaplamaya çağrı yapar.
+/// [`YonetilenAracIpucuUzantisi::managed_tooltip`] üzerinden bu kaplamaya çağrı yapar.
 pub struct AracIpucuKatmani {
     content: Option<AracIpucuIcerigi>,
     prev_trigger_bounds: Option<Bounds<Pixels>>,
@@ -526,7 +526,7 @@ impl Render for AracIpucuKatmani {
 /// Dugme, Anahtar, OnayKutusu, Radyo vb. bileşenlerin paylaştığı araç ipucu durumu.
 /// olabilir embed almak için `.araç ipucu()` destek ile minimal boilerplate.
 #[derive(Default)]
-pub(crate) struct ComponentTooltip {
+pub(crate) struct BilesenAracIpucu {
     pub text: Option<(
         SharedString,
         Option<(Rc<Box<dyn Action>>, Option<SharedString>)>,
@@ -534,9 +534,9 @@ pub(crate) struct ComponentTooltip {
     pub builder: Option<Rc<dyn Fn(&mut Window, &mut App) -> AnyView>>,
 }
 
-impl ComponentTooltip {
-    /// bu araç ipucu için bir `Stateful<Div>` (veya herhangi bir `ManagedTooltipExt` öğe). uygular.
-    pub fn apply<E: ManagedTooltipExt>(self, el: E) -> E {
+impl BilesenAracIpucu {
+    /// bu araç ipucu için bir `Stateful<Div>` (veya herhangi bir `YonetilenAracIpucuUzantisi` öğe). uygular.
+    pub fn apply<E: YonetilenAracIpucuUzantisi>(self, el: E) -> E {
         if let Some(builder) = self.builder {
             el.managed_tooltip(move |window, cx| builder(window, cx))
         } else if let Some((text, action)) = self.text {
@@ -558,8 +558,8 @@ impl ComponentTooltip {
 
 // ── Internal managed tooltip trait ──────────────────────────────────────────
 
-pub(crate) trait ManagedTooltipExt:
-    StatefulInteractiveElement + crate::ElementExt + Sized
+pub(crate) trait YonetilenAracIpucuUzantisi:
+    StatefulInteractiveElement + crate::OgeUzantisi + Sized
 {
     fn managed_tooltip(
         self,
@@ -600,7 +600,7 @@ pub(crate) trait ManagedTooltipExt:
     }
 }
 
-impl<E: StatefulInteractiveElement + crate::ElementExt> ManagedTooltipExt for E {}
+impl<E: StatefulInteractiveElement + crate::OgeUzantisi> YonetilenAracIpucuUzantisi for E {}
 
 #[cfg(test)]
 mod tests {

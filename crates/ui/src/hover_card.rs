@@ -6,7 +6,7 @@ use gpui::{
 use instant::Duration;
 use std::{cell::Cell, rc::Rc};
 
-use crate::{ElementExt, StilUzantisi as _, popover::AcilirKatman};
+use crate::{OgeUzantisi, StilUzantisi as _, popover::AcilirKatman};
 
 /// Tetikleyici öğenin üzerine gelindiğinde içerik gösteren üzerine gelme kartı öğesi.
 ///

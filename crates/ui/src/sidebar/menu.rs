@@ -2,7 +2,7 @@ use crate::{
     Boyutlandirilabilir as _, Daraltilabilir, EtkinTema as _, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
-    menu::{ContextMenuExt, PopupMenu},
+    menu::{AcilirMenu, ContextMenuExt},
     sidebar::YanCubukOgesi,
     v_flex,
 };
@@ -101,7 +101,7 @@ pub struct YanCubukMenuOgesi {
     children: Vec<Self>,
     suffix: Option<Rc<dyn Fn(&mut Window, &mut App) -> AnyElement + 'static>>,
     disabled: bool,
-    context_menu: Option<Rc<dyn Fn(PopupMenu, &mut Window, &mut App) -> PopupMenu + 'static>>,
+    context_menu: Option<Rc<dyn Fn(AcilirMenu, &mut Window, &mut App) -> AcilirMenu + 'static>>,
 }
 
 impl YanCubukMenuOgesi {
@@ -208,7 +208,7 @@ impl YanCubukMenuOgesi {
     /// bağlam menü için menü öğe ayarlar.
     pub fn context_menu(
         mut self,
-        f: impl Fn(PopupMenu, &mut Window, &mut App) -> PopupMenu + 'static,
+        f: impl Fn(AcilirMenu, &mut Window, &mut App) -> AcilirMenu + 'static,
     ) -> Self {
         self.context_menu = Some(Rc::new(f));
         self

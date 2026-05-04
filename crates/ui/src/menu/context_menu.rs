@@ -7,7 +7,7 @@ use gpui::{
     Subscription, Window, anchored, deferred, div, prelude::FluentBuilder, px,
 };
 
-use crate::menu::PopupMenu;
+use crate::menu::AcilirMenu;
 
 /// Bir uzantı özellik için adding bir bağlam menü için bir öğe.
 pub trait ContextMenuExt: InteractiveElement + ParentElement + Styled {
@@ -17,7 +17,7 @@ pub trait ContextMenuExt: InteractiveElement + ParentElement + Styled {
     /// `ContextMenu` öğesi `absolute` konumlandırıldığı için üst öğenin yerleşimini etkilemez.
     fn context_menu(
         mut self,
-        f: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> ContextMenu<Self>
     where
         Self: Sized,
@@ -40,7 +40,7 @@ impl<E: InteractiveElement + ParentElement + Styled> ContextMenuExt for E {}
 pub struct ContextMenu<E: ParentElement + Styled + Sized> {
     id: ElementId,
     element: Option<E>,
-    menu: Option<Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>>,
+    menu: Option<Rc<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu>>,
     // This is not in use, just for style refinement forwarding.
     _ignore_style: StyleRefinement,
     anchor: Anchor,
@@ -62,7 +62,7 @@ impl<E: ParentElement + Styled> ContextMenu<E> {
     #[must_use]
     fn menu<F>(mut self, builder: F) -> Self
     where
-        F: Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        F: Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     {
         self.menu = Some(Rc::new(builder));
         self
@@ -113,7 +113,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> IntoElement for ContextM
 }
 
 struct ContextMenuSharedState {
-    menu_view: Option<Entity<PopupMenu>>,
+    menu_view: Option<Entity<AcilirMenu>>,
     open: bool,
     position: Point<Pixels>,
     _subscription: Option<Subscription>,
@@ -292,12 +292,13 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for ContextMenu<
                             let shared_state = shared_state.clone();
                             let builder = builder.clone();
                             move |window, cx| {
-                                let menu = PopupMenu::build(window, cx, move |menu, window, cx| {
-                                    let Some(build) = &builder else {
-                                        return menu;
-                                    };
-                                    build(menu, window, cx)
-                                });
+                                let menu =
+                                    AcilirMenu::build(window, cx, move |menu, window, cx| {
+                                        let Some(build) = &builder else {
+                                            return menu;
+                                        };
+                                        build(menu, window, cx)
+                                    });
 
                                 // Set up the subscription for dismiss handling
                                 let _subscription = window.subscribe(&menu, cx, {

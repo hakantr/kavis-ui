@@ -11,7 +11,7 @@ use crate::{
     Secilebilir as _, StilUzantisi,
     actions::{Confirm, SelectDown, SelectLeft, SelectRight, SelectUp},
     list::ListeOgesi,
-    menu::{ContextMenuExt as _, PopupMenu},
+    menu::{AcilirMenu, ContextMenuExt as _},
     scroll::KaydirilabilirOge,
 };
 
@@ -204,10 +204,10 @@ pub struct AgacDurumu {
             dyn Fn(
                 usize,
                 &AgacGirdisi,
-                PopupMenu,
+                AcilirMenu,
                 &mut Window,
                 &mut Context<AgacDurumu>,
-            ) -> PopupMenu,
+            ) -> AcilirMenu,
         >,
     >,
 }
@@ -439,7 +439,7 @@ impl Render for AgacDurumu {
             .relative()
             .context_menu({
                 let state = state.clone();
-                move |menu, window, cx: &mut Context<PopupMenu>| {
+                move |menu, window, cx: &mut Context<AcilirMenu>| {
                     if state.read(cx).context_menu_builder.is_none() {
                         return menu;
                     }
@@ -527,10 +527,10 @@ pub struct Agac {
             dyn Fn(
                 usize,
                 &AgacGirdisi,
-                PopupMenu,
+                AcilirMenu,
                 &mut Window,
                 &mut Context<AgacDurumu>,
-            ) -> PopupMenu,
+            ) -> AcilirMenu,
         >,
     >,
 }
@@ -559,7 +559,7 @@ impl Agac {
     /// - `menu`: açılır pencere menü oluşturucu
     pub fn context_menu<F>(mut self, f: F) -> Self
     where
-        F: Fn(usize, &AgacGirdisi, PopupMenu, &mut Window, &mut Context<AgacDurumu>) -> PopupMenu
+        F: Fn(usize, &AgacGirdisi, AcilirMenu, &mut Window, &mut Context<AgacDurumu>) -> AcilirMenu
             + 'static,
     {
         self.context_menu_builder = Some(Rc::new(f));

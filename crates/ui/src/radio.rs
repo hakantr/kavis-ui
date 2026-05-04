@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema, FocusableExt as _, StilUzantisi,
-    checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::ComponentTooltip, v_flex,
+    checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::BilesenAracIpucu, v_flex,
 };
 use gpui::{
     AnyElement, App, Axis, Div, ElementId, InteractiveElement, IntoElement, ParentElement,
@@ -26,7 +26,7 @@ pub struct Radyo {
     tab_index: isize,
     size: BilesenBoyutu,
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
-    tooltip: ComponentTooltip,
+    tooltip: BilesenAracIpucu,
 }
 
 impl Radyo {
@@ -44,7 +44,7 @@ impl Radyo {
             tab_stop: true,
             size: BilesenBoyutu::default(),
             on_click: None,
-            tooltip: ComponentTooltip::default(),
+            tooltip: BilesenAracIpucu::default(),
         }
     }
 

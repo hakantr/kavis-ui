@@ -37,7 +37,7 @@ use crate::input::{
     popovers::{ContextMenu, DiagnosticPopover, HoverPopover, InputContextMenu},
     search::{self, AramaPaneli},
 };
-use crate::menu::PopupMenu;
+use crate::menu::AcilirMenu;
 use crate::{KokGorunum, history::History};
 
 #[derive(Action, Clone, PartialEq, Eq, Deserialize)]
@@ -352,7 +352,7 @@ pub struct InputState {
     ///
     /// Ayarlanırsa yerleşik bağlam menüsünü geçersiz kılar ve [`Self::enable_context_menu`] içindeki değer ayarını yok sayar.
     pub(super) context_menu_builder:
-        Option<Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>>,
+        Option<Rc<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu>>,
 
     /// Sağ tıklamada gösterilen bağlam menüsünün etkin olup olmadığı.
     ///

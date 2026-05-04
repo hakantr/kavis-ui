@@ -8,7 +8,7 @@ use gpui::{
 use crate::{
     AxisExt, Boyutlandirilabilir, StilUzantisi,
     button::Dugme,
-    menu::{DropdownMenu, PopupMenuItem},
+    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici},
     setting::{
         HerhangiBirAyarAlani, RenderOptions,
         fields::{AyarAlaniCizimi, get_value, set_value},
@@ -64,13 +64,13 @@ where
             .outline()
             .with_size(options.size)
             .refine_style(style)
-            .dropdown_menu_with_anchor(Anchor::TopRight, move |menu, _, _| {
+            .acilir_menu_capa_ile(Anchor::TopRight, move |menu, _, _| {
                 let set_value = set_value.clone();
                 let menu = dropdown_options.iter().fold(menu, |menu, (value, label)| {
                     let old_value: SharedString = old_value.clone().into();
                     let checked = &old_value == value;
                     menu.item(
-                        PopupMenuItem::new(label.clone())
+                        AcilirMenuOgesi::new(label.clone())
                             .checked(checked)
                             .on_click({
                                 let value = value.clone();

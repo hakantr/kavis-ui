@@ -21,7 +21,7 @@ pub use state::*;
 pub use tab_panel::*;
 pub use tiles::*;
 
-use crate::ElementExt;
+use crate::OgeUzantisi;
 
 pub(crate) fn init(cx: &mut App) {
     PanelRegistry::init(cx);

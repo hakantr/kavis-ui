@@ -7,7 +7,7 @@ use gpui::{
 
 use crate::{
     BilesenBoyutu, EtkinTema as _, Simge, SimgeAdi, h_flex,
-    menu::PopupMenu,
+    menu::AcilirMenu,
     table::{Column, ColumnGroup, ColumnSort, TabloDurumu, loading::Loading},
 };
 
@@ -101,10 +101,10 @@ pub trait TabloTemsilcisi: Sized + 'static {
     fn context_menu(
         &mut self,
         row_ix: usize,
-        menu: PopupMenu,
+        menu: AcilirMenu,
         window: &mut Window,
         cx: &mut Context<TabloDurumu<Self>>,
-    ) -> PopupMenu {
+    ) -> AcilirMenu {
         menu
     }
 

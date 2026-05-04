@@ -3,7 +3,9 @@ use gpui::{
     Styled, div, prelude::FluentBuilder as _,
 };
 
-use crate::{Daraltilabilir, EtkinTema as _, Secilebilir, StilUzantisi, menu::DropdownMenu};
+use crate::{
+    Daraltilabilir, EtkinTema as _, Secilebilir, StilUzantisi, menu::AcilirMenuTetikleyici,
+};
 
 /// başlık için [`super::YanCubuk`]
 #[derive(IntoElement)]
@@ -74,7 +76,7 @@ impl InteractiveElement for YanCubukBasligi {
     }
 }
 
-impl DropdownMenu for YanCubukBasligi {}
+impl AcilirMenuTetikleyici for YanCubukBasligi {}
 
 impl RenderOnce for YanCubukBasligi {
     fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl gpui::IntoElement {

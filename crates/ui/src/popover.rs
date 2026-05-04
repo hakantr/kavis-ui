@@ -7,7 +7,8 @@ use gpui::{
 use std::{cell::Cell, rc::Rc};
 
 use crate::{
-    ElementExt, Secilebilir, StilUzantisi as _, actions::Cancel, global_state::KureselDurum, v_flex,
+    OgeUzantisi, Secilebilir, StilUzantisi as _, actions::Cancel, global_state::KureselDurum,
+    v_flex,
 };
 
 const CONTEXT: &str = "AcilirKatman";

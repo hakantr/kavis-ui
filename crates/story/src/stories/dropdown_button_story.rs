@@ -134,7 +134,7 @@ impl Render for DropdownButtonStory {
                         .loading(self.loading)
                         .disabled(self.disabled)
                         .selected(selected)
-                        .dropdown_menu_with_anchor(Anchor::BottomRight, move |this, _, _| {
+                        .acilir_menu_capa_ile(Anchor::BottomRight, move |this, _, _| {
                             this.menu_with_check(
                                 "Devre Dışı",
                                 disabled,
@@ -159,7 +159,7 @@ impl Render for DropdownButtonStory {
                         .loading(self.loading)
                         .disabled(self.disabled)
                         .selected(selected)
-                        .dropdown_menu(move |this, _, _| {
+                        .acilir_menu(move |this, _, _| {
                             this.menu_with_check(
                                 "Devre Dışı",
                                 disabled,
@@ -185,7 +185,7 @@ impl Render for DropdownButtonStory {
                         .loading(self.loading)
                         .disabled(self.disabled)
                         .selected(selected)
-                        .dropdown_menu(move |this, _, _| {
+                        .acilir_menu(move |this, _, _| {
                             this.menu_with_check(
                                 "Devre Dışı",
                                 disabled,
@@ -210,7 +210,7 @@ impl Render for DropdownButtonStory {
                         .loading(self.loading)
                         .disabled(self.disabled)
                         .selected(selected)
-                        .dropdown_menu(move |this, _, _| {
+                        .acilir_menu(move |this, _, _| {
                             this.menu_with_check(
                                 "Devre Dışı",
                                 disabled,

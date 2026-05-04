@@ -23,7 +23,7 @@ Ana tipler: `AcilirDugme`.
 ```rust
 AcilirDugme::new("islemler")
     .button(Dugme::new("islemler-dugme").label("İşlemler"))
-    .dropdown_menu(|menu, _, _| menu.label("Yenile").label("Kapat"))
+    .acilir_menu(|menu, _, _| menu.label("Yenile").label("Kapat"))
 ```
 
 ## Notlar

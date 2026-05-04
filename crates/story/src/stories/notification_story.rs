@@ -7,7 +7,7 @@ use kavis_ui::{
     EtkinTema, PencereUzantisi as _, Tema,
     button::{Dugme, DugmeVaryantlari},
     h_flex,
-    menu::{DropdownMenu as _, PopupMenuItem},
+    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _},
     notification::{Bildirim, BildirimTuru},
     text::markdown,
     v_flex,
@@ -81,10 +81,10 @@ impl Render for NotificationStory {
                     Dugme::new("placement")
                         .outline()
                         .label(format!("{:?}", cx.theme().notification.placement))
-                        .dropdown_menu(move |menu, window, cx| {
+                        .acilir_menu(move |menu, window, cx| {
                             let menu = ANCHORS.into_iter().fold(menu, |menu, placement| {
                                 menu.item(
-                                    PopupMenuItem::new(format!("{:?}", placement))
+                                    AcilirMenuOgesi::new(format!("{:?}", placement))
                                         .checked(cx.theme().notification.placement == placement)
                                         .on_click(window.listener_for(
                                             &view,

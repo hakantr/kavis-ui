@@ -3,7 +3,7 @@ use crate::actions::{SelectLeft, SelectRight};
 use crate::menu::menu_item::MenuItemElement;
 use crate::scroll::KaydirilabilirOge;
 use crate::{BilesenBoyutu, Side, StilUzantisi, kbd::KlavyeTusu};
-use crate::{Boyutlandirilabilir as _, ElementExt, EtkinTema, Simge, SimgeAdi, h_flex, v_flex};
+use crate::{Boyutlandirilabilir as _, EtkinTema, OgeUzantisi, Simge, SimgeAdi, h_flex, v_flex};
 use gpui::{
     Action, Anchor, AnyElement, App, AppContext, Bounds, Context, DismissEvent, Edges, Entity,
     EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, KeyBinding,
@@ -14,7 +14,7 @@ use gpui::{ClickEvent, Half, MouseDownEvent, OwnedMenuItem, Point, Subscription}
 
 use std::rc::Rc;
 
-const CONTEXT: &str = "PopupMenu";
+const CONTEXT: &str = "AcilirMenu";
 
 pub fn init(cx: &mut App) {
     cx.bind_keys([
@@ -28,7 +28,7 @@ pub fn init(cx: &mut App) {
 }
 
 /// Bir menü öğe içinde bir açılır pencere menü.
-pub enum PopupMenuItem {
+pub enum AcilirMenuOgesi {
     /// Bir menü ayırıcı öğe.
     Separator,
     /// Bir non-etkileşimli etiket öğe.
@@ -60,16 +60,16 @@ pub enum PopupMenuItem {
         icon: Option<Simge>,
         label: SharedString,
         disabled: bool,
-        menu: Entity<PopupMenu>,
+        menu: Entity<AcilirMenu>,
     },
 }
 
-impl FluentBuilder for PopupMenuItem {}
-impl PopupMenuItem {
+impl FluentBuilder for AcilirMenuOgesi {}
+impl AcilirMenuOgesi {
     /// Yeni bir menü öğe ile verilen etiket oluşturur.
     #[inline]
     pub fn new(label: impl Into<SharedString>) -> Self {
-        PopupMenuItem::Item {
+        AcilirMenuOgesi::Item {
             icon: None,
             label: label.into(),
             disabled: false,
@@ -87,7 +87,7 @@ impl PopupMenuItem {
         F: Fn(&mut Window, &mut App) -> E + 'static,
         E: IntoElement,
     {
-        PopupMenuItem::ElementItem {
+        AcilirMenuOgesi::ElementItem {
             icon: None,
             disabled: false,
             checked: false,
@@ -99,8 +99,8 @@ impl PopupMenuItem {
 
     /// Yeni bir submenu öğe olan opens başka bir açılır pencere menü oluşturur.
     #[inline]
-    pub fn submenu(label: impl Into<SharedString>, menu: Entity<PopupMenu>) -> Self {
-        PopupMenuItem::Submenu {
+    pub fn submenu(label: impl Into<SharedString>, menu: Entity<AcilirMenu>) -> Self {
+        AcilirMenuOgesi::Submenu {
             icon: None,
             label: label.into(),
             disabled: false,
@@ -111,27 +111,27 @@ impl PopupMenuItem {
     /// Bir ayırıcı menü öğe. oluşturur.
     #[inline]
     pub fn separator() -> Self {
-        PopupMenuItem::Separator
+        AcilirMenuOgesi::Separator
     }
 
     /// Bir etiket menü öğe. oluşturur.
     #[inline]
     pub fn label(label: impl Into<SharedString>) -> Self {
-        PopupMenuItem::Etiket(label.into())
+        AcilirMenuOgesi::Etiket(label.into())
     }
 
     /// simge için menü öğe ayarlar.
     ///
-    /// Yalnızca çalışır için [`PopupMenuItem::öğe`], [`PopupMenuItem::ElementItem`] ve [`PopupMenuItem::Submenu`].
+    /// Yalnızca çalışır için [`AcilirMenuOgesi::öğe`], [`AcilirMenuOgesi::ElementItem`] ve [`AcilirMenuOgesi::Submenu`].
     pub fn icon(mut self, icon: impl Into<Simge>) -> Self {
         match &mut self {
-            PopupMenuItem::Item { icon: i, .. } => {
+            AcilirMenuOgesi::Item { icon: i, .. } => {
                 *i = Some(icon.into());
             }
-            PopupMenuItem::ElementItem { icon: i, .. } => {
+            AcilirMenuOgesi::ElementItem { icon: i, .. } => {
                 *i = Some(icon.into());
             }
-            PopupMenuItem::Submenu { icon: i, .. } => {
+            AcilirMenuOgesi::Submenu { icon: i, .. } => {
                 *i = Some(icon.into());
             }
             _ => {}
@@ -141,13 +141,13 @@ impl PopupMenuItem {
 
     /// eylem için menü öğe ayarlar.
     ///
-    /// Yalnızca çalışır için [`PopupMenuItem::öğe`] ve [`PopupMenuItem::ElementItem`].
+    /// Yalnızca çalışır için [`AcilirMenuOgesi::öğe`] ve [`AcilirMenuOgesi::ElementItem`].
     pub fn action(mut self, action: Box<dyn Action>) -> Self {
         match &mut self {
-            PopupMenuItem::Item { action: a, .. } => {
+            AcilirMenuOgesi::Item { action: a, .. } => {
                 *a = Some(action);
             }
-            PopupMenuItem::ElementItem { action: a, .. } => {
+            AcilirMenuOgesi::ElementItem { action: a, .. } => {
                 *a = Some(action);
             }
             _ => {}
@@ -157,16 +157,16 @@ impl PopupMenuItem {
 
     /// devre dışı durum için menü öğe ayarlar.
     ///
-    /// Yalnızca çalışır için [`PopupMenuItem::öğe`], [`PopupMenuItem::ElementItem`] ve [`PopupMenuItem::Submenu`].
+    /// Yalnızca çalışır için [`AcilirMenuOgesi::öğe`], [`AcilirMenuOgesi::ElementItem`] ve [`AcilirMenuOgesi::Submenu`].
     pub fn disabled(mut self, disabled: bool) -> Self {
         match &mut self {
-            PopupMenuItem::Item { disabled: d, .. } => {
+            AcilirMenuOgesi::Item { disabled: d, .. } => {
                 *d = disabled;
             }
-            PopupMenuItem::ElementItem { disabled: d, .. } => {
+            AcilirMenuOgesi::ElementItem { disabled: d, .. } => {
                 *d = disabled;
             }
-            PopupMenuItem::Submenu { disabled: d, .. } => {
+            AcilirMenuOgesi::Submenu { disabled: d, .. } => {
                 *d = disabled;
             }
             _ => {}
@@ -179,10 +179,10 @@ impl PopupMenuItem {
     /// NOT: `check_side` [`Side::Left`] ise simge onay simgesiyle değiştirilir.
     pub fn checked(mut self, checked: bool) -> Self {
         match &mut self {
-            PopupMenuItem::Item { checked: c, .. } => {
+            AcilirMenuOgesi::Item { checked: c, .. } => {
                 *c = checked;
             }
-            PopupMenuItem::ElementItem { checked: c, .. } => {
+            AcilirMenuOgesi::ElementItem { checked: c, .. } => {
                 *c = checked;
             }
             _ => {}
@@ -192,16 +192,16 @@ impl PopupMenuItem {
 
     /// Bir tıklama işleyici için menü öğe ekler.
     ///
-    /// Yalnızca çalışır için [`PopupMenuItem::öğe`] ve [`PopupMenuItem::ElementItem`].
+    /// Yalnızca çalışır için [`AcilirMenuOgesi::öğe`] ve [`AcilirMenuOgesi::ElementItem`].
     pub fn on_click<F>(mut self, handler: F) -> Self
     where
         F: Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     {
         match &mut self {
-            PopupMenuItem::Item { handler: h, .. } => {
+            AcilirMenuOgesi::Item { handler: h, .. } => {
                 *h = Some(Rc::new(handler));
             }
-            PopupMenuItem::ElementItem { handler: h, .. } => {
+            AcilirMenuOgesi::ElementItem { handler: h, .. } => {
                 *h = Some(Rc::new(handler));
             }
             _ => {}
@@ -213,7 +213,7 @@ impl PopupMenuItem {
     #[inline]
     pub fn link(label: impl Into<SharedString>, href: impl Into<String>) -> Self {
         let href = href.into();
-        PopupMenuItem::Item {
+        AcilirMenuOgesi::Item {
             icon: None,
             label: label.into(),
             disabled: false,
@@ -226,16 +226,16 @@ impl PopupMenuItem {
 
     #[inline]
     fn is_clickable(&self) -> bool {
-        !matches!(self, PopupMenuItem::Separator)
+        !matches!(self, AcilirMenuOgesi::Separator)
             && matches!(
                 self,
-                PopupMenuItem::Item {
+                AcilirMenuOgesi::Item {
                     disabled: false,
                     ..
-                } | PopupMenuItem::ElementItem {
+                } | AcilirMenuOgesi::ElementItem {
                     disabled: false,
                     ..
-                } | PopupMenuItem::Submenu {
+                } | AcilirMenuOgesi::Submenu {
                     disabled: false,
                     ..
                 }
@@ -244,18 +244,18 @@ impl PopupMenuItem {
 
     #[inline]
     fn is_separator(&self) -> bool {
-        matches!(self, PopupMenuItem::Separator)
+        matches!(self, AcilirMenuOgesi::Separator)
     }
 
     fn has_left_icon(&self, check_side: Side) -> bool {
         match self {
-            PopupMenuItem::Item { icon, checked, .. } => {
+            AcilirMenuOgesi::Item { icon, checked, .. } => {
                 icon.is_some() || (check_side.is_left() && *checked)
             }
-            PopupMenuItem::ElementItem { icon, checked, .. } => {
+            AcilirMenuOgesi::ElementItem { icon, checked, .. } => {
                 icon.is_some() || (check_side.is_left() && *checked)
             }
-            PopupMenuItem::Submenu { icon, .. } => icon.is_some(),
+            AcilirMenuOgesi::Submenu { icon, .. } => icon.is_some(),
             _ => false,
         }
     }
@@ -263,16 +263,16 @@ impl PopupMenuItem {
     #[inline]
     fn is_checked(&self) -> bool {
         match self {
-            PopupMenuItem::Item { checked, .. } => *checked,
-            PopupMenuItem::ElementItem { checked, .. } => *checked,
+            AcilirMenuOgesi::Item { checked, .. } => *checked,
+            AcilirMenuOgesi::ElementItem { checked, .. } => *checked,
             _ => false,
         }
     }
 }
 
-pub struct PopupMenu {
+pub struct AcilirMenu {
     pub(crate) focus_handle: FocusHandle,
-    pub(crate) menu_items: Vec<PopupMenuItem>,
+    pub(crate) menu_items: Vec<AcilirMenuOgesi>,
     /// odak işleyici Entity için işleyici eylemler.
     pub(crate) action_context: Option<FocusHandle>,
     selected_index: Option<usize>,
@@ -294,7 +294,7 @@ pub struct PopupMenu {
     _subscriptions: Vec<Subscription>,
 }
 
-impl PopupMenu {
+impl AcilirMenu {
     pub(crate) fn new(cx: &mut App) -> Self {
         Self {
             focus_handle: cx.focus_handle(),
@@ -319,7 +319,7 @@ impl PopupMenu {
     pub fn build(
         window: &mut Window,
         cx: &mut App,
-        f: impl FnOnce(Self, &mut Window, &mut Context<PopupMenu>) -> Self,
+        f: impl FnOnce(Self, &mut Window, &mut Context<AcilirMenu>) -> Self,
     ) -> Entity<Self> {
         cx.new(|cx| f(Self::new(cx), window, cx))
     }
@@ -342,7 +342,7 @@ impl PopupMenu {
         self.action_context = action_context.clone();
 
         for item in &self.menu_items {
-            if let PopupMenuItem::Submenu { menu, .. } = item {
+            if let AcilirMenuOgesi::Submenu { menu, .. } = item {
                 menu.update(cx, |menu, cx| {
                     menu.set_action_context(action_context.clone(), cx);
                 });
@@ -417,7 +417,7 @@ impl PopupMenu {
 
     /// etiket ekler.
     pub fn label(mut self, label: impl Into<SharedString>) -> Self {
-        self.menu_items.push(PopupMenuItem::label(label.into()));
+        self.menu_items.push(AcilirMenuOgesi::label(label.into()));
         self
     }
 
@@ -435,7 +435,7 @@ impl PopupMenu {
     ) -> Self {
         let href = href.into();
         self.menu_items
-            .push(PopupMenuItem::link(label, href).disabled(disabled));
+            .push(AcilirMenuOgesi::link(label, href).disabled(disabled));
         self
     }
 
@@ -459,7 +459,7 @@ impl PopupMenu {
     ) -> Self {
         let href = href.into();
         self.menu_items.push(
-            PopupMenuItem::link(label, href)
+            AcilirMenuOgesi::link(label, href)
                 .icon(icon)
                 .disabled(disabled),
         );
@@ -574,7 +574,7 @@ impl PopupMenu {
         E: IntoElement,
     {
         self.menu_items.push(
-            PopupMenuItem::element(builder)
+            AcilirMenuOgesi::element(builder)
                 .action(action)
                 .icon(icon)
                 .disabled(disabled),
@@ -595,7 +595,7 @@ impl PopupMenu {
         E: IntoElement,
     {
         self.menu_items.push(
-            PopupMenuItem::element(builder)
+            AcilirMenuOgesi::element(builder)
                 .action(action)
                 .checked(checked)
                 .disabled(disabled),
@@ -609,11 +609,11 @@ impl PopupMenu {
             return self;
         }
 
-        if let Some(PopupMenuItem::Separator) = self.menu_items.last() {
+        if let Some(AcilirMenuOgesi::Separator) = self.menu_items.last() {
             return self;
         }
 
-        self.menu_items.push(PopupMenuItem::separator());
+        self.menu_items.push(AcilirMenuOgesi::separator());
         self
     }
 
@@ -623,7 +623,7 @@ impl PopupMenu {
         label: impl Into<SharedString>,
         window: &mut Window,
         cx: &mut Context<Self>,
-        f: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {
         self.submenu_with_icon(None, label, window, cx, f)
     }
@@ -635,23 +635,23 @@ impl PopupMenu {
         label: impl Into<SharedString>,
         window: &mut Window,
         cx: &mut Context<Self>,
-        f: impl Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu + 'static,
+        f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {
-        let submenu = PopupMenu::build(window, cx, f);
+        let submenu = AcilirMenu::build(window, cx, f);
         let parent_menu = cx.entity().downgrade();
         submenu.update(cx, |view, _| {
             view.parent_menu = Some(parent_menu);
         });
 
         self.menu_items.push(
-            PopupMenuItem::submenu(label, submenu).when_some(icon, |this, icon| this.icon(icon)),
+            AcilirMenuOgesi::submenu(label, submenu).when_some(icon, |this, icon| this.icon(icon)),
         );
         self
     }
 
     /// menü öğe. ekler.
-    pub fn item(mut self, item: impl Into<PopupMenuItem>) -> Self {
-        let item: PopupMenuItem = item.into();
+    pub fn item(mut self, item: impl Into<AcilirMenuOgesi>) -> Self {
+        let item: AcilirMenuOgesi = item.into();
         self.menu_items.push(item);
         self
     }
@@ -671,7 +671,7 @@ impl PopupMenu {
         checked: bool,
     ) -> &mut Self {
         self.menu_items.push(
-            PopupMenuItem::new(label)
+            AcilirMenuOgesi::new(label)
                 .when_some(icon, |item, icon| item.icon(icon))
                 .disabled(disabled)
                 .checked(checked)
@@ -724,11 +724,11 @@ impl PopupMenu {
         self
     }
 
-    pub(crate) fn active_submenu(&self) -> Option<Entity<PopupMenu>> {
+    pub(crate) fn active_submenu(&self) -> Option<Entity<AcilirMenu>> {
         if let Some(ix) = self.selected_index {
             if let Some(item) = self.menu_items.get(ix) {
                 return match item {
-                    PopupMenuItem::Submenu { menu, .. } => Some(menu.clone()),
+                    AcilirMenuOgesi::Submenu { menu, .. } => Some(menu.clone()),
                     _ => None,
                 };
             }
@@ -741,7 +741,7 @@ impl PopupMenu {
         self.menu_items.is_empty()
     }
 
-    fn clickable_menu_items(&self) -> impl Iterator<Item = (usize, &PopupMenuItem)> {
+    fn clickable_menu_items(&self) -> impl Iterator<Item = (usize, &AcilirMenuOgesi)> {
         self.menu_items
             .iter()
             .enumerate()
@@ -760,7 +760,7 @@ impl PopupMenu {
             Some(index) => {
                 let item = self.menu_items.get(index);
                 match item {
-                    Some(PopupMenuItem::Item {
+                    Some(AcilirMenuOgesi::Item {
                         handler, action, ..
                     }) => {
                         if let Some(handler) = handler {
@@ -771,7 +771,7 @@ impl PopupMenu {
 
                         self.dismiss(&Cancel, window, cx)
                     }
-                    Some(PopupMenuItem::ElementItem {
+                    Some(AcilirMenuOgesi::ElementItem {
                         handler, action, ..
                     }) => {
                         if let Some(handler) = handler {
@@ -1071,7 +1071,7 @@ impl PopupMenu {
     fn render_item(
         &self,
         ix: usize,
-        item: &PopupMenuItem,
+        item: &AcilirMenuOgesi,
         options: RenderOptions,
         window: &mut Window,
         cx: &mut Context<Self>,
@@ -1088,7 +1088,7 @@ impl PopupMenu {
         const EDGE_PADDING: Pixels = px(4.);
         const INNER_PADDING: Pixels = px(8.);
 
-        let is_submenu = matches!(item, PopupMenuItem::Submenu { .. });
+        let is_submenu = matches!(item, AcilirMenuOgesi::Submenu { .. });
         let group_name = format!("{}:item-{}", cx.entity().entity_id(), ix);
 
         let (item_height, radius) = match self.size {
@@ -1116,7 +1116,7 @@ impl PopupMenu {
             }));
 
         match item {
-            PopupMenuItem::Separator => this
+            AcilirMenuOgesi::Separator => this
                 .h_auto()
                 .p_0()
                 .my_0p5()
@@ -1124,7 +1124,7 @@ impl PopupMenu {
                 .border_b(px(2.))
                 .border_color(cx.theme().border)
                 .disabled(true),
-            PopupMenuItem::Etiket(label) => this.disabled(true).cursor_default().child(
+            AcilirMenuOgesi::Etiket(label) => this.disabled(true).cursor_default().child(
                 h_flex()
                     .cursor_default()
                     .items_center()
@@ -1132,7 +1132,7 @@ impl PopupMenu {
                     .children(Self::render_icon(has_left_icon, false, None, window, cx))
                     .child(div().flex_1().child(label.clone())),
             ),
-            PopupMenuItem::ElementItem {
+            AcilirMenuOgesi::ElementItem {
                 render,
                 icon,
                 disabled,
@@ -1160,7 +1160,7 @@ impl PopupMenu {
                         .child((render)(window, cx))
                         .children(right_check_icon.map(|icon| icon.ml_3())),
                 ),
-            PopupMenuItem::Item {
+            AcilirMenuOgesi::Item {
                 icon,
                 label,
                 action,
@@ -1212,7 +1212,7 @@ impl PopupMenu {
                         .children(key),
                 )
             }
-            PopupMenuItem::Submenu {
+            AcilirMenuOgesi::Submenu {
                 icon,
                 label,
                 menu,
@@ -1271,9 +1271,9 @@ impl PopupMenu {
     }
 }
 
-impl FluentBuilder for PopupMenu {}
-impl EventEmitter<DismissEvent> for PopupMenu {}
-impl Focusable for PopupMenu {
+impl FluentBuilder for AcilirMenu {}
+impl EventEmitter<DismissEvent> for AcilirMenu {}
+impl Focusable for AcilirMenu {
     fn focus_handle(&self, _: &App) -> FocusHandle {
         self.focus_handle.clone()
     }
@@ -1286,7 +1286,7 @@ struct RenderOptions {
     radius: Pixels,
 }
 
-impl Render for PopupMenu {
+impl Render for AcilirMenu {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         self.update_submenu_menu_anchor(window);
 

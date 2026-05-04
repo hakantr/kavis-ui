@@ -11,7 +11,7 @@ use crate::{
     button::{Dugme, DugmeVaryantlari},
     h_flex,
     icon::SimgeAdi,
-    menu::{DropdownMenu as _, PopupMenuItem},
+    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _},
 };
 
 /// Sonraki ve önceki bağlantılarıyla sayfa gezinmesi sağlar.
@@ -224,12 +224,12 @@ impl RenderOnce for Sayfalama {
                     .compact()
                     .disabled(self.disabled)
                     .icon(SimgeAdi::Ellipsis)
-                    .dropdown_menu({
+                    .acilir_menu({
                         let on_click = on_click.clone();
                         move |mut menu, _, _| {
                             for page in range.clone() {
                                 menu = menu.item(
-                                    PopupMenuItem::new(format!("{}", page))
+                                    AcilirMenuOgesi::new(format!("{}", page))
                                         .checked(page == current_page)
                                         .on_click({
                                             let on_click = on_click.clone();

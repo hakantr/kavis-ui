@@ -1,5 +1,5 @@
 use crate::{
-    ElementExt, EtkinTema, Placement, StilUzantisi,
+    EtkinTema, OgeUzantisi, Placement, StilUzantisi,
     dialog::{ANIMATION_DURATION, IletisimKutusu},
     focus_trap::FocusTrapManager,
     input::InputState,

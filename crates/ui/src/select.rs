@@ -8,8 +8,8 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, ElementExt as _, EtkinTema,
-    IndexPath, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, IndexPath,
+    OgeUzantisi as _, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
     actions::{Cancel, Confirm, SelectDown, SelectUp},
     global_state::KureselDurum,
     h_flex,

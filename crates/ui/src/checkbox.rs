@@ -3,7 +3,7 @@ use std::{rc::Rc, time::Duration};
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, FocusableExt,
     Secilebilir, SimgeAdi, StilUzantisi as _, icon::AdliSimge, text::Text,
-    tooltip::ComponentTooltip, v_flex,
+    tooltip::BilesenAracIpucu, v_flex,
 };
 use gpui::{
     Animation, AnimationExt, AnyElement, App, Div, ElementId, InteractiveElement, IntoElement,
@@ -25,7 +25,7 @@ pub struct OnayKutusu {
     tab_stop: bool,
     tab_index: isize,
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
-    tooltip: ComponentTooltip,
+    tooltip: BilesenAracIpucu,
 }
 
 impl OnayKutusu {
@@ -43,7 +43,7 @@ impl OnayKutusu {
             on_click: None,
             tab_stop: true,
             tab_index: 0,
-            tooltip: ComponentTooltip::default(),
+            tooltip: BilesenAracIpucu::default(),
         }
     }
 
