@@ -5,6 +5,8 @@ description: GPUI üzerinde Rust ile masaüstü uygulamaları geliştirmek için
 
 # Kavis UI'ye Giriş
 
+Not: Kavis UI, [longbridge/gpui-component](https://github.com/longbridge/gpui-component) kütüphanesinin `0.5.1` sürümü baz alınarak oluşturulmuş sert bir çatalıdır; bu upstream kütüphane ile geriye doğru veya ileriye dönük senkronize, eş kodlama hedeflenmez.
+
 Kavis UI, [GPUI](https://gpui.rs) üzerinde modern masaüstü uygulamaları kurmak için hazırlanmış Rust bileşen kütüphanesidir. Bileşenler, tema sistemi, sanallaştırılmış liste ve tablo, Markdown/HTML içerik, grafikler ve kod editörü altyapısı sağlar.
 
 ## Hızlı Kurulum
