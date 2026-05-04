@@ -69,8 +69,10 @@ pub(crate) fn derive_aksiyon(input: TokenStream) -> TokenStream {
                     deprecated = Some(lit.value());
                 } else {
                     return Err(meta.error(format!(
-                        "'{:?}' argument not recognized, expected \
-                        'namespace', 'no_json', 'no_register', 'deprecated_aliases', or 'deprecated'",
+                        "'{:?}' argümanı tanınmadı; beklenen argümanlar: \
+                        'name'/'ad', 'namespace'/'ad_alani', 'no_json'/'json_yok', \
+                        'no_register'/'kayit_yok', 'deprecated_aliases'/'kullanilmayan_takma_adlar', \
+                        'deprecated'/'kullanimdan_kalkti'",
                         meta.path
                     )));
                 }
