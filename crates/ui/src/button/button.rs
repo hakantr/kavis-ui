@@ -207,6 +207,7 @@ pub struct Dugme {
     on_hover: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
     loading: bool,
     loading_icon: Option<Simge>,
+    group_hover_name: Option<SharedString>,
 
     tab_index: isize,
     tab_stop: bool,
@@ -251,6 +252,7 @@ impl Dugme {
             outline: false,
             children: Vec::new(),
             loading_icon: None,
+            group_hover_name: None,
             dropdown_caret: false,
             tab_index: 0,
             tab_stop: true,
@@ -370,6 +372,14 @@ impl Dugme {
     /// Düğmenin sonunda açılır caret simgesi gösterilip gösterilmeyeceğini ayarlar.
     pub fn dropdown_caret(mut self, dropdown_caret: bool) -> Self {
         self.dropdown_caret = dropdown_caret;
+        self
+    }
+
+    /// Üzerine gelme stilinin, verilen ad ile işaretlenmiş üst grubun üzerine
+    /// gelindiğinde de uygulanmasını sağlar; böylece kardeş düğmeler birlikte
+    /// vurgulanabilir.
+    pub(crate) fn group_hover_with(mut self, name: impl Into<SharedString>) -> Self {
+        self.group_hover_name = Some(name.into());
         self
     }
 
@@ -529,14 +539,21 @@ impl RenderOnce for Dugme {
                     .text_color(selected_style.fg)
             })
             .when(!self.disabled && !self.selected, |this| {
+                let hover_style = style.hovered(self.outline, cx);
                 this.border_color(normal_style.border)
                     .bg(normal_style.bg)
                     .when(normal_style.underline, |this| this.text_decoration_1())
                     .hover(|this| {
-                        let hover_style = style.hovered(self.outline, cx);
                         this.bg(hover_style.bg)
                             .border_color(hover_style.border)
                             .text_color(hover_style.fg)
+                    })
+                    .when_some(self.group_hover_name.clone(), |this, name| {
+                        this.group_hover(name, |this| {
+                            this.bg(hover_style.bg)
+                                .border_color(hover_style.border)
+                                .text_color(hover_style.fg)
+                        })
                     })
                     .active(|this| {
                         let active_style = style.active(self.outline, cx);

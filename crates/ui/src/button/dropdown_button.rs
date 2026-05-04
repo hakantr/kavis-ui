@@ -165,6 +165,7 @@ impl RenderOnce for AcilirDugme {
             SharedString::from(format!("acilir-dugme-bounds:{:?}", &self.id)).into();
         let bounds_state =
             window.use_keyed_state(bounds_id, cx, |_, _| AcilirDugmeOlcuDurumu::default());
+        let group_name: SharedString = format!("acilir-dugme-group:{:?}", &self.id).into();
 
         let wrapped_menu = self.menu.map(|builder| {
             let bounds_state = bounds_state.clone();
@@ -183,6 +184,7 @@ impl RenderOnce for AcilirDugme {
 
         div()
             .id(self.id)
+            .group(group_name.clone())
             .h_flex()
             .on_prepaint({
                 let bounds_state = bounds_state.clone();
@@ -213,7 +215,8 @@ impl RenderOnce for AcilirDugme {
                         .when(self.compact, |this| this.compact())
                         .when(self.outline, |this| this.outline())
                         .with_size(self.size)
-                        .with_variant(self.variant),
+                        .with_variant(self.variant)
+                        .group_hover_with(group_name.clone()),
                 )
                 .when_some(wrapped_menu, |this, menu| {
                     this.child(
@@ -238,6 +241,7 @@ impl RenderOnce for AcilirDugme {
                             .when(self.outline, |this| this.outline())
                             .with_size(self.size)
                             .with_variant(self.variant)
+                            .group_hover_with(group_name.clone())
                             .dropdown_menu_with_anchor(self.anchor, menu),
                     )
                 })
