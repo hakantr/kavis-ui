@@ -3,12 +3,12 @@ description = "GPUI ile güçlü masaüstü uygulamaları oluşturmak için UI b
 keywords = ["desktop", "gpui", "shadcn", "ui", "uikit"]
 license = "Apache-2.0"
 name = "kavis-ui"
-documentation = "https://docs.rs/kavis-ui"
+documentation = "https://hakantr.github.io/kavis-ui"
 homepage = "https://hakantr.github.io/kavis-ui"
 repository = "https://github.com/hakantr/kavis-ui"
 readme = "../../README.md"
-version = "0.6.0"
-publish = true
+version = "0.1.0"
+publish = false
 edition.workspace = true
 
 [lib]

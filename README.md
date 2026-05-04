@@ -1,6 +1,8 @@
 # Kavis UI
 
-[![Derleme Durumu](https://github.com/hakantr/kavis-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/hakantr/kavis-ui/actions/workflows/ci.yml) [![Docs](https://docs.rs/kavis-ui/badge.svg)](https://docs.rs/kavis-ui/) [![Crates.io](https://img.shields.io/crates/v/kavis-ui.svg)](https://crates.io/crates/kavis-ui)
+[![Derleme Durumu](https://github.com/hakantr/kavis-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/hakantr/kavis-ui/actions/workflows/ci.yml)
+
+Not: Kavis UI, [longbridge/gpui-component](https://github.com/longbridge/gpui-component) kütüphanesinin `0.5.1` sürümü baz alınarak oluşturulmuş sert bir çatalıdır; bu upstream kütüphane ile geriye doğru veya ileriye dönük senkronize, eş kodlama hedeflenmez. Kavis UI `0.1.0` bağımsız erken sürüm çizgisindedir; `docs.rs` ve `crates.io` yayınları kütüphane olgunlaştığında açılacaktır.
 
 Kavis UI, [GPUI](https://gpui.rs) üzerinde modern masaüstü uygulamaları geliştirmek için hazırlanmış Rust bileşen kütüphanesidir. Güncel API yüzeyi Türkçe adlandırılmış bileşenleri öne çıkarır: `Dugme`, `KokGorunum`, `Tema`, `Simge`, `SimgeAdi`, `KavisMotoru` ve ilgili state tipleri.
 

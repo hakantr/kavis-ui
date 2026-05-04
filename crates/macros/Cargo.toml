@@ -1,9 +1,9 @@
 [package]
 name = "kavis-ui-macros"
 description = "Macros for Kavis UI."
-version = "0.6.0"
+version = "0.1.0"
 license = "Apache-2.0"
-publish = true
+publish = false
 edition.workspace = true
 
 [lib]

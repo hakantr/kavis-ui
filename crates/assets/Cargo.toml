@@ -3,13 +3,13 @@ name = "kavis-ui-assets"
 description = "Default bundled assets for Kavis UI."
 keywords = ["desktop", "gpui", "shadcn", "ui", "uikit"]
 license = "Apache-2.0"
-documentation = "https://docs.rs/kavis-ui"
+documentation = "https://hakantr.github.io/kavis-ui"
 homepage = "https://hakantr.github.io/kavis-ui"
 repository = "https://github.com/hakantr/kavis-ui"
 readme = "README.md"
 edition.workspace = true
-publish = true
-version = "0.6.0"
+publish = false
+version = "0.1.0"
 
 [lib]
 doctest = false

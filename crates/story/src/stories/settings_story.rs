@@ -578,7 +578,7 @@ impl SettingsStory {
                             "Documentation",
                             AyarAlani::element(OpenURLSettingField::new(
                                 "Rust Dokümantasyonu...",
-                                "https://docs.rs/kavis-ui"
+                                "https://hakantr.github.io/kavis-ui"
                             )),
                         )
                         .description(markdown(

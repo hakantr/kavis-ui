@@ -1,7 +1,7 @@
 [package]
 name = "window_title"
 description = "An example of using kavis-ui to create a window with a custom title bar."
-version = "0.6.0"
+version = "0.1.0"
 publish = false
 edition.workspace = true
 

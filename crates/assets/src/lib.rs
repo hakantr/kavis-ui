@@ -1,6 +1,6 @@
 /// Kavis UI için uygulama varlıklarını gömer.
 ///
-/// Bu varlık paketi [SimgeAdi](https://docs.rs/kavis-ui/latest/kavis_ui/enum.SimgeAdi.html) için SVG simge dosyaları sağlar.
+/// Bu varlık paketi `kavis_ui::SimgeAdi` için SVG simge dosyaları sağlar.
 ///
 /// ## Kullanım
 ///

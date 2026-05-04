@@ -57,7 +57,6 @@ function createNav(prefix = "") {
     { text: "Başlarken", link: `${prefix}/docs/getting-started` || "/docs/getting-started" },
     { text: "Bileşenler", link: `${prefix}/docs/components` || "/docs/components" },
     { text: "Galeri", link: "/gallery/", target: "_blank" },
-    { text: "API Dokümanı", link: "https://docs.rs/kavis-ui" },
     {
       text: "Kaynaklar",
       items: [

@@ -11,10 +11,7 @@
             <a :href="componentsHref"><Blocks /> {{ componentsText }}</a>
         </div>
         <div class="version">
-            {{ versionLabel }}
-            <a href="https://crates.io/crates/kavis-ui" target="_blank">{{
-                VERSION
-            }}</a>
+            {{ versionLabel }} {{ VERSION }}
         </div>
     </div>
     <div class="features">

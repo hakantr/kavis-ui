@@ -23,7 +23,7 @@ Ana tipler: `AciklamaListesi`.
 ```rust
 AciklamaListesi::new()
     .item("Durum", "Aktif", 1)
-    .item("Sürüm", "0.6.0", 1)
+    .item("Sürüm", "0.1.0", 1)
 ```
 
 ## Notlar

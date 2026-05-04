@@ -3,13 +3,13 @@ name = "gpui-wry"
 description = "WebView support for GPUI, based on Wry."
 keywords = ["webview", "gpui","wry"]
 license = "Apache-2.0"
-documentation = "https://docs.rs/kavis-ui"
+documentation = "https://hakantr.github.io/kavis-ui"
 homepage = "https://hakantr.github.io/kavis-ui"
 repository = "https://github.com/hakantr/kavis-ui/tree/main/crates/webview"
 readme = "README.md"
 edition.workspace = true
-publish = true
-version = "0.6.0"
+publish = false
+version = "0.1.0"
 
 [features]
 inspector = ["wry/devtools"]
