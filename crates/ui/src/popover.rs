@@ -233,6 +233,10 @@ pub struct AcilirKatmanDurumu {
     /// Yön çevirme (flip) kararı için bir önceki frame'in değeri kullanılır.
     pub(crate) popup_bounds: Bounds<Pixels>,
     pub(crate) popup_bounds_captured: bool,
+    /// İlk açılış frame'inde popup'ı görünmez çizip ölçü almayı, ikinci frame'de
+    /// (doğru anchor ile) görünür çizmeyi sağlar. Böylece flip kararı verilirken
+    /// kullanıcı popup'ın yer değiştirdiğini fark etmez.
+    pub(crate) popup_visible: bool,
     open: bool,
     on_open_change: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
 
@@ -249,6 +253,7 @@ impl AcilirKatmanDurumu {
             trigger_bounds_captured: false,
             popup_bounds: Bounds::default(),
             popup_bounds_captured: false,
+            popup_visible: false,
             open: default_open,
             on_open_change: None,
             _dismiss_subscription: None,
@@ -280,6 +285,10 @@ impl AcilirKatmanDurumu {
             KureselDurum::global_mut(cx).register_deferred_popover(&self.focus_handle);
         } else {
             KureselDurum::global_mut(cx).unregister_deferred_popover(&self.focus_handle);
+            // Bir sonraki açılışta önceki bounds'tan etkilenip yanlış flip
+            // verme veya görünür açılma riskini ortadan kaldır.
+            self.popup_bounds_captured = false;
+            self.popup_visible = false;
         }
     }
 
@@ -409,6 +418,7 @@ impl RenderOnce for AcilirKatman {
         let trigger_bounds_captured = state.read(cx).trigger_bounds_captured;
         let popup_bounds = state.read(cx).popup_bounds;
         let popup_bounds_captured = state.read(cx).popup_bounds_captured;
+        let popup_visible = state.read(cx).popup_visible;
 
         let Some(trigger) = self.trigger else {
             return div().id("empty");
@@ -417,19 +427,51 @@ impl RenderOnce for AcilirKatman {
         let parent_view_id = window.current_view();
 
         // Önceki frame'de yakalanmış popup_bounds + viewport ile yön çevirme kararı.
-        // İlk frame'de popup_bounds_captured = false olduğu için orijinal anchor kullanılır;
-        // bir sonraki render'da gerçek paint bounds'una göre yön düzeltilir.
+        //
+        // Strateji: mevcut yönde popup ne kadar taşıyor hesapla; flip yönü için
+        // dikey simetri varsayımıyla (popup ile trigger arası boşluk korunur)
+        // taşma miktarını tahmin et; **daha az taşan** yönü seç. İkisi de
+        // taşıyorsa orijinalde kal — fark yoksa flip yapmanın anlamı yok,
+        // GPUI'nin `snap_to_window_with_margin`'i pencere içine sıkıştırsın.
+        //
+        // İlk frame'de `popup_bounds_captured = false` olduğu için orijinal
+        // anchor kullanılır; bir sonraki render'da gerçek paint bounds'una göre
+        // yön düzeltilir.
         let effective_anchor = if popup_bounds_captured {
             let viewport = window.viewport_size();
             let opens_down = matches!(
                 self.anchor,
                 Anchor::TopLeft | Anchor::TopCenter | Anchor::TopRight
             );
-            let overflows_bottom =
-                popup_bounds.origin.y + popup_bounds.size.height > viewport.height;
-            let overflows_top = popup_bounds.origin.y < Pixels::ZERO;
 
-            if (opens_down && overflows_bottom) || (!opens_down && overflows_top) {
+            let popup_top = popup_bounds.origin.y;
+            let popup_bot = popup_top + popup_bounds.size.height;
+            let trigger_top = trigger_bounds.origin.y;
+            let trigger_bot = trigger_top + trigger_bounds.size.height;
+            let popup_h = popup_bounds.size.height;
+
+            // Flip durumunda popup'ın düşeceği konumu tahmin et
+            // (trigger'a göre simetri: popup ile trigger arasındaki boşluk korunur).
+            let (flip_top, flip_bot) = if opens_down {
+                let gap = popup_top - trigger_bot; // pozitif: altta boşluk; negatif: çakışma
+                let new_bot = trigger_top - gap;
+                (new_bot - popup_h, new_bot)
+            } else {
+                let gap = trigger_top - popup_bot;
+                let new_top = trigger_bot + gap;
+                (new_top, new_top + popup_h)
+            };
+
+            let overflow = |top: Pixels, bot: Pixels| -> Pixels {
+                let below = (bot - viewport.height).max(Pixels::ZERO);
+                let above = (Pixels::ZERO - top).max(Pixels::ZERO);
+                below + above
+            };
+
+            let overflow_current = overflow(popup_top, popup_bot);
+            let overflow_flip = overflow(flip_top, flip_bot);
+
+            if overflow_current > Pixels::ZERO && overflow_flip < overflow_current {
                 Self::flip_vertical(self.anchor)
             } else {
                 self.anchor
@@ -510,31 +552,48 @@ impl RenderOnce for AcilirKatman {
         // Popup için inline `anchored` kullanıyoruz; render_popover ile aynı,
         // tek farkı sarmalayıcı div'in `on_prepaint`'inde popup'ın gerçek
         // paint bounds'unu state'e yazıp bir sonraki frame için flip kararı
-        // verilebilmesini sağlamamız.
+        // verilebilmesini sağlamamız. İlk frame'de popup `invisible()` olarak
+        // çizilir (layout korunur, bounds yakalanır), bir sonraki frame'de
+        // doğru anchor'la görünür çizilir → kullanıcı sıçramayı görmez.
         let popup = deferred(
             anchored()
                 .snap_to_window_with_margin(px(8.))
                 .anchor(effective_anchor)
                 .position(position.get())
-                .child(div().relative().child(popover_content).on_prepaint({
-                    let state = state.clone();
-                    move |bounds, window, cx| {
-                        let mut should_request_frame = false;
-                        state.update(cx, |s, cx| {
-                            let changed = s.popup_bounds != bounds;
-                            let first = !s.popup_bounds_captured;
-                            if changed || first {
-                                s.popup_bounds = bounds;
-                                s.popup_bounds_captured = true;
-                                cx.notify();
+                .child(
+                    div()
+                        .relative()
+                        .when(!popup_visible, |this| this.invisible())
+                        .child(popover_content)
+                        .on_prepaint({
+                            let state = state.clone();
+                            move |bounds, window, cx| {
+                                let mut should_request_frame = false;
+                                state.update(cx, |s, cx| {
+                                    let bounds_changed = s.popup_bounds != bounds;
+                                    let first_capture = !s.popup_bounds_captured;
+                                    let became_visible = !s.popup_visible;
+                                    if bounds_changed || first_capture {
+                                        s.popup_bounds = bounds;
+                                        s.popup_bounds_captured = true;
+                                    }
+                                    if became_visible {
+                                        s.popup_visible = true;
+                                    }
+                                    if bounds_changed
+                                        || first_capture
+                                        || became_visible
+                                    {
+                                        cx.notify();
+                                    }
+                                    should_request_frame = first_capture || became_visible;
+                                });
+                                if should_request_frame {
+                                    window.request_animation_frame();
+                                }
                             }
-                            should_request_frame = first;
-                        });
-                        if should_request_frame {
-                            window.request_animation_frame();
-                        }
-                    }
-                })),
+                        }),
+                ),
         )
         .with_priority(1);
 
