@@ -8,10 +8,10 @@ use kavis_ui::{
 };
 
 use crate::{
-    AccordionStory, AlertDialogStory, AlertStory, AvatarStory, BadgeStory, BreadcrumbStory,
-    ButtonStory, CalendarStory, ChartStory, CheckboxStory, ClipboardStory, CollapsibleStory,
-    ColorPickerStory, DataTableStory, DatePickerStory, DescriptionListStory, DialogStory,
-    DividerStory, DropdownButtonStory, EditorStory, FormStory, GroupBoxStory, HoverCardStory,
+    AccordionStory, AlertDialogStory, AlertStory, AvatarStory, AyiriciStory, BadgeStory,
+    BreadcrumbStory, ButtonStory, CalendarStory, ChartStory, CheckboxStory, ClipboardStory,
+    CollapsibleStory, ColorPickerStory, DataTableStory, DatePickerStory, DescriptionListStory,
+    DialogStory, DropdownButtonStory, EditorStory, FormStory, GroupBoxStory, HoverCardStory,
     IconStory, ImageStory, InputStory, KbdStory, LabelStory, ListStory, MenuStory,
     NotificationStory, NumberInputStory, OtpInputStory, PaginationStory, PopoverStory,
     ProgressStory, RadioStory, RatingStory, ResizableStory, ScrollbarStory, SelectStory,
@@ -68,7 +68,7 @@ impl Gallery {
                     StoryContainer::panel::<DatePickerStory>(window, cx),
                     StoryContainer::panel::<DescriptionListStory>(window, cx),
                     StoryContainer::panel::<DialogStory>(window, cx),
-                    StoryContainer::panel::<DividerStory>(window, cx),
+                    StoryContainer::panel::<AyiriciStory>(window, cx),
                     StoryContainer::panel::<DropdownButtonStory>(window, cx),
                     StoryContainer::panel::<EditorStory>(window, cx),
                     StoryContainer::panel::<FormStory>(window, cx),

@@ -1261,7 +1261,7 @@ impl BlockNode {
             }
             BlockNode::Ayirici { .. } => div()
                 .pb(mb)
-                .child(div().id("divider").bg(cx.theme().border).h(px(2.)))
+                .child(div().id("ayirici").bg(cx.theme().border).h(px(2.)))
                 .into_any_element(),
             BlockNode::Break { .. } => div().id("break").into_any_element(),
             BlockNode::Unknown { .. } | BlockNode::Definition { .. } => div().into_any_element(),

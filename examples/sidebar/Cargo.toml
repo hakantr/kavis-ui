@@ -1,0 +1,14 @@
+[package]
+name = "sidebar"
+description = "Shadcn tarzı yan çubuk daralma modlarını gösteren Kavis UI örneği."
+version = "0.1.0"
+publish = false
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+kavis-ui.workspace = true
+kavis-ui-assets.workspace = true
+
+[lints]
+workspace = true

@@ -171,6 +171,65 @@ impl Render for NotificationStory {
                     ),
             )
             .child(
+                section("Tür, Başlık ve Açıklama")
+                    .child(
+                        Dugme::new("show-typed-info")
+                            .info()
+                            .label("Bilgi")
+                            .on_click(cx.listener(|_, _, window, cx| {
+                                window.push_notification(
+                                    Bildirim::info(
+                                        "Değişiklikleriniz buluta kaydedildi ve tüm cihazlarınızla eşitlenecek.",
+                                    )
+                                    .title("Tüm değişiklikler kaydedildi"),
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        Dugme::new("show-typed-success")
+                            .success()
+                            .label("Başarılı")
+                            .on_click(cx.listener(|_, _, window, cx| {
+                                window.push_notification(
+                                    Bildirim::success(
+                                        "99,00 USD tutarındaki ödemeniz işlendi ve makbuz e-postayla gönderildi.",
+                                    )
+                                    .title("Ödeme alındı"),
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        Dugme::new("show-typed-warning")
+                            .warning()
+                            .label("Uyarı")
+                            .on_click(cx.listener(|_, _, window, cx| {
+                                window.push_notification(
+                                    Bildirim::warning(
+                                        "Ağ bağlantınız kararsız. Bazı değişikliklerin kaydedilmesi daha uzun sürebilir.",
+                                    )
+                                    .title("Bağlantı kararsız"),
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        Dugme::new("show-typed-error")
+                            .danger()
+                            .label("Hata")
+                            .on_click(cx.listener(|_, _, window, cx| {
+                                window.push_notification(
+                                    Bildirim::error(
+                                        "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.",
+                                    )
+                                    .title("İstek başarısız"),
+                                    cx,
+                                )
+                            })),
+                    ),
+            )
+            .child(
                 section("Benzersiz Bildirim").child(
                     Dugme::new("show-notify-unique")
                         .outline()

@@ -17,9 +17,11 @@ Bu not, `../gpui-component` reposundaki 2026-05-04 tarihli upstream değişiklik
 | `SidebarCollapsible` | `YanCubukDaralma` | `Icon`, `Offcanvas`, `None` varyantları var. |
 | `.collapsible(true/false)` | `.collapsible(YanCubukDaralma::...)` | Geri uyumluluk iptal edildi; bool kabul edilmiyor. |
 | `crates/story/src/stories/sidebar_story.rs` | `crates/story/src/stories/sidebar_story.rs` | Story yeni collapse mode seçicisine geçirildi. |
+| `examples/sidebar` | `examples/sidebar` | Shadcn collapse modlarını gösteren Kavis örneği Türkçe API ile taşındı. |
 | `ButtonGroup` | `DugmeGrubu` | Story kontrolü için kullanıldı. |
 | `Selectable` trait | `Secilebilir as _` | `.selected(...)` çağrıları için import edildi. |
 | `Divider` -> `Separator` | `Ayirici` korunuyor, `separator` alias eklendi | Türkçe ana API bozulmadı, upstream İngilizce isim için köprü var. |
+| `DividerStory` -> `SeparatorStory` | `AyiriciStory` | Kavis story adı Türkçe karşılığa taşındı. |
 | `DescriptionList::divider()` | `DescriptionList::separator()` alias | `separator()` çağrısı `divider()`a yönlenir. |
 | `notification` icon alignment | `Bildirim` ikon wrapper | `.top(px(18.)).left_4()` ile başlık hizasına alındı. |
 | Markdown inline injections | `SozdizimiVurgulayici` injection layers | Inline markdown katmanları ayrı parse ediliyor. |
@@ -50,6 +52,7 @@ Bu not, `../gpui-component` reposundaki 2026-05-04 tarihli upstream değişiklik
 - Header/footer içerik gizleme koşulu raw `collapsed` yerine `icon_collapsed` ile yapıldı.
 - Main content layout `size_full()` yerine `h_full().flex_1().min_w_0().overflow_hidden()` oldu.
 - `story-web` kırılımı için ayrıca `cargo check -p kavis-ui-story-web` çalıştırıldı ve geçti.
+- Upstream `examples/sidebar` örneği `examples/sidebar` olarak Kavis API ile eklendi.
 
 ## Highlighter Uyarlaması
 
@@ -77,6 +80,7 @@ Bu not, `../gpui-component` reposundaki 2026-05-04 tarihli upstream değişiklik
   - `lib.rs`: `pub mod separator;`
   - `bilesenler.rs`: `pub use crate::separator::*;`
   - `description_list.rs`: `separator()` alias
+- Story tarafında eski `DividerStory` adı yerine Türkçe `AyiriciStory` kullanılır.
 - Gelecekte İngilizce örnek kod upstreamden doğrudan taşınırsa `separator` modülü importları kurtarır.
 
 ## Test ve Kontrol Komutları
@@ -130,6 +134,14 @@ git diff --check
 - `has_highlight_covering` yardımcı fonksiyonu HTML feature kombinasyonu için de derlenmesi adına feature gate genişletildi.
 - `test_markdown_plain_inline_skips_injection_layer` upstream'da Japonca CJK metniyle çağrılırken, kavis-ui tarafında Türkçe ASCII metin korundu (trigger byte tetiklemediği için fonksiyonel sonuç aynı).
 
+## Sonradan Kapatılan Rename Boşlukları
+
+Upstream `49b4ad41` commit'inde `Divider`'dan ileri taşınan iç adlandırmalar başlangıçta atlandı. Türkçe karşılıklarına dönüştürüldü:
+
+- `crates/ui/src/kbd.rs` `Kbd::format` içindeki `const DIVIDER` → `const AYIRICI`. (Tamamen iç değişken, `Ayirici` tip adıyla aynı kalıba çekildi.)
+- `crates/ui/src/text/node.rs` markdown blok render'ındaki `div().id("divider")` → `div().id("ayirici")`. (`BlockNode::Ayirici` varyantıyla tutarlı.)
+- `BlockNode::Ayirici` varyantı upstream'de `BlockNode::HorizontalRule` olarak yeniden adlandırıldı, ancak `pub(crate)` iç tip olduğu için fork tercihi olarak Türkçe `Ayirici` korunuyor (semantik olarak hem ayırıcı hem yatay çizgi anlamlarını kapsıyor).
+
 ## Gelecek Merge Kontrol Listesi
 
 1. Upstream tarih filtresini netleştir:
@@ -146,7 +158,7 @@ git diff --check
 4. Eski kullanım taraması yap:
    - `.collapsible(true/false)`
    - `divider::`
-   - `DividerStory`
+   - `DividerStory` / `SeparatorStory` -> `AyiriciStory`
 5. Story ve story-web ayrı ayrı derle.
 6. Eğer kullanıcı geri uyumluluk istemiyorsa compatibility adapter ekleme.
 7. Geniş davranış değişikliklerinde küçük unit test ekle; UI story davranışı için compile check ile yetinme, gerekirse görsel/runtime kontrol planla.
@@ -154,5 +166,5 @@ git diff --check
 ## Riskler
 
 - `Offcanvas` modunda içerik animasyon sonrası unmount edilir; focus/tab order davranışı ileride runtime testle doğrulanmalı.
-- `separator` için dosya/Story rename yapılmadı; yalnızca alias eklendi. Upstreamle birebir isim uyumu istenirse `divider_story.rs` ve story listesi ayrıca ele alınmalı.
+- `separator` için ana Türkçe API `Ayirici` olarak kalır. İngilizce `Separator` yalnızca upstream importlarını taşımak için köprü alias'tır.
 - Highlighter injection akışı daha karmaşık hale geldi; yeni dil injectionları eklenirse `should_parse_injection_layer` sadece markdown inline özelinde kalmalı.

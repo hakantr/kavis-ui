@@ -7,11 +7,11 @@ use kavis_ui::{EtkinTema, divider::Ayirici, h_flex, label::Etiket, v_flex};
 
 const DESCRIPTION: &str = "Kavis UI, GPUI ile güçlü çapraz platform masaüstü uygulamaları geliştirmek için Rust GUI bileşenleri sunar.";
 
-pub struct DividerStory {
+pub struct AyiriciStory {
     focus_handle: kavis_ui::ham_gpui::FocusHandle,
 }
 
-impl super::Story for DividerStory {
+impl super::Story for AyiriciStory {
     fn title() -> &'static str {
         "Ayirici"
     }
@@ -25,7 +25,7 @@ impl super::Story for DividerStory {
     }
 }
 
-impl DividerStory {
+impl AyiriciStory {
     pub fn view(_window: &mut Window, cx: &mut App) -> Entity<Self> {
         cx.new(|cx| Self {
             focus_handle: cx.focus_handle(),
@@ -33,13 +33,13 @@ impl DividerStory {
     }
 }
 
-impl Focusable for DividerStory {
+impl Focusable for AyiriciStory {
     fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
 
-impl Render for DividerStory {
+impl Render for AyiriciStory {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         v_flex()
             .gap_6()
