@@ -237,6 +237,10 @@ pub struct AcilirKatmanDurumu {
     /// (doğru anchor ile) görünür çizmeyi sağlar. Böylece flip kararı verilirken
     /// kullanıcı popup'ın yer değiştirdiğini fark etmez.
     pub(crate) popup_visible: bool,
+    /// Bir önceki frame'de yön çevirme kararı verildi mi? Çift atlamayı (oscillation)
+    /// engellemek için kararlı tutulur — her render'da `self.anchor`'dan baştan
+    /// türetilmez, bir önceki kararın üzerine inşa edilir.
+    pub(crate) is_flipped: bool,
     open: bool,
     on_open_change: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
 
@@ -254,6 +258,7 @@ impl AcilirKatmanDurumu {
             popup_bounds: Bounds::default(),
             popup_bounds_captured: false,
             popup_visible: false,
+            is_flipped: false,
             open: default_open,
             on_open_change: None,
             _dismiss_subscription: None,
@@ -289,6 +294,7 @@ impl AcilirKatmanDurumu {
             // verme veya görünür açılma riskini ortadan kaldır.
             self.popup_bounds_captured = false;
             self.popup_visible = false;
+            self.is_flipped = false;
         }
     }
 
@@ -419,6 +425,7 @@ impl RenderOnce for AcilirKatman {
         let popup_bounds = state.read(cx).popup_bounds;
         let popup_bounds_captured = state.read(cx).popup_bounds_captured;
         let popup_visible = state.read(cx).popup_visible;
+        let was_flipped = state.read(cx).is_flipped;
 
         let Some(trigger) = self.trigger else {
             return div().id("empty");
@@ -426,21 +433,34 @@ impl RenderOnce for AcilirKatman {
 
         let parent_view_id = window.current_view();
 
-        // Önceki frame'de yakalanmış popup_bounds + viewport ile yön çevirme kararı.
+        // Yön çevirme (flip) kararı.
         //
-        // Strateji: mevcut yönde popup ne kadar taşıyor hesapla; flip yönü için
-        // dikey simetri varsayımıyla (popup ile trigger arası boşluk korunur)
-        // taşma miktarını tahmin et; **daha az taşan** yönü seç. İkisi de
-        // taşıyorsa orijinalde kal — fark yoksa flip yapmanın anlamı yok,
-        // GPUI'nin `snap_to_window_with_margin`'i pencere içine sıkıştırsın.
+        // Strateji:
+        //  1. **Mevcut yön = `current_anchor`**: bir önceki frame'in `is_flipped`
+        //     değerine göre `self.anchor` ya da `flip_vertical(self.anchor)`.
+        //     popup_bounds bu yönde ölçülmüştür.
+        //  2. Mevcut yönde taşma var mı hesapla.
+        //  3. Karşı yön için **dikey simetri varsayımı** ile taşmayı tahmin et
+        //     (popup ile trigger arasındaki boşluk korunur).
+        //  4. **Histerez marjı** (= trigger yüksekliği): mevcut yön taşıyor ve
+        //     karşı yön bu marjdan daha fazla farkla daha iyi olursa flip et.
+        //     Aksi takdirde mevcut yönde kal — bu, "popup_h + trigger_h" kadar
+        //     dar bir şeritte iki yön de eşit kötü olduğunda iki frame arası
+        //     çift atlama (oscillation) olmasını engeller.
         //
-        // İlk frame'de `popup_bounds_captured = false` olduğu için orijinal
-        // anchor kullanılır; bir sonraki render'da gerçek paint bounds'una göre
-        // yön düzeltilir.
-        let effective_anchor = if popup_bounds_captured {
+        // İlk frame'de `popup_bounds_captured = false` olduğu için karar
+        // verilemez; orijinal `self.anchor` kullanılır, bir sonraki render'da
+        // gerçek paint bounds'una göre değerlendirilir.
+        let current_anchor = if was_flipped {
+            Self::flip_vertical(self.anchor)
+        } else {
+            self.anchor
+        };
+
+        let new_flipped = if popup_bounds_captured {
             let viewport = window.viewport_size();
             let opens_down = matches!(
-                self.anchor,
+                current_anchor,
                 Anchor::TopLeft | Anchor::TopCenter | Anchor::TopRight
             );
 
@@ -450,10 +470,8 @@ impl RenderOnce for AcilirKatman {
             let trigger_bot = trigger_top + trigger_bounds.size.height;
             let popup_h = popup_bounds.size.height;
 
-            // Flip durumunda popup'ın düşeceği konumu tahmin et
-            // (trigger'a göre simetri: popup ile trigger arasındaki boşluk korunur).
             let (flip_top, flip_bot) = if opens_down {
-                let gap = popup_top - trigger_bot; // pozitif: altta boşluk; negatif: çakışma
+                let gap = popup_top - trigger_bot;
                 let new_bot = trigger_top - gap;
                 (new_bot - popup_h, new_bot)
             } else {
@@ -470,12 +488,25 @@ impl RenderOnce for AcilirKatman {
 
             let overflow_current = overflow(popup_top, popup_bot);
             let overflow_flip = overflow(flip_top, flip_bot);
+            let hysteresis = trigger_bounds.size.height;
 
-            if overflow_current > Pixels::ZERO && overflow_flip < overflow_current {
-                Self::flip_vertical(self.anchor)
+            if overflow_current > Pixels::ZERO
+                && overflow_flip + hysteresis < overflow_current
+            {
+                !was_flipped
             } else {
-                self.anchor
+                was_flipped
             }
+        } else {
+            was_flipped
+        };
+
+        if new_flipped != was_flipped {
+            state.update(cx, |s, _| s.is_flipped = new_flipped);
+        }
+
+        let effective_anchor = if new_flipped {
+            Self::flip_vertical(self.anchor)
         } else {
             self.anchor
         };
