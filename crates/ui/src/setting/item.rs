@@ -5,7 +5,7 @@ use gpui::{
 use std::{any::TypeId, ops::Deref, rc::Rc};
 
 use crate::{
-    AxisExt, EtkinTema as _, StyledExt as _,
+    AxisExt, EtkinTema as _, StilUzantisi as _,
     label::Etiket,
     setting::{
         ElementField, HerhangiBirAyarAlani, RenderOptions,

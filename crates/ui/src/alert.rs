@@ -7,7 +7,8 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema as _, Renklendir, Simge, SimgeAdi, Sizable, Size, StyledExt, h_flex,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, Renklendir, Simge, SimgeAdi, StilUzantisi,
+    h_flex,
     text::{MetinGorunumuStili, Text},
 };
 
@@ -63,7 +64,7 @@ pub struct Uyari {
     icon: Simge,
     title: Option<SharedString>,
     message: Text,
-    size: Size,
+    size: BilesenBoyutu,
     banner: bool,
     on_close: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
     visible: bool,
@@ -79,7 +80,7 @@ impl Uyari {
             icon: Simge::new(SimgeAdi::Info),
             title: None,
             message: message.into(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             banner: false,
             visible: true,
             on_close: None,
@@ -157,8 +158,8 @@ impl Uyari {
     }
 }
 
-impl Sizable for Uyari {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Uyari {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -177,9 +178,9 @@ impl RenderOnce for Uyari {
         }
 
         let (radius, padding_x, padding_y, gap) = match self.size {
-            Size::XSmall => (cx.theme().radius, px(12.), px(6.), px(6.)),
-            Size::Small => (cx.theme().radius, px(12.), px(8.), px(6.)),
-            Size::Large => (cx.theme().radius_lg, px(20.), px(14.), px(12.)),
+            BilesenBoyutu::CokKucuk => (cx.theme().radius, px(12.), px(6.), px(6.)),
+            BilesenBoyutu::Kucuk => (cx.theme().radius, px(12.), px(8.), px(6.)),
+            BilesenBoyutu::Buyuk => (cx.theme().radius_lg, px(20.), px(14.), px(12.)),
             _ => (cx.theme().radius, px(16.), px(10.), px(12.)),
         };
 
@@ -244,7 +245,7 @@ impl RenderOnce for Uyari {
                         })
                         .child(
                             Simge::new(SimgeAdi::Close)
-                                .with_size(self.size.max(Size::Medium))
+                                .with_size(self.size.max(BilesenBoyutu::Orta))
                                 .flex_shrink_0(),
                         ),
                 )

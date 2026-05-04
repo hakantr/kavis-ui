@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use crate::{
-    Sizable, Size,
+    BilesenBoyutu, Boyutlandirilabilir,
     form::{Field, FieldProps},
     v_flex,
 };
@@ -81,8 +81,8 @@ impl Styled for Form {
     }
 }
 
-impl Sizable for Form {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Form {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.props.size = size.into();
         self
     }
@@ -93,8 +93,8 @@ impl RenderOnce for Form {
         let props = self.props;
 
         let gap = match props.size {
-            Size::XSmall | Size::Small => px(6.),
-            Size::Large => px(12.),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(6.),
+            BilesenBoyutu::Buyuk => px(12.),
             _ => px(8.),
         };
 

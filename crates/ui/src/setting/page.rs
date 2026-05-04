@@ -6,7 +6,7 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    EtkinTema, Simge, SimgeAdi, Sizable, StyledExt,
+    Boyutlandirilabilir, EtkinTema, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari},
     h_flex,
     label::Etiket,

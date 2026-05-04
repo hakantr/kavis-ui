@@ -4,7 +4,7 @@ use gpui::{
     prelude::FluentBuilder as _, px,
 };
 use kavis_ui::{
-    Disableable as _, Sizable, StyledExt,
+    Boyutlandirilabilir, DevreDisiBirakilabilir as _, StilUzantisi,
     checkbox::OnayKutusu,
     h_flex,
     input::{InputEvent, OtpInput, OtpState},

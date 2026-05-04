@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    Sizable, StyledExt,
+    Boyutlandirilabilir, StilUzantisi,
     checkbox::OnayKutusu,
     setting::{
         HerhangiBirAyarAlani, RenderOptions,

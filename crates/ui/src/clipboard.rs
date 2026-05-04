@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    SimgeAdi, Sizable as _,
+    Boyutlandirilabilir as _, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
 };
 

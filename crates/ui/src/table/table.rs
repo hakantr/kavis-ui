@@ -3,7 +3,10 @@ use gpui::{
     StyleRefinement, Styled, TextAlign, Window, div, prelude::FluentBuilder as _, px, relative,
 };
 
-use crate::{AnyChildElement, ChildElement, EtkinTema as _, Sizable, Size, StyledExt as _};
+use crate::{
+    AnyChildElement, BilesenBoyutu, Boyutlandirilabilir, ChildElement, EtkinTema as _,
+    StilUzantisi as _,
+};
 
 const MIN_CELL_WIDTH: Pixels = px(100.);
 
@@ -12,7 +15,7 @@ const MIN_CELL_WIDTH: Pixels = px(100.);
 /// [`VeriTablosu`] aksine bu basit, durumsuz ve bileştirilebilir bir tablodur.
 /// olmadan virtual kaydırma veya sütun yönetim.
 ///
-/// [`Sizable`] ile yapılan boyut ayarları tüm alt öğelere otomatik olarak aktarılır.
+/// [`Boyutlandirilabilir`] ile yapılan boyut ayarları tüm alt öğelere otomatik olarak aktarılır.
 ///
 /// # Örnek
 ///
@@ -36,7 +39,7 @@ pub struct Tablo {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyChildElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl Tablo {
@@ -45,7 +48,7 @@ impl Tablo {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -70,8 +73,8 @@ impl Styled for Tablo {
     }
 }
 
-impl Sizable for Tablo {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Tablo {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -108,7 +111,7 @@ pub struct TabloBasligi {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyChildElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloBasligi {
@@ -117,7 +120,7 @@ impl TabloBasligi {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -149,8 +152,8 @@ impl ChildElement for TabloBasligi {
     }
 }
 
-impl Sizable for TabloBasligi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloBasligi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -181,7 +184,7 @@ pub struct TabloGovdesi {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyChildElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloGovdesi {
@@ -190,7 +193,7 @@ impl TabloGovdesi {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -215,8 +218,8 @@ impl Styled for TabloGovdesi {
     }
 }
 
-impl Sizable for TabloGovdesi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloGovdesi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -250,7 +253,7 @@ pub struct TabloAltligi {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyChildElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloAltligi {
@@ -259,7 +262,7 @@ impl TabloAltligi {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -284,8 +287,8 @@ impl Styled for TabloAltligi {
     }
 }
 
-impl Sizable for TabloAltligi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloAltligi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -323,7 +326,7 @@ pub struct TabloSatiri {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyChildElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloSatiri {
@@ -332,7 +335,7 @@ impl TabloSatiri {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -357,8 +360,8 @@ impl Styled for TabloSatiri {
     }
 }
 
-impl Sizable for TabloSatiri {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloSatiri {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -398,7 +401,7 @@ pub struct TabloBasHucre {
     children: Vec<AnyElement>,
     col_span: usize,
     align: TextAlign,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloBasHucre {
@@ -409,7 +412,7 @@ impl TabloBasHucre {
             children: Vec::new(),
             col_span: 1,
             align: TextAlign::Left,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -438,8 +441,8 @@ impl ParentElement for TabloBasHucre {
     }
 }
 
-impl Sizable for TabloBasHucre {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloBasHucre {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -490,7 +493,7 @@ pub struct TabloHucresi {
     children: Vec<AnyElement>,
     col_span: usize,
     align: TextAlign,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloHucresi {
@@ -501,7 +504,7 @@ impl TabloHucresi {
             children: Vec::new(),
             col_span: 1,
             align: TextAlign::Left,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -530,8 +533,8 @@ impl ParentElement for TabloHucresi {
     }
 }
 
-impl Sizable for TabloHucresi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloHucresi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -580,7 +583,7 @@ pub struct TabloAciklamasi {
     ix: usize,
     style: StyleRefinement,
     children: Vec<AnyElement>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl TabloAciklamasi {
@@ -589,7 +592,7 @@ impl TabloAciklamasi {
             ix: 0,
             style: StyleRefinement::default(),
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 }
@@ -600,8 +603,8 @@ impl ParentElement for TabloAciklamasi {
     }
 }
 
-impl Sizable for TabloAciklamasi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TabloAciklamasi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

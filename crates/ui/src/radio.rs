@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    AxisExt, EtkinTema, FocusableExt as _, Sizable, Size, StyledExt, checkbox::checkbox_check_icon,
-    h_flex, text::Text, tooltip::ComponentTooltip, v_flex,
+    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema, FocusableExt as _, StilUzantisi,
+    checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::ComponentTooltip, v_flex,
 };
 use gpui::{
     AnyElement, App, Axis, Div, ElementId, InteractiveElement, IntoElement, ParentElement,
@@ -24,7 +24,7 @@ pub struct Radyo {
     disabled: bool,
     tab_stop: bool,
     tab_index: isize,
-    size: Size,
+    size: BilesenBoyutu,
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
     tooltip: ComponentTooltip,
 }
@@ -42,7 +42,7 @@ impl Radyo {
             disabled: false,
             tab_index: 0,
             tab_stop: true,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             on_click: None,
             tooltip: ComponentTooltip::default(),
         }
@@ -105,8 +105,8 @@ impl Radyo {
     }
 }
 
-impl Sizable for Radyo {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Radyo {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -172,10 +172,10 @@ impl RenderOnce for Radyo {
                 .rounded(cx.theme().radius * 0.5)
                 .focus_ring(is_focused, px(2.), window, cx)
                 .map(|this| match self.size {
-                    Size::XSmall => this.text_xs(),
-                    Size::Small => this.text_sm(),
-                    Size::Medium => this.text_base(),
-                    Size::Large => this.text_lg(),
+                    BilesenBoyutu::CokKucuk => this.text_xs(),
+                    BilesenBoyutu::Kucuk => this.text_sm(),
+                    BilesenBoyutu::Orta => this.text_base(),
+                    BilesenBoyutu::Buyuk => this.text_lg(),
                     _ => this,
                 })
                 .refine_style(&self.style)
@@ -183,10 +183,10 @@ impl RenderOnce for Radyo {
                     div()
                         .relative()
                         .map(|this| match self.size {
-                            Size::XSmall => this.size_3(),
-                            Size::Small => this.size_3p5(),
-                            Size::Medium => this.size_4(),
-                            Size::Large => this.size(rems(1.125)),
+                            BilesenBoyutu::CokKucuk => this.size_3(),
+                            BilesenBoyutu::Kucuk => this.size_3p5(),
+                            BilesenBoyutu::Orta => this.size_4(),
+                            BilesenBoyutu::Buyuk => this.size(rems(1.125)),
                             _ => this.size_4(),
                         })
                         .flex_shrink_0()

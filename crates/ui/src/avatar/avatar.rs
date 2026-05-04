@@ -5,13 +5,13 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema, Renklendir, Simge, SimgeAdi, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Renklendir, Simge, SimgeAdi, StilUzantisi,
     avatar::{AvatarSized as _, avatar_size},
 };
 
 /// User avatar öğe.
 ///
-/// Biz kullanabilir [`Sizable`] özellik ayarlamak için boyut avatar (bakınız ayrıca: [`avatar_size`] about boyut içinde pikseller).
+/// Biz kullanabilir [`Boyutlandirilabilir`] özellik ayarlamak için boyut avatar (bakınız ayrıca: [`avatar_size`] about boyut içinde pikseller).
 #[derive(IntoElement)]
 pub struct Avatar {
     base: Div,
@@ -20,7 +20,7 @@ pub struct Avatar {
     name: Option<SharedString>,
     short_name: SharedString,
     placeholder: Simge,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl Avatar {
@@ -32,7 +32,7 @@ impl Avatar {
             name: None,
             short_name: SharedString::default(),
             placeholder: Simge::new(SimgeAdi::User),
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
         }
     }
 
@@ -59,8 +59,8 @@ impl Avatar {
     }
 }
 
-impl Sizable for Avatar {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Avatar {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -163,6 +163,6 @@ mod tests {
 
         assert_eq!(avatar.name, Some(SharedString::from("Jason Lee")));
         assert_eq!(avatar.short_name, SharedString::from("JL"));
-        assert_eq!(avatar.size, Size::Large);
+        assert_eq!(avatar.size, BilesenBoyutu::Buyuk);
     }
 }

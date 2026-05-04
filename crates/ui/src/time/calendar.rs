@@ -9,7 +9,8 @@ use gpui::{
 };
 
 use crate::{
-    Disableable as _, EtkinTema, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir as _, EtkinTema, Secilebilir,
+    SimgeAdi, StilUzantisi as _,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex, i18n, v_flex,
 };
@@ -276,7 +277,7 @@ impl Esleyici {
 #[derive(IntoElement)]
 pub struct Takvim {
     id: ElementId,
-    size: Size,
+    size: BilesenBoyutu,
     state: Entity<TakvimDurumu>,
     style: StyleRefinement,
     /// Görünümde gösterilecek ay sayısı.
@@ -596,7 +597,7 @@ impl Takvim {
     pub fn new(state: &Entity<TakvimDurumu>) -> Self {
         Self {
             id: ("calendar", state.entity_id()).into(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             state: state.clone(),
             style: StyleRefinement::default(),
             number_of_months: 1,
@@ -687,9 +688,9 @@ impl Takvim {
         let disabled = view_mode.is_month();
         let multiple_months = self.number_of_months > 1;
         let icon_size = match self.size {
-            Size::Small => Size::Small,
-            Size::Large => Size::Medium,
-            _ => Size::Medium,
+            BilesenBoyutu::Kucuk => BilesenBoyutu::Kucuk,
+            BilesenBoyutu::Buyuk => BilesenBoyutu::Orta,
+            _ => BilesenBoyutu::Orta,
         };
 
         h_flex()
@@ -768,8 +769,8 @@ impl Takvim {
                         h_flex()
                             .justify_center()
                             .map(|this| match self.size {
-                                Size::Small => this.gap_2(),
-                                Size::Large => this.gap_4(),
+                                BilesenBoyutu::Kucuk => this.gap_2(),
+                                BilesenBoyutu::Buyuk => this.gap_4(),
                                 _ => this.gap_3(),
                             })
                             .child(
@@ -871,8 +872,8 @@ impl Takvim {
         h_flex()
             .id(id.into())
             .map(|this| match self.size {
-                Size::Small => this.size_7().rounded(cx.theme().radius / 2.),
-                Size::Large => this.size_10().rounded(cx.theme().radius * 2.),
+                BilesenBoyutu::Kucuk => this.size_7().rounded(cx.theme().radius / 2.),
+                BilesenBoyutu::Buyuk => this.size_10().rounded(cx.theme().radius * 2.),
                 _ => this.size_9().rounded(cx.theme().radius),
             })
             .justify_center()
@@ -910,8 +911,8 @@ impl Takvim {
 
         h_flex()
             .map(|this| match self.size {
-                Size::Small => this.gap_3().text_sm(),
-                Size::Large => this.gap_5().text_base(),
+                BilesenBoyutu::Kucuk => this.gap_3().text_sm(),
+                BilesenBoyutu::Buyuk => this.gap_5().text_base(),
                 _ => this.gap_4().text_sm(),
             })
             .justify_between()
@@ -943,8 +944,8 @@ impl Takvim {
     fn render_week(&self, week: impl Into<SharedString>, _: &mut Window, cx: &mut App) -> Div {
         h_flex()
             .map(|this| match self.size {
-                Size::Small => this.size_7().rounded(cx.theme().radius / 2.0),
-                Size::Large => this.size_10().rounded(cx.theme().radius),
+                BilesenBoyutu::Kucuk => this.size_7().rounded(cx.theme().radius / 2.0),
+                BilesenBoyutu::Buyuk => this.size_10().rounded(cx.theme().radius),
                 _ => this.size_9().rounded(cx.theme().radius),
             })
             .justify_center()
@@ -970,8 +971,8 @@ impl Takvim {
 
         h_flex()
             .map(|this| match self.size {
-                Size::Small => this.gap_3(),
-                Size::Large => this.gap_5(),
+                BilesenBoyutu::Kucuk => this.gap_3(),
+                BilesenBoyutu::Buyuk => this.gap_5(),
                 _ => this.gap_4(),
             })
             .justify_between()
@@ -981,8 +982,8 @@ impl Takvim {
     fn render_selection_placeholder(&self, _: &mut App) -> Div {
         v_flex()
             .map(|this| match self.size {
-                Size::Small => this.w(px(208.)),
-                Size::Large => this.w(px(292.)),
+                BilesenBoyutu::Kucuk => this.w(px(208.)),
+                BilesenBoyutu::Buyuk => this.w(px(292.)),
                 _ => this.w(px(264.)),
             })
             .invisible()
@@ -1016,8 +1017,8 @@ impl Takvim {
             .gap_0p5()
             .gap_y_3()
             .map(|this| match self.size {
-                Size::Small => this.mt_2().gap_y_2().w(px(208.)),
-                Size::Large => this.mt_4().gap_y_4().w(px(292.)),
+                BilesenBoyutu::Kucuk => this.mt_2().gap_y_2().w(px(208.)),
+                BilesenBoyutu::Buyuk => this.mt_4().gap_y_4().w(px(292.)),
                 _ => this.mt_3().gap_y_3().w(px(264.)),
             })
             .justify_between()
@@ -1062,8 +1063,8 @@ impl Takvim {
             .id("years")
             .gap_0p5()
             .map(|this| match self.size {
-                Size::Small => this.mt_2().gap_y_2().w(px(208.)),
-                Size::Large => this.mt_4().gap_y_4().w(px(292.)),
+                BilesenBoyutu::Kucuk => this.mt_2().gap_y_2().w(px(208.)),
+                BilesenBoyutu::Buyuk => this.mt_4().gap_y_4().w(px(292.)),
                 _ => this.mt_3().gap_y_3().w(px(264.)),
             })
             .justify_between()
@@ -1099,8 +1100,8 @@ impl Takvim {
     }
 }
 
-impl Sizable for Takvim {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Takvim {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

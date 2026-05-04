@@ -3,7 +3,7 @@ use gpui::{
     div, prelude::FluentBuilder, px, relative,
 };
 
-use crate::{EtkinTema, Simge, Sizable, Size, StyledExt, h_flex, white};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Simge, StilUzantisi, h_flex, white};
 
 #[derive(Default, Clone)]
 enum BadgeVariant {
@@ -35,7 +35,7 @@ pub struct Rozet {
     variant: BadgeVariant,
     children: Vec<AnyElement>,
     color: Option<Hsla>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl Rozet {
@@ -48,7 +48,7 @@ impl Rozet {
             variant: Default::default(),
             color: None,
             children: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -91,8 +91,8 @@ impl ParentElement for Rozet {
     }
 }
 
-impl Sizable for Rozet {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Rozet {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -106,9 +106,9 @@ impl RenderOnce for Rozet {
         };
 
         let (size, text_size) = match self.size {
-            Size::Large => (px(24.), px(14.)),
-            Size::Medium | Size::Size(_) => (px(16.), px(10.)),
-            Size::Small | Size::XSmall => (px(10.), px(8.)),
+            BilesenBoyutu::Buyuk => (px(24.), px(14.)),
+            BilesenBoyutu::Orta | BilesenBoyutu::Ozel(_) => (px(16.), px(10.)),
+            BilesenBoyutu::Kucuk | BilesenBoyutu::CokKucuk => (px(10.), px(8.)),
         };
 
         div()
@@ -135,11 +135,13 @@ impl RenderOnce for Rozet {
                                 };
 
                                 let (top, left) = match self.size {
-                                    Size::Large => (px(2.), -px(count.len() as f32)),
-                                    Size::Medium | Size::Size(_) => {
+                                    BilesenBoyutu::Buyuk => (px(2.), -px(count.len() as f32)),
+                                    BilesenBoyutu::Orta | BilesenBoyutu::Ozel(_) => {
                                         (-px(3.), -px(3.) * count.len())
                                     }
-                                    Size::Small | Size::XSmall => (-px(4.), -px(4.) * count.len()),
+                                    BilesenBoyutu::Kucuk | BilesenBoyutu::CokKucuk => {
+                                        (-px(4.), -px(4.) * count.len())
+                                    }
                                 };
 
                                 this.top(top)

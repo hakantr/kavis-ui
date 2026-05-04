@@ -2,7 +2,7 @@ use gpui::*;
 use kavis_ui::{
     h_flex,
     theme::{EtkinTema, Renklendir},
-    v_flex, KokGorunum, Sizable,
+    v_flex, KokGorunum, Boyutlandirilabilir,
 };
 
 actions!(demo, [Quit]);

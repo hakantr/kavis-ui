@@ -3,7 +3,7 @@ use gpui::{
     IntoElement, ParentElement as _, Render, Styled, Window, div, prelude::FluentBuilder as _, px,
 };
 use kavis_ui::{
-    AxisExt, EtkinTema, IndexPath, Selectable, Sizable, Size,
+    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema, IndexPath, Secilebilir,
     button::{Dugme, DugmeGrubu},
     checkbox::OnayKutusu,
     color_picker::{RenkSecici, RenkSeciciDurumu},
@@ -27,7 +27,7 @@ pub struct FormStory {
     subscribe_email: bool,
     date: Entity<TarihSeciciDurumu>,
     layout: Axis,
-    size: Size,
+    size: BilesenBoyutu,
     columns: usize,
 }
 
@@ -92,7 +92,7 @@ impl FormStory {
             color_state,
             subscribe_email: false,
             layout: Axis::Vertical,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             columns: 1,
         }
     }
@@ -156,26 +156,26 @@ impl Render for FormStory {
                             .small()
                             .child(
                                 Dugme::new("large")
-                                    .selected(self.size == Size::Large)
+                                    .selected(self.size == BilesenBoyutu::Buyuk)
                                     .child("Büyük"),
                             )
                             .child(
                                 Dugme::new("medium")
                                     .child("Orta")
-                                    .selected(self.size == Size::Medium),
+                                    .selected(self.size == BilesenBoyutu::Orta),
                             )
                             .child(
                                 Dugme::new("small")
                                     .child("Küçük")
-                                    .selected(self.size == Size::Small),
+                                    .selected(self.size == BilesenBoyutu::Kucuk),
                             )
                             .on_click(cx.listener(|this, selecteds: &Vec<usize>, _, cx| {
                                 if selecteds.contains(&0) {
-                                    this.size = Size::Large;
+                                    this.size = BilesenBoyutu::Buyuk;
                                 } else if selecteds.contains(&1) {
-                                    this.size = Size::Medium;
+                                    this.size = BilesenBoyutu::Orta;
                                 } else if selecteds.contains(&2) {
-                                    this.size = Size::Small;
+                                    this.size = BilesenBoyutu::Kucuk;
                                 }
                                 cx.notify();
                             })),

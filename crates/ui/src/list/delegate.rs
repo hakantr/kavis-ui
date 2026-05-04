@@ -1,14 +1,14 @@
 use gpui::{AnyElement, App, Context, IntoElement, ParentElement as _, Styled as _, Task, Window};
 
 use crate::{
-    EtkinTema as _, IndexPath, Selectable, Simge, SimgeAdi, h_flex,
+    EtkinTema as _, IndexPath, Secilebilir, Simge, SimgeAdi, h_flex,
     list::{ListeDurumu, loading::Loading},
 };
 
 /// Bir temsilci için Liste.
 #[allow(unused)]
 pub trait ListeTemsilcisi: Sized + 'static {
-    type Item: Selectable + IntoElement;
+    type Item: Secilebilir + IntoElement;
 
     /// Sorgu girdisi değiştiğinde bu yöntem çağrılır.
     /// Aramayı burada gerçekleştirebilirsiniz.

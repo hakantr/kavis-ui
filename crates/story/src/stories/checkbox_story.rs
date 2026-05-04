@@ -4,7 +4,8 @@ use gpui::{
 };
 
 use kavis_ui::{
-    Disableable as _, EtkinTema, Sizable, checkbox::OnayKutusu, h_flex, text::markdown, v_flex,
+    Boyutlandirilabilir, DevreDisiBirakilabilir as _, EtkinTema, checkbox::OnayKutusu, h_flex,
+    text::markdown, v_flex,
 };
 
 use crate::section;

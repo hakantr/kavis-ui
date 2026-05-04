@@ -13,7 +13,10 @@ use super::{Sekme, SekmeVaryanti};
 use crate::animation::{Lerp, ease_in_out_cubic};
 use crate::button::{Dugme, DugmeVaryantlari as _};
 use crate::menu::{DropdownMenu as _, PopupMenuItem};
-use crate::{ElementExt, EtkinTema, Selectable, Simge, SimgeAdi, Sizable, Size, StyledExt, h_flex};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, ElementExt, EtkinTema, Secilebilir, Simge, SimgeAdi,
+    StilUzantisi, h_flex,
+};
 
 struct TabIndicatorBounds {
     container: Bounds<Pixels>,
@@ -46,7 +49,7 @@ pub struct SekmeCubugu {
     last_empty_space: AnyElement,
     selected_index: Option<usize>,
     variant: SekmeVaryanti,
-    size: Size,
+    size: BilesenBoyutu,
     menu: bool,
     on_click: Option<Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
 }
@@ -64,7 +67,7 @@ impl SekmeCubugu {
             prefix: None,
             suffix: None,
             variant: SekmeVaryanti::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             last_empty_space: div().w_3().into_any_element(),
             selected_index: None,
             on_click: None,
@@ -317,8 +320,8 @@ impl Styled for SekmeCubugu {
     }
 }
 
-impl Sizable for SekmeCubugu {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for SekmeCubugu {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -327,8 +330,8 @@ impl Sizable for SekmeCubugu {
 impl RenderOnce for SekmeCubugu {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let default_gap = match self.size {
-            Size::Small | Size::XSmall => px(8.),
-            Size::Large => px(16.),
+            BilesenBoyutu::Kucuk | BilesenBoyutu::CokKucuk => px(8.),
+            BilesenBoyutu::Buyuk => px(16.),
             _ => px(12.),
         };
         let (bg, paddings, gap) = match self.variant {
@@ -346,8 +349,8 @@ impl RenderOnce for SekmeCubugu {
             }
             SekmeVaryanti::Segmented => {
                 let padding_x = match self.size {
-                    Size::XSmall => px(2.),
-                    Size::Small => px(3.),
+                    BilesenBoyutu::CokKucuk => px(2.),
+                    BilesenBoyutu::Kucuk => px(3.),
                     _ => px(4.),
                 };
                 let padding = Edges {
@@ -361,9 +364,9 @@ impl RenderOnce for SekmeCubugu {
             SekmeVaryanti::Underline => {
                 // This gap is same as the tab inner_paddings
                 let gap = match self.size {
-                    Size::XSmall => px(10.),
-                    Size::Small => px(12.),
-                    Size::Large => px(20.),
+                    BilesenBoyutu::CokKucuk => px(10.),
+                    BilesenBoyutu::Kucuk => px(12.),
+                    BilesenBoyutu::Buyuk => px(20.),
                     _ => px(16.),
                 };
 

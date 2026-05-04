@@ -1,6 +1,6 @@
 use gpui::{prelude::FluentBuilder, *};
 use kavis_ui::{
-    EtkinTema as _, IndexPath, Simge, SimgeAdi, StyledExt as _, TemaRengi,
+    EtkinTema as _, IndexPath, Simge, SimgeAdi, StilUzantisi as _, TemaRengi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
     input::{Input, InputEvent, InputState},

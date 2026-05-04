@@ -3,7 +3,7 @@ use gpui::{
     StyleRefinement, Styled, div, prelude::FluentBuilder as _,
 };
 
-use crate::{EtkinTema, Sizable, Size, StyledExt as _, avatar::Avatar};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi as _, avatar::Avatar};
 
 /// Bir grouped avatars göstermek için içinde bir kompakt yerleşim.
 #[derive(IntoElement)]
@@ -11,7 +11,7 @@ pub struct AvatarGroup {
     base: Div,
     style: StyleRefinement,
     avatars: Vec<Avatar>,
-    size: Size,
+    size: BilesenBoyutu,
     limit: usize,
     ellipsis: bool,
 }
@@ -23,7 +23,7 @@ impl AvatarGroup {
             base: div(),
             style: StyleRefinement::default(),
             avatars: Vec::new(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             limit: 3,
             ellipsis: false,
         }
@@ -54,8 +54,8 @@ impl AvatarGroup {
     }
 }
 
-impl Sizable for AvatarGroup {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for AvatarGroup {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -124,7 +124,7 @@ mod tests {
             .ellipsis();
 
         assert_eq!(group.avatars.len(), 4);
-        assert_eq!(group.size, Size::Large);
+        assert_eq!(group.size, BilesenBoyutu::Buyuk);
         assert_eq!(group.limit, 3);
         assert!(group.ellipsis);
     }

@@ -1,5 +1,5 @@
 use crate::{
-    Selectable, Sizable,
+    Boyutlandirilabilir, Secilebilir,
     actions::{Cancel, SelectLeft, SelectRight},
     button::{Dugme, DugmeVaryantlari},
     global_state::KureselDurum,
@@ -40,8 +40,7 @@ impl AppMenuBar {
     pub fn new_in<Cx: AppContext>(cx: &mut Cx) -> Entity<Self> {
         cx.new(|cx| {
             KureselDurum::ensure_global(cx);
-            let observer =
-                cx.observe_global::<KureselDurum>(|this: &mut Self, cx| this.reload(cx));
+            let observer = cx.observe_global::<KureselDurum>(|this: &mut Self, cx| this.reload(cx));
             let mut this = Self {
                 selected_index: None,
                 action_context: None,

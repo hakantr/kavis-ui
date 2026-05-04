@@ -11,7 +11,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, ElementExt, h_flex, resizable::PANEL_MIN_SIZE, styled::StyledExt as _, v_flex,
+    AxisExt, ElementExt, h_flex, resizable::PANEL_MIN_SIZE, styled::StilUzantisi as _, v_flex,
 };
 
 use super::{YenidenBoyutlandirilabilirDurum, resizable_panel, resize_handle};

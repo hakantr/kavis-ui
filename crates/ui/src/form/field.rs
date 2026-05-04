@@ -6,11 +6,11 @@ use gpui::{
     Window, div, prelude::FluentBuilder as _, px,
 };
 
-use crate::{AxisExt, EtkinTema as _, Size, StyledExt, h_flex, v_flex};
+use crate::{AxisExt, BilesenBoyutu, EtkinTema as _, StilUzantisi, h_flex, v_flex};
 
 #[derive(Clone, Copy)]
 pub(super) struct FieldProps {
-    pub(super) size: Size,
+    pub(super) size: BilesenBoyutu,
     pub(super) layout: Axis,
     pub(super) columns: usize,
 
@@ -22,7 +22,7 @@ impl Default for FieldProps {
     fn default() -> Self {
         Self {
             layout: Axis::Vertical,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             columns: 1,
             label_width: Some(px(140.)),
             label_text_size: None,
@@ -259,8 +259,8 @@ impl RenderOnce for Field {
         }
 
         let gap = match self.props.size {
-            Size::Large => px(8.),
-            Size::XSmall | Size::Small => px(4.),
+            BilesenBoyutu::Buyuk => px(8.),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(4.),
             _ => px(4.),
         };
         let inner_gap = if layout.is_horizontal() {

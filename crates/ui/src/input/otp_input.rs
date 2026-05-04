@@ -7,7 +7,10 @@ use gpui::{
 
 use super::{InputEvent, blink_cursor::BlinkCursor, input::input_style, state::InputState};
 use crate::KokGorunum;
-use crate::{Disableable, EtkinTema, Simge, SimgeAdi, Sizable, Size, h_flex, v_flex};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Simge, SimgeAdi, h_flex,
+    v_flex,
+};
 
 pub struct OtpState {
     focus_handle: FocusHandle,
@@ -238,7 +241,7 @@ impl Render for OtpState {
 pub struct OtpInput {
     state: Entity<OtpState>,
     number_of_groups: usize,
-    size: Size,
+    size: BilesenBoyutu,
     disabled: bool,
 }
 
@@ -248,7 +251,7 @@ impl OtpInput {
         Self {
             state: state.clone(),
             number_of_groups: 2,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             disabled: false,
         }
     }
@@ -259,14 +262,14 @@ impl OtpInput {
         self
     }
 }
-impl Disableable for OtpInput {
+impl DevreDisiBirakilabilir for OtpInput {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
-impl Sizable for OtpInput {
-    fn with_size(mut self, size: impl Into<crate::Size>) -> Self {
+impl Boyutlandirilabilir for OtpInput {
+    fn with_size(mut self, size: impl Into<crate::BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -278,11 +281,11 @@ impl RenderOnce for OtpInput {
         let is_focused = state.focus_handle.is_focused(window);
 
         let text_size = match self.size {
-            Size::XSmall => px(14.),
-            Size::Small => px(14.),
-            Size::Medium => px(16.),
-            Size::Large => px(18.),
-            Size::Size(v) => v * 0.5,
+            BilesenBoyutu::CokKucuk => px(14.),
+            BilesenBoyutu::Kucuk => px(14.),
+            BilesenBoyutu::Orta => px(16.),
+            BilesenBoyutu::Buyuk => px(18.),
+            BilesenBoyutu::Ozel(v) => v * 0.5,
         };
 
         let cursor_ix = state
@@ -322,11 +325,11 @@ impl RenderOnce for OtpInput {
                     .rounded(cx.theme().radius)
                     .text_size(text_size)
                     .map(|this| match self.size {
-                        Size::XSmall => this.w_6().h_6(),
-                        Size::Small => this.w_6().h_6(),
-                        Size::Medium => this.w_8().h_8(),
-                        Size::Large => this.w_11().h_11(),
-                        Size::Size(px) => this.w(px).h(px),
+                        BilesenBoyutu::CokKucuk => this.w_6().h_6(),
+                        BilesenBoyutu::Kucuk => this.w_6().h_6(),
+                        BilesenBoyutu::Orta => this.w_8().h_8(),
+                        BilesenBoyutu::Buyuk => this.w_11().h_11(),
+                        BilesenBoyutu::Ozel(px) => this.w(px).h(px),
                     })
                     .on_mouse_down(
                         MouseButton::Left,

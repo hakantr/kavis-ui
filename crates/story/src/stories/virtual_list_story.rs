@@ -5,7 +5,7 @@ use gpui::{
     ParentElement, Pixels, Render, ScrollStrategy, Size, Styled, Window, div, px, size,
 };
 use kavis_ui::{
-    EtkinTema as _, SanalListeKaydirmaTutamaci, Selectable, Sizable,
+    Boyutlandirilabilir, EtkinTema as _, SanalListeKaydirmaTutamaci, Secilebilir,
     button::{Dugme, DugmeGrubu},
     divider::Ayirici,
     h_flex,

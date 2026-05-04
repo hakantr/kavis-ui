@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, Simge, SimgeAdi, Sizable, Size, Tema, TemaModu,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Simge, SimgeAdi, Tema, TemaModu,
     button::Dugme,
     group_box::GrupKutusuVaryanti,
     h_flex,
@@ -80,7 +80,7 @@ impl AppSettings {
 pub struct SettingsStory {
     focus_handle: FocusHandle,
     group_variant: GrupKutusuVaryanti,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 struct OpenURLSettingField {
@@ -140,7 +140,7 @@ impl SettingsStory {
         Self {
             focus_handle: cx.focus_handle(),
             group_variant: GrupKutusuVaryanti::Outline,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 
@@ -228,9 +228,9 @@ impl SettingsStory {
                             "Grup Boyutu",
                             AyarAlani::dropdown(
                                 vec![
-                                    (Size::Medium.as_str().into(), "Orta".into()),
-                                    (Size::Small.as_str().into(), "Küçük".into()),
-                                    (Size::XSmall.as_str().into(), "Çok Küçük".into()),
+                                    (BilesenBoyutu::Orta.as_str().into(), "Orta".into()),
+                                    (BilesenBoyutu::Kucuk.as_str().into(), "Küçük".into()),
+                                    (BilesenBoyutu::CokKucuk.as_str().into(), "Çok Küçük".into()),
                                 ],
                                 {
                                     let view = view.clone();
@@ -242,13 +242,13 @@ impl SettingsStory {
                                     let view = view.clone();
                                     move |val: SharedString, cx: &mut App| {
                                         view.update(cx, |view, cx| {
-                                            view.size = Size::from_str(val.as_str());
+                                            view.size = BilesenBoyutu::from_str(val.as_str());
                                             cx.notify();
                                         });
                                     }
                                 },
                             )
-                            .default_value(Size::default().as_str().to_string()),
+                            .default_value(BilesenBoyutu::default().as_str().to_string()),
                         )
                         .description("Ayar grubu için boyut seçer."),
                     ]),

@@ -1,6 +1,6 @@
 use std::{panic::Location, rc::Rc};
 
-use crate::{StyledExt, scroll::KaydirmaCubuguTutamaci};
+use crate::{StilUzantisi, scroll::KaydirmaCubuguTutamaci};
 
 use super::{KaydirmaCubugu, KaydirmaCubuguEkseni};
 use gpui::{

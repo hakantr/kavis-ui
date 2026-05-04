@@ -1,4 +1,7 @@
-use crate::{Disableable, EtkinTema, Selectable, Simge, Sizable as _, StyledExt, h_flex};
+use crate::{
+    Boyutlandirilabilir as _, DevreDisiBirakilabilir, EtkinTema, Secilebilir, Simge, StilUzantisi,
+    h_flex,
+};
 use gpui::{
     AnyElement, App, ClickEvent, Div, ElementId, InteractiveElement, IntoElement, MouseButton,
     MouseDownEvent, MouseMoveEvent, ParentElement, RenderOnce, Stateful,
@@ -127,14 +130,14 @@ impl ListeOgesi {
     }
 }
 
-impl Disableable for ListeOgesi {
+impl DevreDisiBirakilabilir for ListeOgesi {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Selectable for ListeOgesi {
+impl Secilebilir for ListeOgesi {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

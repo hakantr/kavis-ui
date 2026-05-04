@@ -2,7 +2,7 @@ use gpui::{
     AnyElement, App, IntoElement, ParentElement, RenderOnce, StyleRefinement, Styled, Window,
 };
 
-use crate::{StyledExt as _, v_flex};
+use crate::{StilUzantisi as _, v_flex};
 
 /// başlık bölüm bir iletişim kutusu, typically içerir IletisimBaslikMetni ve IletisimAciklamasi.
 ///

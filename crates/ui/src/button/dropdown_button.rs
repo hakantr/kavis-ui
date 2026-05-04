@@ -1,11 +1,13 @@
 use gpui::Corners;
 use gpui::{
-    Anchor, App, Context, Edges, ElementId, InteractiveElement as _, IntoElement, ParentElement,
-    Pixels, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, prelude::FluentBuilder,
+    Anchor, App, Context, Div, Edges, ElementId, Entity, InteractiveElement, Interactivity,
+    IntoElement, ParentElement, Pixels, RenderOnce, SharedString, Stateful, StyleRefinement,
+    Styled, Window, div, prelude::FluentBuilder,
 };
 
 use crate::{
-    Disableable, ElementExt as _, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, ElementExt as _, Secilebilir,
+    SimgeAdi, StilUzantisi as _,
     menu::{DropdownMenu, PopupMenu},
     tooltip::ComponentTooltip,
 };
@@ -16,6 +18,99 @@ struct AcilirDugmeOlcuDurumu {
 }
 
 use super::{Dugme, DugmeVaryanti, DugmeVaryantlari, DugmeYuvarlakligi};
+
+/// İçinde hem ana eylem düğmesi hem de açılır chevron düğmesi bulunan, açılır
+/// menünün tetikleyicisi olarak kullanılan dahili sarmalayıcı. Sarmalayıcının
+/// tamamı tetikleyici olduğu için her iki düğmeye yapılan tıklama da menüyü
+/// açar; aynı zamanda popover açıldığında her iki düğme de "selected" görünür.
+#[derive(IntoElement)]
+struct AcilirDugmeTetikleyici {
+    base: Stateful<Div>,
+    style: StyleRefinement,
+    group_name: SharedString,
+    selected: bool,
+    action: Option<Dugme>,
+    chevron: Option<Dugme>,
+    bounds_state: Option<Entity<AcilirDugmeOlcuDurumu>>,
+}
+
+impl AcilirDugmeTetikleyici {
+    fn new(id: impl Into<ElementId>, group_name: impl Into<SharedString>) -> Self {
+        let id = id.into();
+        Self {
+            base: div().id(id).flex_shrink_0(),
+            style: StyleRefinement::default(),
+            group_name: group_name.into(),
+            selected: false,
+            action: None,
+            chevron: None,
+            bounds_state: None,
+        }
+    }
+
+    fn action(mut self, button: Option<Dugme>) -> Self {
+        self.action = button;
+        self
+    }
+
+    fn chevron(mut self, button: Option<Dugme>) -> Self {
+        self.chevron = button;
+        self
+    }
+
+    fn track_bounds(mut self, state: Entity<AcilirDugmeOlcuDurumu>) -> Self {
+        self.bounds_state = Some(state);
+        self
+    }
+
+    fn refined_style(mut self, style: StyleRefinement) -> Self {
+        self.style = style;
+        self
+    }
+}
+
+impl Styled for AcilirDugmeTetikleyici {
+    fn style(&mut self) -> &mut StyleRefinement {
+        &mut self.style
+    }
+}
+
+impl InteractiveElement for AcilirDugmeTetikleyici {
+    fn interactivity(&mut self) -> &mut Interactivity {
+        self.base.interactivity()
+    }
+}
+
+impl Secilebilir for AcilirDugmeTetikleyici {
+    fn selected(mut self, selected: bool) -> Self {
+        self.selected = selected;
+        self
+    }
+
+    fn is_selected(&self) -> bool {
+        self.selected
+    }
+}
+
+impl DropdownMenu for AcilirDugmeTetikleyici {}
+
+impl RenderOnce for AcilirDugmeTetikleyici {
+    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
+        let selected = self.selected;
+        self.base
+            .group(self.group_name)
+            .flex()
+            .items_center()
+            .when_some(self.bounds_state, |this, state| {
+                this.on_prepaint(move |bounds, _, cx| {
+                    state.update(cx, |s, _| s.width = bounds.size.width);
+                })
+            })
+            .refine_style(&self.style)
+            .when_some(self.action, |this, btn| this.child(btn.selected(selected)))
+            .when_some(self.chevron, |this, btn| this.child(btn.selected(selected)))
+    }
+}
 
 #[derive(IntoElement)]
 pub struct AcilirDugme {
@@ -31,7 +126,7 @@ pub struct AcilirDugme {
     outline: bool,
     loading: bool,
     variant: DugmeVaryanti,
-    size: Size,
+    size: BilesenBoyutu,
     rounded: DugmeYuvarlakligi,
     anchor: Anchor,
     tooltip: ComponentTooltip,
@@ -51,7 +146,7 @@ impl AcilirDugme {
             outline: false,
             loading: false,
             variant: DugmeVaryanti::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             rounded: DugmeYuvarlakligi::default(),
             anchor: Anchor::TopRight,
             tooltip: ComponentTooltip::default(),
@@ -119,7 +214,7 @@ impl AcilirDugme {
     }
 }
 
-impl Disableable for AcilirDugme {
+impl DevreDisiBirakilabilir for AcilirDugme {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -132,8 +227,8 @@ impl Styled for AcilirDugme {
     }
 }
 
-impl Sizable for AcilirDugme {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for AcilirDugme {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -146,7 +241,7 @@ impl DugmeVaryantlari for AcilirDugme {
     }
 }
 
-impl Selectable for AcilirDugme {
+impl Secilebilir for AcilirDugme {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -166,6 +261,8 @@ impl RenderOnce for AcilirDugme {
         let bounds_state =
             window.use_keyed_state(bounds_id, cx, |_, _| AcilirDugmeOlcuDurumu::default());
         let group_name: SharedString = format!("acilir-dugme-group:{:?}", &self.id).into();
+        let trigger_id: ElementId =
+            SharedString::from(format!("acilir-dugme-trigger:{:?}", &self.id)).into();
 
         let wrapped_menu = self.menu.map(|builder| {
             let bounds_state = bounds_state.clone();
@@ -182,69 +279,66 @@ impl RenderOnce for AcilirDugme {
             f
         });
 
+        let action_button = self.button.map(|button| {
+            button
+                .rounded(self.rounded)
+                .border_corners(Corners {
+                    top_left: true,
+                    top_right: rounded,
+                    bottom_left: true,
+                    bottom_right: rounded,
+                })
+                .border_edges(Edges {
+                    left: true,
+                    top: true,
+                    right: true,
+                    bottom: true,
+                })
+                .loading(self.loading)
+                .disabled(self.disabled || self.loading)
+                .when(self.compact, |this| this.compact())
+                .when(self.outline, |this| this.outline())
+                .with_size(self.size)
+                .with_variant(self.variant)
+                .group_hover_with(group_name.clone())
+        });
+
+        let chevron_button = wrapped_menu.is_some().then(|| {
+            Dugme::new("popup")
+                .icon(SimgeAdi::ChevronDown)
+                .rounded(self.rounded)
+                .border_edges(Edges {
+                    left: rounded,
+                    top: true,
+                    right: true,
+                    bottom: true,
+                })
+                .border_corners(Corners {
+                    top_left: rounded,
+                    top_right: true,
+                    bottom_left: rounded,
+                    bottom_right: true,
+                })
+                .disabled(self.disabled || self.loading)
+                .when(self.compact, |this| this.compact())
+                .when(self.outline, |this| this.outline())
+                .with_size(self.size)
+                .with_variant(self.variant)
+                .group_hover_with(group_name.clone())
+        });
+
+        let trigger = AcilirDugmeTetikleyici::new(trigger_id, group_name)
+            .selected(self.selected)
+            .action(action_button)
+            .chevron(chevron_button)
+            .track_bounds(bounds_state.clone())
+            .refined_style(self.style.clone());
+
         div()
             .id(self.id)
-            .group(group_name.clone())
-            .h_flex()
-            .on_prepaint({
-                let bounds_state = bounds_state.clone();
-                move |bounds, _, cx| {
-                    bounds_state.update(cx, |s, _| s.width = bounds.size.width);
-                }
-            })
-            .refine_style(&self.style)
-            .when_some(self.button, |this, button| {
-                this.child(
-                    button
-                        .rounded(self.rounded)
-                        .border_corners(Corners {
-                            top_left: true,
-                            top_right: rounded,
-                            bottom_left: true,
-                            bottom_right: rounded,
-                        })
-                        .border_edges(Edges {
-                            left: true,
-                            top: true,
-                            right: true,
-                            bottom: true,
-                        })
-                        .loading(self.loading)
-                        .selected(self.selected)
-                        .disabled(self.disabled || self.loading)
-                        .when(self.compact, |this| this.compact())
-                        .when(self.outline, |this| this.outline())
-                        .with_size(self.size)
-                        .with_variant(self.variant)
-                        .group_hover_with(group_name.clone()),
-                )
-                .when_some(wrapped_menu, |this, menu| {
-                    this.child(
-                        Dugme::new("popup")
-                            .icon(SimgeAdi::ChevronDown)
-                            .rounded(self.rounded)
-                            .border_edges(Edges {
-                                left: rounded,
-                                top: true,
-                                right: true,
-                                bottom: true,
-                            })
-                            .border_corners(Corners {
-                                top_left: rounded,
-                                top_right: true,
-                                bottom_left: rounded,
-                                bottom_right: true,
-                            })
-                            .selected(self.selected)
-                            .disabled(self.disabled || self.loading)
-                            .when(self.compact, |this| this.compact())
-                            .when(self.outline, |this| this.outline())
-                            .with_size(self.size)
-                            .with_variant(self.variant)
-                            .group_hover_with(group_name.clone())
-                            .dropdown_menu_with_anchor(self.anchor, menu),
-                    )
-                })
+            .map(|this| match wrapped_menu {
+                Some(menu) => this.child(trigger.dropdown_menu_with_anchor(self.anchor, menu)),
+                None => this.child(trigger),
             })
             .map(|this| self.tooltip.apply(this))
     }
@@ -272,7 +366,7 @@ mod tests {
         assert!(dropdown.button.is_some());
         assert_eq!(dropdown.variant, DugmeVaryanti::Primary);
         assert!(dropdown.outline);
-        assert_eq!(dropdown.size, Size::Large);
+        assert_eq!(dropdown.size, BilesenBoyutu::Buyuk);
         assert!(dropdown.compact);
         assert!(!dropdown.loading);
         assert!(!dropdown.disabled);

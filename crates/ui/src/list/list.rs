@@ -5,12 +5,12 @@ use crate::actions::{Cancel, Confirm, SelectDown, SelectUp};
 use crate::input::InputState;
 use crate::list::cache::{MeasuredEntrySize, RowEntry, RowsCache};
 use crate::{
-    EtkinTema, SimgeAdi, Size,
+    BilesenBoyutu, EtkinTema, SimgeAdi,
     input::{Input, InputEvent},
     scroll::KaydirmaCubugu,
     v_flex,
 };
-use crate::{IndexPath, Selectable, Simge, Sizable, StyledExt};
+use crate::{Boyutlandirilabilir, IndexPath, Secilebilir, Simge, StilUzantisi};
 use crate::{SanalListeKaydirmaTutamaci, list::ListeTemsilcisi, v_virtual_list};
 use gpui::{
     App, AvailableSpace, ClickEvent, Context, DefiniteLength, EdgesRefinement, EventEmitter,
@@ -45,7 +45,7 @@ pub enum ListeOlayi {
 }
 
 struct ListOptions {
-    size: Size,
+    size: BilesenBoyutu,
     scrollbar_visible: bool,
     search_placeholder: Option<SharedString>,
     max_height: Option<Length>,
@@ -55,7 +55,7 @@ struct ListOptions {
 impl Default for ListOptions {
     fn default() -> Self {
         Self {
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             scrollbar_visible: true,
             max_height: None,
             search_placeholder: None,
@@ -641,7 +641,7 @@ where
                 this.child(
                     div()
                         .map(|this| match self.options.size {
-                            Size::Small => this.px_1p5(),
+                            BilesenBoyutu::Kucuk => this.px_1p5(),
                             _ => this.px_2(),
                         })
                         .border_b_1()
@@ -726,11 +726,11 @@ where
     }
 }
 
-impl<D> Sizable for Liste<D>
+impl<D> Boyutlandirilabilir for Liste<D>
 where
     D: ListeTemsilcisi + 'static,
 {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.options.size = size.into();
         self
     }

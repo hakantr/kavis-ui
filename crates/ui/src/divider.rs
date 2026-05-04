@@ -1,4 +1,4 @@
-use crate::{EtkinTema, StyledExt};
+use crate::{EtkinTema, StilUzantisi};
 use gpui::{
     App, Axis, Div, Hsla, IntoElement, ParentElement, PathBuilder, RenderOnce, SharedString,
     StyleRefinement, Styled, Window, canvas, div, point, prelude::FluentBuilder as _, px,

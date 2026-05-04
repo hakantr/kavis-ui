@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema as _, StyledExt as _,
+    EtkinTema as _, StilUzantisi as _,
     dialog::{CancelDialog, ConfirmDialog},
     h_flex,
 };

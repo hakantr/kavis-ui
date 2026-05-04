@@ -5,7 +5,7 @@ use gpui::{
 
 use crate::section;
 use kavis_ui::{
-    Sizable,
+    Boyutlandirilabilir,
     button::Dugme,
     h_flex,
     input::{Input, InputState},

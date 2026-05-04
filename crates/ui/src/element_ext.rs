@@ -2,16 +2,16 @@ use gpui::{
     AnyElement, App, Bounds, IntoElement, ParentElement, Pixels, Styled as _, Window, canvas,
 };
 
-use crate::{Sizable, Size};
+use crate::{BilesenBoyutu, Boyutlandirilabilir};
 
 #[derive(Default)]
 struct ChildElementOptions {
     ix: usize,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 #[allow(patterns_in_fns_without_body)]
-pub trait ChildElement: Sizable + IntoElement {
+pub trait ChildElement: Boyutlandirilabilir + IntoElement {
     fn with_ix(mut self, ix: usize) -> Self;
 }
 
@@ -28,7 +28,7 @@ impl AnyChildElement {
         }))
     }
 
-    pub fn into_any(self, ix: usize, size: Size) -> AnyElement {
+    pub fn into_any(self, ix: usize, size: BilesenBoyutu) -> AnyElement {
         (self.0)(ChildElementOptions { ix, size })
     }
 }

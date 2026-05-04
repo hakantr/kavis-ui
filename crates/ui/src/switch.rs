@@ -1,6 +1,6 @@
 use crate::{
-    Disableable, EtkinTema, Side, Sizable, Size, StyledExt, h_flex, text::Text,
-    tooltip::ComponentTooltip,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Side, StilUzantisi,
+    h_flex, text::Text, tooltip::ComponentTooltip,
 };
 use gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement, IntoElement,
@@ -19,7 +19,7 @@ pub struct Anahtar {
     label: Option<Text>,
     label_side: Side,
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
-    size: Size,
+    size: BilesenBoyutu,
     color: Option<Hsla>,
     tooltip: ComponentTooltip,
 }
@@ -36,7 +36,7 @@ impl Anahtar {
             label: None,
             on_click: None,
             label_side: Side::Right,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             color: None,
             tooltip: ComponentTooltip::default(),
         }
@@ -83,14 +83,14 @@ impl Styled for Anahtar {
     }
 }
 
-impl Sizable for Anahtar {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Anahtar {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
 }
 
-impl Disableable for Anahtar {
+impl DevreDisiBirakilabilir for Anahtar {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -119,11 +119,11 @@ impl RenderOnce for Anahtar {
         };
 
         let (bg_width, bg_height) = match self.size {
-            Size::XSmall | Size::Small => (px(28.), px(16.)),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => (px(28.), px(16.)),
             _ => (px(36.), px(20.)),
         };
         let bar_width = match self.size {
-            Size::XSmall | Size::Small => px(12.),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(12.),
             _ => px(16.),
         };
         let inset = px(2.);
@@ -198,7 +198,7 @@ impl RenderOnce for Anahtar {
                 .when_some(self.label, |this, label| {
                     this.child(div().line_height(bg_height).child(label).map(
                         |this| match self.size {
-                            Size::XSmall | Size::Small => this.text_sm(),
+                            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => this.text_sm(),
                             _ => this.text_base(),
                         },
                     ))

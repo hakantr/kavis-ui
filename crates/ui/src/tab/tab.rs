@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use crate::{EtkinTema, Selectable, Simge, SimgeAdi, Sizable, Size, StyledExt, h_flex};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Secilebilir, Simge, SimgeAdi, StilUzantisi,
+    h_flex,
+};
 use gpui::prelude::FluentBuilder as _;
 use gpui::{
     AnyElement, App, ClickEvent, Div, Edges, Hsla, InteractiveElement, IntoElement, MouseButton,
@@ -20,17 +23,17 @@ pub enum SekmeVaryanti {
 }
 
 impl SekmeVaryanti {
-    fn height(&self, size: Size) -> Pixels {
+    fn height(&self, size: BilesenBoyutu) -> Pixels {
         match size {
-            Size::XSmall => match self {
+            BilesenBoyutu::CokKucuk => match self {
                 SekmeVaryanti::Underline => px(26.),
                 _ => px(20.),
             },
-            Size::Small => match self {
+            BilesenBoyutu::Kucuk => match self {
                 SekmeVaryanti::Underline => px(30.),
                 _ => px(24.),
             },
-            Size::Large => match self {
+            BilesenBoyutu::Buyuk => match self {
                 SekmeVaryanti::Underline => px(44.),
                 _ => px(36.),
             },
@@ -41,19 +44,19 @@ impl SekmeVaryanti {
         }
     }
 
-    pub(super) fn inner_height(&self, size: Size) -> Pixels {
+    pub(super) fn inner_height(&self, size: BilesenBoyutu) -> Pixels {
         match size {
-            Size::XSmall => match self {
+            BilesenBoyutu::CokKucuk => match self {
                 SekmeVaryanti::Sekme | SekmeVaryanti::Outline | SekmeVaryanti::Pill => px(18.),
                 SekmeVaryanti::Segmented => px(16.),
                 SekmeVaryanti::Underline => px(20.),
             },
-            Size::Small => match self {
+            BilesenBoyutu::Kucuk => match self {
                 SekmeVaryanti::Sekme | SekmeVaryanti::Outline | SekmeVaryanti::Pill => px(22.),
                 SekmeVaryanti::Segmented => px(18.),
                 SekmeVaryanti::Underline => px(22.),
             },
-            Size::Large => match self {
+            BilesenBoyutu::Buyuk => match self {
                 SekmeVaryanti::Sekme | SekmeVaryanti::Outline | SekmeVaryanti::Pill => px(36.),
                 SekmeVaryanti::Segmented => px(28.),
                 SekmeVaryanti::Underline => px(32.),
@@ -68,11 +71,11 @@ impl SekmeVaryanti {
     }
 
     /// Varsayılan px(12) değeri paneldeki px_3 ile eşleşir; bakınız [`crate::dock::SekmePaneli`].
-    fn inner_paddings(&self, size: Size) -> Edges<Pixels> {
+    fn inner_paddings(&self, size: BilesenBoyutu) -> Edges<Pixels> {
         let mut padding_x = match size {
-            Size::XSmall => px(8.),
-            Size::Small => px(10.),
-            Size::Large => px(16.),
+            BilesenBoyutu::CokKucuk => px(8.),
+            BilesenBoyutu::Kucuk => px(10.),
+            BilesenBoyutu::Buyuk => px(16.),
             _ => px(12.),
         };
 
@@ -87,9 +90,9 @@ impl SekmeVaryanti {
         }
     }
 
-    fn inner_margins(&self, size: Size) -> Edges<Pixels> {
+    fn inner_margins(&self, size: BilesenBoyutu) -> Edges<Pixels> {
         match size {
-            Size::XSmall => match self {
+            BilesenBoyutu::CokKucuk => match self {
                 SekmeVaryanti::Underline => Edges {
                     top: px(1.),
                     bottom: px(2.),
@@ -97,7 +100,7 @@ impl SekmeVaryanti {
                 },
                 _ => Edges::all(px(0.)),
             },
-            Size::Small => match self {
+            BilesenBoyutu::Kucuk => match self {
                 SekmeVaryanti::Underline => Edges {
                     top: px(2.),
                     bottom: px(3.),
@@ -105,7 +108,7 @@ impl SekmeVaryanti {
                 },
                 _ => Edges::all(px(0.)),
             },
-            Size::Large => match self {
+            BilesenBoyutu::Buyuk => match self {
                 SekmeVaryanti::Underline => Edges {
                     top: px(5.),
                     bottom: px(6.),
@@ -330,34 +333,34 @@ impl SekmeVaryanti {
         }
     }
 
-    pub(super) fn tab_bar_radius(&self, size: Size, cx: &App) -> Pixels {
+    pub(super) fn tab_bar_radius(&self, size: BilesenBoyutu, cx: &App) -> Pixels {
         if *self != SekmeVaryanti::Segmented {
             return px(0.);
         }
 
         match size {
-            Size::XSmall | Size::Small => cx.theme().radius,
-            Size::Large => cx.theme().radius_lg,
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => cx.theme().radius,
+            BilesenBoyutu::Buyuk => cx.theme().radius_lg,
             _ => cx.theme().radius_lg,
         }
     }
 
-    fn radius(&self, size: Size, cx: &App) -> Pixels {
+    fn radius(&self, size: BilesenBoyutu, cx: &App) -> Pixels {
         match self {
             SekmeVaryanti::Outline | SekmeVaryanti::Pill => px(99.),
             SekmeVaryanti::Segmented => match size {
-                Size::XSmall | Size::Small => cx.theme().radius,
-                Size::Large => cx.theme().radius_lg,
+                BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => cx.theme().radius,
+                BilesenBoyutu::Buyuk => cx.theme().radius_lg,
                 _ => cx.theme().radius_lg,
             },
             _ => px(0.),
         }
     }
 
-    pub(super) fn inner_radius(&self, size: Size, cx: &App) -> Pixels {
+    pub(super) fn inner_radius(&self, size: BilesenBoyutu, cx: &App) -> Pixels {
         match self {
             SekmeVaryanti::Segmented => match size {
-                Size::Large => self.tab_bar_radius(size, cx) - px(3.),
+                BilesenBoyutu::Buyuk => self.tab_bar_radius(size, cx) - px(3.),
                 _ => self.tab_bar_radius(size, cx) - px(2.),
             },
             _ => px(0.),
@@ -400,7 +403,7 @@ pub struct Sekme {
     suffix: Option<AnyElement>,
     children: Vec<AnyElement>,
     variant: SekmeVaryanti,
-    size: Size,
+    size: BilesenBoyutu,
     pub(super) disabled: bool,
     pub(super) selected: bool,
     pub(super) indicator_active: bool,
@@ -452,7 +455,7 @@ impl Default for Sekme {
             prefix: None,
             suffix: None,
             variant: SekmeVaryanti::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             on_click: None,
         }
     }
@@ -552,7 +555,7 @@ impl ParentElement for Sekme {
     }
 }
 
-impl Selectable for Sekme {
+impl Secilebilir for Sekme {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -577,8 +580,8 @@ impl Styled for Sekme {
     }
 }
 
-impl Sizable for Sekme {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Sekme {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -621,8 +624,8 @@ impl RenderOnce for Sekme {
             .overflow_hidden()
             .text_color(tab_style.fg)
             .map(|this| match self.size {
-                Size::XSmall => this.text_xs(),
-                Size::Large => this.text_base(),
+                BilesenBoyutu::CokKucuk => this.text_xs(),
+                BilesenBoyutu::Buyuk => this.text_base(),
                 _ => this.text_sm(),
             })
             .bg(tab_style.bg)
@@ -660,9 +663,9 @@ impl RenderOnce for Sekme {
                         Some(icon) => {
                             this.w(inner_height * 1.25)
                                 .child(icon.map(|this| match self.size {
-                                    Size::XSmall => this.size_2p5(),
-                                    Size::Small => this.size_3p5(),
-                                    Size::Large => this.size_4(),
+                                    BilesenBoyutu::CokKucuk => this.size_2p5(),
+                                    BilesenBoyutu::Kucuk => this.size_3p5(),
+                                    BilesenBoyutu::Buyuk => this.size_4(),
                                     _ => this.size_4(),
                                 }))
                         }

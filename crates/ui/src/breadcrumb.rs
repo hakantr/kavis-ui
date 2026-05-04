@@ -6,7 +6,7 @@ use gpui::{
     prelude::FluentBuilder as _,
 };
 
-use crate::{EtkinTema, Simge, SimgeAdi, StyledExt, h_flex};
+use crate::{EtkinTema, Simge, SimgeAdi, StilUzantisi, h_flex};
 
 /// Breadcrumb gezinme öğesi.
 #[derive(IntoElement)]

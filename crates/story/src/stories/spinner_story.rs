@@ -2,7 +2,7 @@ use gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled,
     Window, px,
 };
-use kavis_ui::{EtkinTema as _, SimgeAdi, Sizable, spinner::DonerGosterge, v_flex};
+use kavis_ui::{Boyutlandirilabilir, EtkinTema as _, SimgeAdi, spinner::DonerGosterge, v_flex};
 
 use crate::section;
 

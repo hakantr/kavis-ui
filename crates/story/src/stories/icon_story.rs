@@ -3,7 +3,7 @@ use gpui::{
     Styled, Window,
 };
 use kavis_ui::{
-    EtkinTema as _, Simge, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema as _, Simge, SimgeAdi,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari},
     dock::PanelControl,
     h_flex, neutral_500, v_flex,

@@ -1,4 +1,6 @@
-use crate::{Simge, Sizable, Size, progress::DaireselIlerleme, spinner::DonerGosterge};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, Simge, progress::DaireselIlerleme, spinner::DonerGosterge,
+};
 use gpui::{App, IntoElement, RenderOnce, Window, prelude::FluentBuilder};
 
 /// Dugme simge olan olabilir bir Simge, DonerGosterge, veya Ilerleme kullanmak için `simge` yöntem Dugme.
@@ -8,7 +10,7 @@ pub struct DugmeSimgesi {
     icon: DugmeSimgesiVaryanti,
     loading_icon: Option<Simge>,
     loading: bool,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl<T> From<T> for DugmeSimgesi
@@ -27,7 +29,7 @@ impl DugmeSimgesi {
             icon: icon.into(),
             loading_icon: None,
             loading: false,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
         }
     }
 
@@ -42,8 +44,8 @@ impl DugmeSimgesi {
     }
 }
 
-impl Sizable for DugmeSimgesi {
-    fn with_size(mut self, size: impl Into<crate::Size>) -> Self {
+impl Boyutlandirilabilir for DugmeSimgesi {
+    fn with_size(mut self, size: impl Into<crate::BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -93,8 +95,8 @@ impl DugmeSimgesiVaryanti {
     }
 }
 
-impl Sizable for DugmeSimgesiVaryanti {
-    fn with_size(self, size: impl Into<crate::Size>) -> Self {
+impl Boyutlandirilabilir for DugmeSimgesiVaryanti {
+    fn with_size(self, size: impl Into<crate::BilesenBoyutu>) -> Self {
         match self {
             Self::Simge(icon) => Self::Simge(icon.with_size(size)),
             Self::DonerGosterge(spinner) => Self::DonerGosterge(spinner.with_size(size)),
@@ -145,7 +147,7 @@ mod tests {
 
         assert!(icon.loading);
         assert!(icon.loading_icon.is_some());
-        assert_eq!(icon.size, Size::Large);
+        assert_eq!(icon.size, BilesenBoyutu::Buyuk);
     }
 
     #[gpui::test]

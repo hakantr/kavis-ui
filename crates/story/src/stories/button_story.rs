@@ -4,7 +4,8 @@ use gpui::{
 };
 
 use kavis_ui::{
-    Disableable as _, EtkinTema, Selectable as _, Simge, SimgeAdi, Sizable as _, Tema,
+    Boyutlandirilabilir as _, DevreDisiBirakilabilir as _, EtkinTema, Secilebilir as _, Simge,
+    SimgeAdi, Tema,
     button::{Dugme, DugmeGrubu, DugmeOzelVaryanti, DugmeVaryantlari as _},
     checkbox::OnayKutusu,
     h_flex,

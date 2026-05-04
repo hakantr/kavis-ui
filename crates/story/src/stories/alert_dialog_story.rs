@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, PencereUzantisi as _, Simge, SimgeAdi, StyledExt,
+    EtkinTema, PencereUzantisi as _, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari},
     dialog::{
         IletisimAciklamasi, IletisimAltligi, IletisimBasligi, IletisimBaslikMetni,

@@ -7,7 +7,7 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    Disableable, Simge, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, Simge, StilUzantisi,
     button::{Dugme, DugmeVaryantlari},
     h_flex,
     icon::SimgeAdi,
@@ -19,7 +19,7 @@ use crate::{
 pub struct Sayfalama {
     id: ElementId,
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     current_page: usize,
     total_pages: usize,
     disabled: bool,
@@ -40,7 +40,7 @@ impl Sayfalama {
         Self {
             id: id.into(),
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             current_page: 1,
             total_pages: 1,
             visible_pages: 5,
@@ -149,15 +149,15 @@ impl Sayfalama {
     }
 }
 
-impl Disableable for Sayfalama {
+impl DevreDisiBirakilabilir for Sayfalama {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Sizable for Sayfalama {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Sayfalama {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

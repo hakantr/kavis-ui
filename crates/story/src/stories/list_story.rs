@@ -8,7 +8,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, IndexPath, Selectable, Simge, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema, IndexPath, Secilebilir, Simge, SimgeAdi,
     button::Dugme,
     checkbox::OnayKutusu,
     h_flex,
@@ -60,7 +60,7 @@ impl CompanyListItem {
     }
 }
 
-impl Selectable for CompanyListItem {
+impl Secilebilir for CompanyListItem {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

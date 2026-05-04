@@ -1,4 +1,4 @@
-use crate::{Disableable, EtkinTema, StyledExt, h_flex};
+use crate::{DevreDisiBirakilabilir, EtkinTema, StilUzantisi, h_flex};
 use gpui::{
     AnyElement, App, ClickEvent, ElementId, InteractiveElement, IntoElement, MouseButton,
     ParentElement, RenderOnce, SharedString, StatefulInteractiveElement as _, StyleRefinement,
@@ -63,7 +63,7 @@ impl MenuItemElement {
     }
 }
 
-impl Disableable for MenuItemElement {
+impl DevreDisiBirakilabilir for MenuItemElement {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self

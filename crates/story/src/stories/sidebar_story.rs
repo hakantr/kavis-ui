@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, Side, Simge, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema, Side, Simge, SimgeAdi,
     badge::Rozet,
     breadcrumb::{GezintiYolu, GezintiYoluOgesi},
     divider::Ayirici,

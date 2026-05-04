@@ -2,8 +2,8 @@ use crate::actions::{Cancel, Confirm, SelectDown, SelectUp};
 use crate::actions::{SelectLeft, SelectRight};
 use crate::menu::menu_item::MenuItemElement;
 use crate::scroll::KaydirilabilirOge;
-use crate::{ElementExt, EtkinTema, Simge, SimgeAdi, Sizable as _, h_flex, v_flex};
-use crate::{Side, Size, StyledExt, kbd::KlavyeTusu};
+use crate::{BilesenBoyutu, Side, StilUzantisi, kbd::KlavyeTusu};
+use crate::{Boyutlandirilabilir as _, ElementExt, EtkinTema, Simge, SimgeAdi, h_flex, v_flex};
 use gpui::{
     Action, Anchor, AnyElement, App, AppContext, Bounds, Context, DismissEvent, Edges, Entity,
     EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, KeyBinding,
@@ -280,7 +280,7 @@ pub struct PopupMenu {
     max_width: Option<Pixels>,
     max_height: Option<Pixels>,
     bounds: Bounds<Pixels>,
-    size: Size,
+    size: BilesenBoyutu,
     check_side: Side,
 
     /// Bu bir alt menüyse üst menüsü.
@@ -310,7 +310,7 @@ impl PopupMenu {
             scrollable: false,
             scroll_handle: ScrollHandle::default(),
             external_link_icon: true,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             submenu_anchor: (Anchor::TopLeft, Pixels::ZERO),
             _subscriptions: vec![],
         }
@@ -658,7 +658,7 @@ impl PopupMenu {
 
     /// Küçük boyut kullanılır; menü öğesinin yüksekliği küçülür.
     pub(crate) fn small(mut self) -> Self {
-        self.size = Size::Small;
+        self.size = BilesenBoyutu::Kucuk;
         self
     }
 
@@ -1092,7 +1092,7 @@ impl PopupMenu {
         let group_name = format!("{}:item-{}", cx.entity().entity_id(), ix);
 
         let (item_height, radius) = match self.size {
-            Size::Small => (px(20.), options.radius.half()),
+            BilesenBoyutu::Kucuk => (px(20.), options.radius.half()),
             _ => (px(26.), options.radius),
         };
 

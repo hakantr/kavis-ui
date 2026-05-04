@@ -10,7 +10,7 @@ use gpui::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    StyledExt,
+    StilUzantisi,
     resizable::{PANEL_MIN_SIZE, resize_handle},
 };
 

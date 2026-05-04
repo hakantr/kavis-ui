@@ -3,7 +3,7 @@ use gpui::{
     Styled as _, Subscription, Window, div, prelude::FluentBuilder as _,
 };
 use kavis_ui::{
-    EtkinTema as _, Renklendir, Sizable,
+    Boyutlandirilabilir, EtkinTema as _, Renklendir,
     color_picker::{RenkSecici, RenkSeciciDurumu, RenkSeciciOlayi},
     v_flex,
 };

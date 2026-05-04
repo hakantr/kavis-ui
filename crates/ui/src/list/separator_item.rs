@@ -1,7 +1,7 @@
 use gpui::{AnyElement, ParentElement, RenderOnce, StyleRefinement};
 use smallvec::SmallVec;
 
-use crate::{Selectable, StyledExt, list::ListeOgesi};
+use crate::{Secilebilir, StilUzantisi, list::ListeOgesi};
 
 pub struct ListeAyiriciOgesi {
     style: StyleRefinement,
@@ -23,7 +23,7 @@ impl ParentElement for ListeAyiriciOgesi {
     }
 }
 
-impl Selectable for ListeAyiriciOgesi {
+impl Secilebilir for ListeAyiriciOgesi {
     fn selected(self, _: bool) -> Self {
         self
     }

@@ -5,7 +5,7 @@ use gpui::{
 };
 use kavis_ui::{AxisExt, h_flex, menu::DropdownMenu as _};
 use kavis_ui::{
-    Sizable as _, Size,
+    BilesenBoyutu, Boyutlandirilabilir as _,
     button::Dugme,
     checkbox::OnayKutusu,
     description_list::{AciklamaListesi, AciklamaOgesi},
@@ -17,13 +17,13 @@ use serde::Deserialize;
 
 #[derive(Action, Clone, PartialEq, Eq, Deserialize)]
 #[action(namespace = description_list_story, no_json)]
-struct ChangeSize(Size);
+struct ChangeSize(BilesenBoyutu);
 
 pub struct DescriptionListStory {
     focus_handle: FocusHandle,
     layout: Axis,
     bordered: bool,
-    size: Size,
+    size: BilesenBoyutu,
     items: Vec<(&'static str, &'static str, usize)>,
 }
 
@@ -65,7 +65,7 @@ impl DescriptionListStory {
         Self {
             items,
             bordered: true,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             layout: Axis::Horizontal,
             focus_handle: cx.focus_handle(),
         }
@@ -157,18 +157,18 @@ impl Render for DescriptionListStory {
                                 move |menu, _, _| {
                                     menu.menu_with_check(
                                         "Büyük",
-                                        size == Size::Large,
-                                        Box::new(ChangeSize(Size::Large)),
+                                        size == BilesenBoyutu::Buyuk,
+                                        Box::new(ChangeSize(BilesenBoyutu::Buyuk)),
                                     )
                                     .menu_with_check(
                                         "Orta",
-                                        size == Size::Medium,
-                                        Box::new(ChangeSize(Size::Medium)),
+                                        size == BilesenBoyutu::Orta,
+                                        Box::new(ChangeSize(BilesenBoyutu::Orta)),
                                     )
                                     .menu_with_check(
                                         "Küçük",
-                                        size == Size::Small,
-                                        Box::new(ChangeSize(Size::Small)),
+                                        size == BilesenBoyutu::Kucuk,
+                                        Box::new(ChangeSize(BilesenBoyutu::Kucuk)),
                                     )
                                 }
                             }),

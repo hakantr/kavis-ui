@@ -10,7 +10,8 @@ use gpui::{
 };
 
 use crate::{
-    Disableable, EtkinTema as _, SimgeAdi, Sizable, Size, StyleSized, StyledExt as _,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema as _, SimgeAdi,
+    StilBoyutlandirma, StilUzantisi as _,
     button::{Dugme, DugmeVaryantlari as _},
     i18n,
     input::{Input, InputEvent, InputState, MaskPattern},
@@ -966,7 +967,7 @@ struct MonthSuggestionsPopover {
     date_input: Entity<TarihGirdisiDurumu>,
     range: Range<usize>,
     suggestions: Vec<MonthNameSuggestion>,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl MonthSuggestionsPopover {
@@ -975,7 +976,7 @@ impl MonthSuggestionsPopover {
         date_input: Entity<TarihGirdisiDurumu>,
         range: Range<usize>,
         suggestions: Vec<MonthNameSuggestion>,
-        size: Size,
+        size: BilesenBoyutu,
     ) -> Self {
         Self {
             id: "date-input-month-suggestions".into(),
@@ -1131,7 +1132,7 @@ pub struct TarihGirdisi {
     id: ElementId,
     state: Entity<TarihGirdisiDurumu>,
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     placeholder: Option<SharedString>,
     appearance: bool,
     cleanable: bool,
@@ -1144,7 +1145,7 @@ impl TarihGirdisi {
             id: ("date-input", state.entity_id()).into(),
             state: state.clone(),
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             placeholder: None,
             appearance: true,
             cleanable: false,
@@ -1177,8 +1178,8 @@ impl Focusable for TarihGirdisi {
     }
 }
 
-impl Sizable for TarihGirdisi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TarihGirdisi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -1190,7 +1191,7 @@ impl Styled for TarihGirdisi {
     }
 }
 
-impl Disableable for TarihGirdisi {
+impl DevreDisiBirakilabilir for TarihGirdisi {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self

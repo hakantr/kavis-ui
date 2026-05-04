@@ -12,7 +12,8 @@ use gpui::{
     prelude::FluentBuilder as _,
 };
 use kavis_ui::{
-    EtkinTema as _, Selectable, Sizable as _, Size, StyleSized as _, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir as _, EtkinTema as _, Secilebilir, StilBoyutlandirma as _,
+    StilUzantisi,
     button::Dugme,
     checkbox::OnayKutusu,
     h_flex,
@@ -31,7 +32,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Action, Clone, PartialEq, Eq, Deserialize)]
 #[action(namespace = data_table_story, no_json)]
-struct ChangeSize(Size);
+struct ChangeSize(BilesenBoyutu);
 
 #[derive(Action, Clone, PartialEq, Eq, Deserialize)]
 #[action(namespace = data_table_story, no_json)]
@@ -191,7 +192,7 @@ struct StockTableDelegate {
     columns: Vec<Column>,
     /// Yerleşik sütunlardan sonra eklenecek fazladan "Column N" sütun sayısı.
     extra_columns_count: usize,
-    size: Size,
+    size: BilesenBoyutu,
     loading: bool,
     lazy_load: bool,
     full_loading: bool,
@@ -207,7 +208,7 @@ struct StockTableDelegate {
 impl StockTableDelegate {
     fn new(size: usize) -> Self {
         Self {
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             stocks: random_stocks(size),
             lazy_load: false,
             clicked_row: None,
@@ -448,10 +449,13 @@ impl TabloTemsilcisi for StockTableDelegate {
             Box::new(OpenDetail(row_ix)),
         )
         .separator()
-        .menu("Boyut Büyük", Box::new(ChangeSize(Size::Large)))
-        .menu("Boyut Orta", Box::new(ChangeSize(Size::Medium)))
-        .menu("Boyut Küçük", Box::new(ChangeSize(Size::Small)))
-        .menu("Boyut Çok Küçük", Box::new(ChangeSize(Size::XSmall)))
+        .menu("Boyut Büyük", Box::new(ChangeSize(BilesenBoyutu::Buyuk)))
+        .menu("Boyut Orta", Box::new(ChangeSize(BilesenBoyutu::Orta)))
+        .menu("Boyut Küçük", Box::new(ChangeSize(BilesenBoyutu::Kucuk)))
+        .menu(
+            "Boyut Çok Küçük",
+            Box::new(ChangeSize(BilesenBoyutu::CokKucuk)),
+        )
     }
 
     fn render_tr(
@@ -747,7 +751,7 @@ pub struct DataTableStory {
     num_extra_cols_input: Entity<InputState>,
     stripe: bool,
     refresh_data: bool,
-    size: Size,
+    size: BilesenBoyutu,
 
     _subscriptions: Vec<Subscription>,
     _load_task: Task<()>,
@@ -846,7 +850,7 @@ impl DataTableStory {
             num_extra_cols_input,
             stripe: false,
             refresh_data: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             _subscriptions,
             _load_task,
         }
@@ -1171,23 +1175,23 @@ impl Render for DataTableStory {
                             .dropdown_menu(move |menu, _, _| {
                                 menu.menu_with_check(
                                     "Büyük",
-                                    size == Size::Large,
-                                    Box::new(ChangeSize(Size::Large)),
+                                    size == BilesenBoyutu::Buyuk,
+                                    Box::new(ChangeSize(BilesenBoyutu::Buyuk)),
                                 )
                                 .menu_with_check(
                                     "Orta",
-                                    size == Size::Medium,
-                                    Box::new(ChangeSize(Size::Medium)),
+                                    size == BilesenBoyutu::Orta,
+                                    Box::new(ChangeSize(BilesenBoyutu::Orta)),
                                 )
                                 .menu_with_check(
                                     "Küçük",
-                                    size == Size::Small,
-                                    Box::new(ChangeSize(Size::Small)),
+                                    size == BilesenBoyutu::Kucuk,
+                                    Box::new(ChangeSize(BilesenBoyutu::Kucuk)),
                                 )
                                 .menu_with_check(
                                     "Çok Küçük",
-                                    size == Size::XSmall,
-                                    Box::new(ChangeSize(Size::XSmall)),
+                                    size == BilesenBoyutu::CokKucuk,
+                                    Box::new(ChangeSize(BilesenBoyutu::CokKucuk)),
                                 )
                             }),
                     )

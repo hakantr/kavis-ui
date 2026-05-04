@@ -3,7 +3,7 @@ use gpui::{
     StyleRefinement, Styled, Window, div,
 };
 
-use crate::{EtkinTema as _, StyledExt as _};
+use crate::{EtkinTema as _, StilUzantisi as _};
 
 /// açıklama öğe için bir iletişim kutusu başlık.
 ///

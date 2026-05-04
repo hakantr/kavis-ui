@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    SimgeAdi, Sizable, StyledExt,
+    Boyutlandirilabilir, SimgeAdi, StilUzantisi,
     button::{Gecis, GecisGrubu, GecisVaryantlari},
     v_flex,
 };

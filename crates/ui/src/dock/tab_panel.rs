@@ -9,7 +9,7 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    AxisExt, EtkinTema, Placement, Selectable, SimgeAdi, Sizable,
+    AxisExt, Boyutlandirilabilir, EtkinTema, Placement, Secilebilir, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     dock::PanelInfo,
     h_flex,

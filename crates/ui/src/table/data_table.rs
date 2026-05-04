@@ -1,5 +1,5 @@
 use crate::{
-    EtkinTema, Sizable, Size,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema,
     actions::{
         Cancel, SelectDown, SelectFirst, SelectLast, SelectNextColumn, SelectPageDown,
         SelectPageUp, SelectPrevColumn, SelectUp,
@@ -35,7 +35,7 @@ pub(super) struct TabloSecenekleri {
     /// kullanmak için kenarlık stil tablo ayarlar.
     pub(super) bordered: bool,
     /// hücre boyut tablo.
-    pub(super) size: Size,
+    pub(super) size: BilesenBoyutu,
 }
 
 impl Default for TabloSecenekleri {
@@ -44,7 +44,7 @@ impl Default for TabloSecenekleri {
             scrollbar_visible: Edges::all(true),
             stripe: false,
             bordered: true,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         }
     }
 }
@@ -126,11 +126,11 @@ where
     }
 }
 
-impl<D> Sizable for VeriTablosu<D>
+impl<D> Boyutlandirilabilir for VeriTablosu<D>
 where
     D: TabloTemsilcisi,
 {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.options.size = size.into();
         self
     }

@@ -3,7 +3,7 @@ use gpui::{
     SharedString, Styled, Subscription, Window, hsla, px,
 };
 use kavis_ui::{
-    EtkinTema, PencereUzantisi, Renklendir as _, StyledExt,
+    EtkinTema, PencereUzantisi, Renklendir as _, StilUzantisi,
     checkbox::OnayKutusu,
     clipboard::Pano,
     h_flex,

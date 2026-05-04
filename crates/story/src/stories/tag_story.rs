@@ -3,7 +3,7 @@ use gpui::{
     Styled, Window, px,
 };
 
-use kavis_ui::{RenkAdi, Sizable, h_flex, indigo_50, indigo_500, tag::Cip, v_flex};
+use kavis_ui::{Boyutlandirilabilir, RenkAdi, h_flex, indigo_50, indigo_500, tag::Cip, v_flex};
 
 use crate::section;
 

@@ -10,7 +10,8 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    Disableable, EtkinTema, Simge, SimgeAdi, Sizable, Size, StyleSized as _, StyledExt as _,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Simge, SimgeAdi,
+    StilBoyutlandirma as _, StilUzantisi as _,
     actions::{Cancel, Confirm},
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
@@ -275,15 +276,15 @@ pub struct TarihSecici {
     state: Entity<TarihSeciciDurumu>,
     cleanable: bool,
     placeholder: Option<SharedString>,
-    size: Size,
+    size: BilesenBoyutu,
     number_of_months: usize,
     presets: Option<Vec<TarihAraligiOnAyari>>,
     appearance: bool,
     disabled: bool,
 }
 
-impl Sizable for TarihSecici {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for TarihSecici {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -300,7 +301,7 @@ impl Styled for TarihSecici {
     }
 }
 
-impl Disableable for TarihSecici {
+impl DevreDisiBirakilabilir for TarihSecici {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -321,7 +322,7 @@ impl TarihSecici {
             state: state.clone(),
             cleanable: false,
             placeholder: None,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             style: StyleRefinement::default(),
             number_of_months: 2,
             presets: None,

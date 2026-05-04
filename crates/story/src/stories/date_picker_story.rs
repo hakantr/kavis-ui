@@ -4,7 +4,7 @@ use gpui::{
     Styled as _, Subscription, Window, div, px,
 };
 use kavis_ui::{
-    EtkinTema as _, Sizable as _, calendar,
+    Boyutlandirilabilir as _, EtkinTema as _, calendar,
     date_input::{TarihGirdisi, TarihGirdisiDurumu, TarihGirdisiOlayi},
     date_picker::{TarihAraligiOnAyari, TarihSecici, TarihSeciciDurumu, TarihSeciciOlayi},
     v_flex,

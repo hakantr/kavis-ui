@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    EtkinTema, InteractiveElementExt as _, Simge, SimgeAdi, Sizable as _, StyledExt, h_flex,
+    Boyutlandirilabilir as _, EtkinTema, InteractiveElementExt as _, Simge, SimgeAdi, StilUzantisi,
+    h_flex,
 };
 use gpui::{
     AnyElement, App, ClickEvent, Context, Decorations, Hsla, InteractiveElement, IntoElement,

@@ -1,5 +1,5 @@
 use crate::{
-    Daraltilabilir, EtkinTema as _, Simge, SimgeAdi, Sizable as _, StyledExt,
+    Boyutlandirilabilir as _, Daraltilabilir, EtkinTema as _, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
     menu::{ContextMenuExt, PopupMenu},

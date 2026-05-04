@@ -7,7 +7,7 @@ use gpui::{
     MouseUpEvent, ParentElement, Pixels, SharedString, StyleRefinement, Styled, Window, div,
 };
 
-use crate::StyledExt;
+use crate::StilUzantisi;
 use crate::scroll::KaydirilabilirOge;
 use crate::text::TextViewFormat;
 use crate::text::node::CodeBlock;

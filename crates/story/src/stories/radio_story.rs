@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, Sizable, h_flex,
+    Boyutlandirilabilir, EtkinTema, h_flex,
     radio::{Radyo, RadyoGrubu},
     v_flex,
 };

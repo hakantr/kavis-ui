@@ -3,7 +3,7 @@ use gpui::{
     Styled, div, prelude::FluentBuilder as _,
 };
 
-use crate::{Daraltilabilir, EtkinTema as _, Selectable, StyledExt, menu::DropdownMenu};
+use crate::{Daraltilabilir, EtkinTema as _, Secilebilir, StilUzantisi, menu::DropdownMenu};
 
 /// başlık için [`super::YanCubuk`]
 #[derive(IntoElement)]
@@ -34,7 +34,7 @@ impl Default for YanCubukBasligi {
     }
 }
 
-impl Selectable for YanCubukBasligi {
+impl Secilebilir for YanCubukBasligi {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

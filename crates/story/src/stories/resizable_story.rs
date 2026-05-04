@@ -3,7 +3,7 @@ use gpui::{
     ParentElement as _, Pixels, Render, SharedString, Styled, Window, div, px,
 };
 use kavis_ui::{
-    EtkinTema, Sizable as _,
+    Boyutlandirilabilir as _, EtkinTema,
     button::Dugme,
     h_flex,
     resizable::{YenidenBoyutlandirilabilirDurum, h_resizable, resizable_panel, v_resizable},

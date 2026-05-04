@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema as _, StyledExt,
+    EtkinTema as _, StilUzantisi,
     button::{Dugme, DugmeVaryantlari},
     checkbox::OnayKutusu,
     group_box::{GrupKutusu, GrupKutusuVaryantlari as _},

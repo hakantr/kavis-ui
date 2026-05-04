@@ -1,4 +1,4 @@
-use crate::{EtkinTema, Sizable, Size, StyledExt};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi};
 use gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement as _, IntoElement,
     ParentElement, RenderOnce, StyleRefinement, Styled, Window, div, ease_in_out,
@@ -15,7 +15,7 @@ pub struct Ilerleme {
     style: StyleRefinement,
     color: Option<Hsla>,
     value: f32,
-    size: Size,
+    size: BilesenBoyutu,
     loading: bool,
 }
 
@@ -27,7 +27,7 @@ impl Ilerleme {
             value: Default::default(),
             color: None,
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             loading: false,
         }
     }
@@ -62,8 +62,8 @@ impl Styled for Ilerleme {
     }
 }
 
-impl Sizable for Ilerleme {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Ilerleme {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -80,11 +80,11 @@ impl RenderOnce for Ilerleme {
         inner_style.corner_radii = radius;
 
         let (height, radius) = match self.size {
-            Size::XSmall => (px(4.), px(2.)),
-            Size::Small => (px(6.), px(3.)),
-            Size::Medium => (px(8.), px(4.)),
-            Size::Large => (px(10.), px(5.)),
-            Size::Size(s) => (s, s / 2.),
+            BilesenBoyutu::CokKucuk => (px(4.), px(2.)),
+            BilesenBoyutu::Kucuk => (px(6.), px(3.)),
+            BilesenBoyutu::Orta => (px(8.), px(4.)),
+            BilesenBoyutu::Buyuk => (px(10.), px(5.)),
+            BilesenBoyutu::Ozel(s) => (s, s / 2.),
         };
 
         let state = window.use_keyed_state(self.id.clone(), cx, |_, _| IlerlemeDurumu::new(value));

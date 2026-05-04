@@ -4,7 +4,7 @@ use gpui::{
 };
 use smallvec::SmallVec;
 
-use crate::{EtkinTema, StyledExt as _, v_flex};
+use crate::{EtkinTema, StilUzantisi as _, v_flex};
 
 /// varyant GrupKutusu.
 #[derive(Debug, Clone, Default, Copy, PartialEq, Eq, Hash)]

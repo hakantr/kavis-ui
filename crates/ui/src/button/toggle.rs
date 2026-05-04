@@ -8,7 +8,8 @@ use gpui::{
 use smallvec::{SmallVec, smallvec};
 
 use crate::{
-    Disableable, EtkinTema, Simge, Sizable, Size, StyledExt, h_flex, tooltip::ComponentTooltip,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Simge, StilUzantisi,
+    h_flex, tooltip::ComponentTooltip,
 };
 
 #[derive(Default, Copy, Debug, Clone, PartialEq, Eq, Hash)]
@@ -36,7 +37,7 @@ pub struct Gecis {
     id: ElementId,
     style: StyleRefinement,
     checked: bool,
-    size: Size,
+    size: BilesenBoyutu,
     variant: GecisVaryanti,
     disabled: bool,
     border_corners: Corners<bool>,
@@ -53,7 +54,7 @@ impl Gecis {
             id: id.into(),
             style: StyleRefinement::default(),
             checked: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             variant: GecisVaryanti::default(),
             disabled: false,
             border_corners: Corners {
@@ -127,15 +128,15 @@ impl ParentElement for Gecis {
     }
 }
 
-impl Disableable for Gecis {
+impl DevreDisiBirakilabilir for Gecis {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Sizable for Gecis {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Gecis {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -161,9 +162,9 @@ impl RenderOnce for Gecis {
             .items_center()
             .justify_center()
             .map(|this| match self.size {
-                Size::XSmall => this.min_w_5().h_5().px_0p5().text_xs(),
-                Size::Small => this.min_w_6().h_6().px_1().text_sm(),
-                Size::Large => this.min_w_9().h_9().px_3().text_lg(),
+                BilesenBoyutu::CokKucuk => this.min_w_5().h_5().px_0p5().text_xs(),
+                BilesenBoyutu::Kucuk => this.min_w_6().h_6().px_1().text_sm(),
+                BilesenBoyutu::Buyuk => this.min_w_9().h_9().px_3().text_lg(),
                 _ => this.min_w_8().h_8().px_2(),
             })
             .when(self.border_corners.top_left, |this| {
@@ -213,7 +214,7 @@ impl RenderOnce for Gecis {
 pub struct GecisGrubu {
     id: ElementId,
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     variant: GecisVaryanti,
     disabled: bool,
     segmented: bool,
@@ -227,7 +228,7 @@ impl GecisGrubu {
         Self {
             id: id.into(),
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             variant: GecisVaryanti::default(),
             disabled: false,
             segmented: false,
@@ -269,8 +270,8 @@ impl GecisGrubu {
     }
 }
 
-impl Sizable for GecisGrubu {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for GecisGrubu {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -283,7 +284,7 @@ impl GecisVaryantlari for GecisGrubu {
     }
 }
 
-impl Disableable for GecisGrubu {
+impl DevreDisiBirakilabilir for GecisGrubu {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -398,7 +399,7 @@ mod tests {
         assert_eq!(toggle.children.len(), 2); // label + icon
         assert!(toggle.checked);
         assert_eq!(toggle.variant, GecisVaryanti::Outline);
-        assert_eq!(toggle.size, Size::Large);
+        assert_eq!(toggle.size, BilesenBoyutu::Buyuk);
         assert!(!toggle.disabled);
         assert!(toggle.on_click.is_some());
     }
@@ -417,7 +418,7 @@ mod tests {
 
         assert_eq!(group.items.len(), 3);
         assert_eq!(group.variant, GecisVaryanti::Outline);
-        assert_eq!(group.size, Size::Large);
+        assert_eq!(group.size, BilesenBoyutu::Buyuk);
         assert!(group.segmented);
         assert!(!group.disabled);
         assert!(group.on_click.is_some());

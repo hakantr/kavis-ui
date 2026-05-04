@@ -6,14 +6,14 @@ use gpui::{
     prelude::FluentBuilder as _, rems,
 };
 
-use crate::{EtkinTema as _, Simge, SimgeAdi, Sizable, Size, h_flex, v_flex};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, Simge, SimgeAdi, h_flex, v_flex};
 
 /// Akordeon öğe.
 #[derive(IntoElement)]
 pub struct Akordeon {
     id: ElementId,
     multiple: bool,
-    size: Size,
+    size: BilesenBoyutu,
     bordered: bool,
     disabled: bool,
     children: Vec<AkordeonOgesi>,
@@ -26,7 +26,7 @@ impl Akordeon {
         Self {
             id: id.into(),
             multiple: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             bordered: true,
             children: Vec::new(),
             disabled: false,
@@ -74,8 +74,8 @@ impl Akordeon {
     }
 }
 
-impl Sizable for Akordeon {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Akordeon {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -142,7 +142,7 @@ pub struct AkordeonOgesi {
     title: AnyElement,
     children: Vec<AnyElement>,
     open: bool,
-    size: Size,
+    size: BilesenBoyutu,
     bordered: bool,
     disabled: bool,
     on_toggle_click: Option<Arc<dyn Fn(&bool, &mut Window, &mut App)>>,
@@ -159,7 +159,7 @@ impl AkordeonOgesi {
             open: false,
             disabled: false,
             on_toggle_click: None,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             bordered: true,
         }
     }
@@ -211,8 +211,8 @@ impl ParentElement for AkordeonOgesi {
     }
 }
 
-impl Sizable for AkordeonOgesi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for AkordeonOgesi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -221,8 +221,8 @@ impl Sizable for AkordeonOgesi {
 impl RenderOnce for AkordeonOgesi {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let text_size = match self.size {
-            Size::XSmall => rems(0.875),
-            Size::Small => rems(0.875),
+            BilesenBoyutu::CokKucuk => rems(0.875),
+            BilesenBoyutu::Kucuk => rems(0.875),
             _ => rems(1.0),
         };
 
@@ -243,9 +243,9 @@ impl RenderOnce for AkordeonOgesi {
                         .justify_between()
                         .gap_3()
                         .map(|this| match self.size {
-                            Size::XSmall => this.py_0().px_1p5(),
-                            Size::Small => this.py_0p5().px_2(),
-                            Size::Large => this.py_1p5().px_4(),
+                            BilesenBoyutu::CokKucuk => this.py_0().px_1p5(),
+                            BilesenBoyutu::Kucuk => this.py_0p5().px_2(),
+                            BilesenBoyutu::Buyuk => this.py_1p5().px_4(),
                             _ => this.py_1().px_3(),
                         })
                         .when(self.open, |this| {
@@ -262,8 +262,8 @@ impl RenderOnce for AkordeonOgesi {
                             h_flex()
                                 .items_center()
                                 .map(|this| match self.size {
-                                    Size::XSmall => this.gap_1(),
-                                    Size::Small => this.gap_1(),
+                                    BilesenBoyutu::CokKucuk => this.gap_1(),
+                                    BilesenBoyutu::Kucuk => this.gap_1(),
                                     _ => this.gap_2(),
                                 })
                                 .when_some(self.icon, |this, icon| {
@@ -298,9 +298,9 @@ impl RenderOnce for AkordeonOgesi {
                     this.child(
                         div()
                             .map(|this| match self.size {
-                                Size::XSmall => this.p_1p5(),
-                                Size::Small => this.p_2(),
-                                Size::Large => this.p_4(),
+                                BilesenBoyutu::CokKucuk => this.p_1p5(),
+                                BilesenBoyutu::Kucuk => this.p_2(),
+                                BilesenBoyutu::Buyuk => this.p_4(),
                                 _ => this.p_3(),
                             })
                             .children(self.children),

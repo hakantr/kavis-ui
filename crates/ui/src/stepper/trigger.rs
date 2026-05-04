@@ -4,7 +4,7 @@ use gpui::{
     prelude::FluentBuilder as _, px,
 };
 
-use crate::{AxisExt, EtkinTema as _, Simge, Size, StyleSized, StyledExt as _};
+use crate::{AxisExt, BilesenBoyutu, EtkinTema as _, Simge, StilBoyutlandirma, StilUzantisi as _};
 
 /// tetikleyici part bir adımlayıcı öğe.
 #[derive(IntoElement)]
@@ -18,7 +18,7 @@ pub(super) struct AdimlayiciTetikleyicisi {
     layout: Axis,
     disabled: bool,
     text_center: bool,
-    size: Size,
+    size: BilesenBoyutu,
     on_click: Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>,
 }
 
@@ -31,7 +31,7 @@ impl AdimlayiciTetikleyicisi {
             icon_size: px(24.),
             layout: Axis::Horizontal,
             disabled: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             children: Vec::new(),
             text_center: false,
             style: StyleRefinement::default(),
@@ -69,7 +69,7 @@ impl AdimlayiciTetikleyicisi {
         self
     }
 
-    pub(super) fn with_size(mut self, size: Size) -> Self {
+    pub(super) fn with_size(mut self, size: BilesenBoyutu) -> Self {
         self.size = size;
         self
     }
@@ -131,7 +131,7 @@ impl RenderOnce for AdimlayiciTetikleyicisi {
                         this.bg(cx.theme().primary)
                             .text_color(cx.theme().primary_foreground)
                     })
-                    .when(self.size != Size::XSmall, |this| {
+                    .when(self.size != BilesenBoyutu::CokKucuk, |this| {
                         this.map(|this| {
                             this.child(if let Some(icon) = self.icon {
                                 icon.into_any_element()

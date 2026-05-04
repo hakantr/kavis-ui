@@ -13,10 +13,10 @@ use crate::input::element::{LINE_NUMBER_RIGHT_MARGIN, RIGHT_MARGIN};
 use crate::menu::PopupMenu;
 use crate::scroll::KaydirmaCubugu;
 use crate::spinner::DonerGosterge;
+use crate::{BilesenBoyutu, SimgeAdi};
+use crate::{Boyutlandirilabilir, StilBoyutlandirma};
 use crate::{EtkinTema, Renklendir, v_flex};
-use crate::{Selectable, StyledExt, h_flex};
-use crate::{SimgeAdi, Size};
-use crate::{Sizable, StyleSized};
+use crate::{Secilebilir, StilUzantisi, h_flex};
 
 use super::InputState;
 
@@ -37,7 +37,7 @@ pub(crate) fn input_style(disabled: bool, cx: &App) -> (Hsla, Hsla) {
 pub struct Input {
     state: Entity<InputState>,
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     prefix: Option<AnyElement>,
     suffix: Option<AnyElement>,
     height: Option<DefiniteLength>,
@@ -57,14 +57,14 @@ pub struct Input {
         Option<Rc<dyn Fn(PopupMenu, &mut Window, &mut Context<PopupMenu>) -> PopupMenu>>,
 }
 
-impl Sizable for Input {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Input {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
 }
 
-impl Selectable for Input {
+impl Secilebilir for Input {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -80,7 +80,7 @@ impl Input {
     pub fn new(state: &Entity<InputState>) -> Self {
         Self {
             state: state.clone(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             style: StyleRefinement::default(),
             prefix: None,
             suffix: None,
@@ -285,8 +285,8 @@ impl RenderOnce for Input {
         let state = self.state.read(cx);
         let focused = state.focus_handle.is_focused(window) && !state.disabled;
         let gap_x = match self.size {
-            Size::Small => px(4.),
-            Size::Large => px(8.),
+            BilesenBoyutu::Kucuk => px(4.),
+            BilesenBoyutu::Buyuk => px(8.),
             _ => px(6.),
         };
 

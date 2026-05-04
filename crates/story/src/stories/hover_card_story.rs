@@ -3,7 +3,7 @@ use gpui::{
     Styled as _, Window, div, px, relative,
 };
 use kavis_ui::{
-    EtkinTema, StyledExt, avatar::Avatar, button::Dugme, h_flex, hover_card::UzerineGelmeKarti,
+    EtkinTema, StilUzantisi, avatar::Avatar, button::Dugme, h_flex, hover_card::UzerineGelmeKarti,
     v_flex,
 };
 use std::time::Duration;

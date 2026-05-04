@@ -12,7 +12,7 @@ use smallvec::SmallVec;
 use std::{ops::Range, rc::Rc};
 
 use crate::{
-    EtkinTema as _, KokGorunum, Renklendir, Selectable, SimgeAdi, Sizable as _,
+    Boyutlandirilabilir as _, EtkinTema as _, KokGorunum, Renklendir, Secilebilir, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     input::{RopeExt as _, blink_cursor::CURSOR_WIDTH, display_map::LineLayout},
 };
@@ -272,8 +272,8 @@ impl TextElement {
 
             // cursor bounds
             let cursor_height = match state.size {
-                crate::Size::Large => 1.,
-                crate::Size::Small => 0.75,
+                crate::BilesenBoyutu::Buyuk => 1.,
+                crate::BilesenBoyutu::Kucuk => 0.75,
                 _ => 0.85,
             } * line_height;
 

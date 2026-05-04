@@ -7,7 +7,10 @@ use gpui::{
     StyleRefinement, Styled, TextAlign, actions, prelude::FluentBuilder as _,
 };
 
-use crate::{Disableable, SimgeAdi, Sizable, Size, StyledExt as _, button::Dugme, h_flex};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, SimgeAdi, StilUzantisi as _,
+    button::Dugme, h_flex,
+};
 
 use super::{Input, InputState};
 
@@ -26,7 +29,7 @@ pub fn init(cx: &mut App) {
 pub struct NumberInput {
     state: Entity<InputState>,
     placeholder: SharedString,
-    size: Size,
+    size: BilesenBoyutu,
     prefix: Option<AnyElement>,
     suffix: Option<AnyElement>,
     appearance: bool,
@@ -39,7 +42,7 @@ impl NumberInput {
     pub fn new(state: &Entity<InputState>) -> Self {
         Self {
             state: state.clone(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             placeholder: SharedString::default(),
             prefix: None,
             suffix: None,
@@ -88,7 +91,7 @@ impl NumberInput {
     }
 }
 
-impl Disableable for NumberInput {
+impl DevreDisiBirakilabilir for NumberInput {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -129,8 +132,8 @@ impl Focusable for NumberInput {
     }
 }
 
-impl Sizable for NumberInput {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for NumberInput {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

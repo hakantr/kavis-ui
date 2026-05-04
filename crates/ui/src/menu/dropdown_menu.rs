@@ -5,10 +5,10 @@ use gpui::{
     RenderOnce, SharedString, StyleRefinement, Styled, Window,
 };
 
-use crate::{Selectable, button::Dugme, menu::PopupMenu, popover::AcilirKatman};
+use crate::{Secilebilir, button::Dugme, menu::PopupMenu, popover::AcilirKatman};
 
 /// Bir açılır menü özellik için düğmeler ve diğer etkileşimli öğeler
-pub trait DropdownMenu: Styled + Selectable + InteractiveElement + IntoElement + 'static {
+pub trait DropdownMenu: Styled + Secilebilir + InteractiveElement + IntoElement + 'static {
     /// Bir açılır menü ile verilen öğeler, anchored için TopLeft köşe oluşturur.
     fn dropdown_menu(
         self,
@@ -33,7 +33,7 @@ pub trait DropdownMenu: Styled + Selectable + InteractiveElement + IntoElement +
 impl DropdownMenu for Dugme {}
 
 #[derive(IntoElement)]
-pub struct DropdownMenuPopover<T: Selectable + IntoElement + 'static> {
+pub struct DropdownMenuPopover<T: Secilebilir + IntoElement + 'static> {
     id: ElementId,
     style: StyleRefinement,
     anchor: Anchor,
@@ -43,7 +43,7 @@ pub struct DropdownMenuPopover<T: Selectable + IntoElement + 'static> {
 
 impl<T> DropdownMenuPopover<T>
 where
-    T: Selectable + IntoElement + 'static,
+    T: Secilebilir + IntoElement + 'static,
 {
     fn new(
         id: ElementId,
@@ -80,7 +80,7 @@ struct DropdownMenuState {
 
 impl<T> RenderOnce for DropdownMenuPopover<T>
 where
-    T: Selectable + IntoElement + 'static,
+    T: Secilebilir + IntoElement + 'static,
 {
     fn render(self, window: &mut Window, cx: &mut gpui::App) -> impl IntoElement {
         let builder = self.builder.clone();

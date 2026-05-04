@@ -3,13 +3,15 @@ use gpui::{
     Styled, Window, div, prelude::FluentBuilder as _, px, relative,
 };
 
-use crate::{AxisExt, EtkinTema as _, Sizable, Size, h_flex, text::Text, v_flex};
+use crate::{
+    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, h_flex, text::Text, v_flex,
+};
 
 /// Bir açıklama liste.
 #[derive(IntoElement)]
 pub struct AciklamaListesi {
     items: Vec<AciklamaOgesi>,
-    size: Size,
+    size: BilesenBoyutu,
     layout: Axis,
     label_width: DefiniteLength,
     bordered: bool,
@@ -128,7 +130,7 @@ impl AciklamaListesi {
             items: Vec::new(),
             layout: Axis::Horizontal,
             label_width: px(120.).into(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             bordered: true,
             columns: 3,
         }
@@ -240,8 +242,8 @@ impl AciklamaListesi {
     }
 }
 
-impl Sizable for AciklamaListesi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for AciklamaListesi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -250,17 +252,17 @@ impl Sizable for AciklamaListesi {
 impl RenderOnce for AciklamaListesi {
     fn render(self, _: &mut Window, cx: &mut gpui::App) -> impl gpui::IntoElement {
         let base_gap = match self.size {
-            Size::XSmall | Size::Small => px(2.),
-            Size::Medium => px(4.),
-            Size::Large => px(8.),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(2.),
+            BilesenBoyutu::Orta => px(4.),
+            BilesenBoyutu::Buyuk => px(8.),
             _ => px(4.),
         };
 
         // Only for Horizontal layout
         let (mut padding_x, mut padding_y) = match self.size {
-            Size::XSmall | Size::Small => (px(4.), px(2.)),
-            Size::Medium => (px(8.), px(4.)),
-            Size::Large => (px(12.), px(6.)),
+            BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => (px(4.), px(2.)),
+            BilesenBoyutu::Orta => (px(8.), px(4.)),
+            BilesenBoyutu::Buyuk => (px(12.), px(6.)),
             _ => (px(8.), px(4.)),
         };
 

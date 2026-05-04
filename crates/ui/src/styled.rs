@@ -55,7 +55,7 @@ macro_rules! font_weight {
     any(feature = "inspector", debug_assertions),
     gpui_macros::derive_inspector_reflection
 )]
-pub trait StyledExt: Styled + Sized {
+pub trait StilUzantisi: Styled + Sized {
     /// Refine stil bu öğe, applying verilen stil refinement.
     fn refine_style(mut self, style: &StyleRefinement) -> Self {
         self.style().refine(style);
@@ -192,38 +192,38 @@ pub trait StyledExt: Styled + Sized {
     }
 }
 
-impl<E: Styled> StyledExt for E {}
+impl<E: Styled> StilUzantisi for E {}
 
 /// Bir boyut için öğeler.
 #[derive(Clone, Default, Copy, PartialEq, Eq, Debug, Deserialize, Serialize)]
-pub enum Size {
-    Size(Pixels),
-    XSmall,
-    Small,
+pub enum BilesenBoyutu {
+    Ozel(Pixels),
+    CokKucuk,
+    Kucuk,
     #[default]
-    Medium,
-    Large,
+    Orta,
+    Buyuk,
 }
 
-impl Size {
+impl BilesenBoyutu {
     fn as_f32(&self) -> f32 {
         match self {
-            Size::Size(val) => val.as_f32(),
-            Size::XSmall => 0.,
-            Size::Small => 1.,
-            Size::Medium => 2.,
-            Size::Large => 3.,
+            BilesenBoyutu::Ozel(val) => val.as_f32(),
+            BilesenBoyutu::CokKucuk => 0.,
+            BilesenBoyutu::Kucuk => 1.,
+            BilesenBoyutu::Orta => 2.,
+            BilesenBoyutu::Buyuk => 3.,
         }
     }
 
     /// boyut olarak bir static metin döndürür.
     pub fn as_str(&self) -> &'static str {
         match self {
-            Size::XSmall => "xs",
-            Size::Small => "sm",
-            Size::Medium => "md",
-            Size::Large => "lg",
-            Size::Size(_) => "custom",
+            BilesenBoyutu::CokKucuk => "xs",
+            BilesenBoyutu::Kucuk => "sm",
+            BilesenBoyutu::Orta => "md",
+            BilesenBoyutu::Buyuk => "lg",
+            BilesenBoyutu::Ozel(_) => "custom",
         }
     }
 
@@ -234,14 +234,14 @@ impl Size {
     /// - "md" veya "medium"
     /// - "lg" veya "büyük"
     ///
-    /// Diğer tüm değerler Boyut::Medium döndürür.
+    /// Diğer tüm değerler `BilesenBoyutu::Orta` döndürür.
     pub fn from_str(size: &str) -> Self {
         match size.to_lowercase().as_str() {
-            "xs" | "xsmall" => Size::XSmall,
-            "sm" | "small" => Size::Small,
-            "md" | "medium" => Size::Medium,
-            "lg" | "large" => Size::Large,
-            _ => Size::Medium,
+            "xs" | "xsmall" => BilesenBoyutu::CokKucuk,
+            "sm" | "small" => BilesenBoyutu::Kucuk,
+            "md" | "medium" => BilesenBoyutu::Orta,
+            "lg" | "large" => BilesenBoyutu::Buyuk,
+            _ => BilesenBoyutu::Orta,
         }
     }
 
@@ -249,9 +249,9 @@ impl Size {
     #[inline]
     pub fn table_row_height(&self) -> Pixels {
         match self {
-            Size::XSmall => px(26.),
-            Size::Small => px(30.),
-            Size::Large => px(40.),
+            BilesenBoyutu::CokKucuk => px(26.),
+            BilesenBoyutu::Kucuk => px(30.),
+            BilesenBoyutu::Buyuk => px(40.),
             _ => px(32.),
         }
     }
@@ -260,19 +260,19 @@ impl Size {
     #[inline]
     pub fn table_cell_padding(&self) -> Edges<Pixels> {
         match self {
-            Size::XSmall => Edges {
+            BilesenBoyutu::CokKucuk => Edges {
                 top: px(2.),
                 bottom: px(2.),
                 left: px(4.),
                 right: px(4.),
             },
-            Size::Small => Edges {
+            BilesenBoyutu::Kucuk => Edges {
                 top: px(3.),
                 bottom: px(3.),
                 left: px(6.),
                 right: px(6.),
             },
-            Size::Large => Edges {
+            BilesenBoyutu::Buyuk => Edges {
                 top: px(8.),
                 bottom: px(8.),
                 left: px(12.),
@@ -290,33 +290,35 @@ impl Size {
     /// bir daha küçük boyut. döndürür.
     pub fn smaller(&self) -> Self {
         match self {
-            Size::XSmall => Size::XSmall,
-            Size::Small => Size::XSmall,
-            Size::Medium => Size::Small,
-            Size::Large => Size::Medium,
-            Size::Size(val) => Size::Size(*val * 0.2),
+            BilesenBoyutu::CokKucuk => BilesenBoyutu::CokKucuk,
+            BilesenBoyutu::Kucuk => BilesenBoyutu::CokKucuk,
+            BilesenBoyutu::Orta => BilesenBoyutu::Kucuk,
+            BilesenBoyutu::Buyuk => BilesenBoyutu::Orta,
+            BilesenBoyutu::Ozel(val) => BilesenBoyutu::Ozel(*val * 0.2),
         }
     }
 
     /// bir daha büyük boyut. döndürür.
     pub fn larger(&self) -> Self {
         match self {
-            Size::XSmall => Size::Small,
-            Size::Small => Size::Medium,
-            Size::Medium => Size::Large,
-            Size::Large => Size::Large,
-            Size::Size(val) => Size::Size(*val * 1.2),
+            BilesenBoyutu::CokKucuk => BilesenBoyutu::Kucuk,
+            BilesenBoyutu::Kucuk => BilesenBoyutu::Orta,
+            BilesenBoyutu::Orta => BilesenBoyutu::Buyuk,
+            BilesenBoyutu::Buyuk => BilesenBoyutu::Buyuk,
+            BilesenBoyutu::Ozel(val) => BilesenBoyutu::Ozel(*val * 1.2),
         }
     }
 
     /// maksimum boyut arasında iki boyutlar döndürür.
     ///
-    /// Ör. `Size::XSmall.max(Size::Small)` `Size::XSmall` döndürür.
+    /// Ör. `BilesenBoyutu::CokKucuk.max(BilesenBoyutu::Kucuk)` `BilesenBoyutu::CokKucuk` döndürür.
     pub fn max(&self, other: Self) -> Self {
         match (self, other) {
-            (Size::Size(a), Size::Size(b)) => Size::Size(px(a.as_f32().min(b.as_f32()))),
-            (Size::Size(a), _) => Size::Size(*a),
-            (_, Size::Size(b)) => Size::Size(b),
+            (BilesenBoyutu::Ozel(a), BilesenBoyutu::Ozel(b)) => {
+                BilesenBoyutu::Ozel(px(a.as_f32().min(b.as_f32())))
+            }
+            (BilesenBoyutu::Ozel(a), _) => BilesenBoyutu::Ozel(*a),
+            (_, BilesenBoyutu::Ozel(b)) => BilesenBoyutu::Ozel(b),
             (a, b) if a.as_f32() < b.as_f32() => *a,
             _ => other,
         }
@@ -324,12 +326,14 @@ impl Size {
 
     /// minimum boyut arasında iki boyutlar döndürür.
     ///
-    /// Ör. `Size::XSmall.min(Size::Small)` `Size::Small` döndürür.
+    /// Ör. `BilesenBoyutu::CokKucuk.min(BilesenBoyutu::Kucuk)` `BilesenBoyutu::Kucuk` döndürür.
     pub fn min(&self, other: Self) -> Self {
         match (self, other) {
-            (Size::Size(a), Size::Size(b)) => Size::Size(px(a.as_f32().max(b.as_f32()))),
-            (Size::Size(a), _) => Size::Size(*a),
-            (_, Size::Size(b)) => Size::Size(b),
+            (BilesenBoyutu::Ozel(a), BilesenBoyutu::Ozel(b)) => {
+                BilesenBoyutu::Ozel(px(a.as_f32().max(b.as_f32())))
+            }
+            (BilesenBoyutu::Ozel(a), _) => BilesenBoyutu::Ozel(*a),
+            (_, BilesenBoyutu::Ozel(b)) => BilesenBoyutu::Ozel(b),
             (a, b) if a.as_f32() > b.as_f32() => *a,
             _ => other,
         }
@@ -338,10 +342,10 @@ impl Size {
     /// yatay girdi dolgu döndürür.
     pub fn input_px(&self) -> Pixels {
         match self {
-            Self::Large => px(16.),
-            Self::Medium => px(12.),
-            Self::Small => px(8.),
-            Self::XSmall => px(4.),
+            Self::Buyuk => px(16.),
+            Self::Orta => px(12.),
+            Self::Kucuk => px(8.),
+            Self::CokKucuk => px(4.),
             _ => px(8.),
         }
     }
@@ -349,24 +353,24 @@ impl Size {
     /// dikey girdi dolgu döndürür.
     pub fn input_py(&self) -> Pixels {
         match self {
-            Size::Large => px(10.),
-            Size::Medium => px(8.),
-            Size::Small => px(2.),
-            Size::XSmall => px(0.),
+            BilesenBoyutu::Buyuk => px(10.),
+            BilesenBoyutu::Orta => px(8.),
+            BilesenBoyutu::Kucuk => px(2.),
+            BilesenBoyutu::CokKucuk => px(0.),
             _ => px(2.),
         }
     }
 }
 
-impl From<Pixels> for Size {
+impl From<Pixels> for BilesenBoyutu {
     fn from(size: Pixels) -> Self {
-        Size::Size(size)
+        BilesenBoyutu::Ozel(size)
     }
 }
 
 /// Seçilebilir öğeleri tanımlayan özellik.
 #[allow(patterns_in_fns_without_body)]
-pub trait Selectable: Sized {
+pub trait Secilebilir: Sized {
     /// seçili durum öğe ayarlar.
     fn selected(mut self, selected: bool) -> Self;
 
@@ -381,147 +385,146 @@ pub trait Selectable: Sized {
 
 /// Devre dışı bırakılabilir öğeleri tanımlayan özellik.
 #[allow(patterns_in_fns_without_body)]
-pub trait Disableable {
+pub trait DevreDisiBirakilabilir {
     /// devre dışı durum öğe ayarlar.
     fn disabled(mut self, disabled: bool) -> Self;
 }
 
 /// Bir özellik için ayar boyut bir öğe.
-/// Varsayılan olarak Boyut::Medium kullanılır.
+/// Varsayılan olarak `BilesenBoyutu::Orta` kullanılır.
 #[allow(patterns_in_fns_without_body)]
-pub trait Sizable: Sized {
-    /// ui::Boyut bu öğe ayarlar.
+pub trait Boyutlandirilabilir: Sized {
+    /// Bu öğenin bileşen boyutunu ayarlar.
     ///
-    /// `IconSize` değerine dönüştürmek için `ButtonSize` de alabilir,
-    /// Or bir `Pixels` ayarlamak için özel boyut: `px(30.)`
-    fn with_size(mut self, size: impl Into<Size>) -> Self;
+    /// Bir `Pixels` değeri verilirse özel boyut olarak kullanılır: `px(30.)`.
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self;
 
-    /// için Boyut::XSmall ayarlar.
+    /// `BilesenBoyutu::CokKucuk` ayarlar.
     #[inline(always)]
     fn xsmall(self) -> Self {
-        self.with_size(Size::XSmall)
+        self.with_size(BilesenBoyutu::CokKucuk)
     }
 
-    /// için Boyut::Small ayarlar.
+    /// `BilesenBoyutu::Kucuk` ayarlar.
     #[inline(always)]
     fn small(self) -> Self {
-        self.with_size(Size::Small)
+        self.with_size(BilesenBoyutu::Kucuk)
     }
 
-    /// için Boyut::Large ayarlar.
+    /// `BilesenBoyutu::Buyuk` ayarlar.
     #[inline(always)]
     fn large(self) -> Self {
-        self.with_size(Size::Large)
+        self.with_size(BilesenBoyutu::Buyuk)
     }
 }
 
 #[allow(unused)]
-pub trait StyleSized<T: Styled> {
-    fn input_text_size(self, size: Size) -> Self;
-    fn input_size(self, size: Size) -> Self;
-    fn input_pl(self, size: Size) -> Self;
-    fn input_pr(self, size: Size) -> Self;
-    fn input_px(self, size: Size) -> Self;
-    fn input_py(self, size: Size) -> Self;
-    fn input_h(self, size: Size) -> Self;
-    fn list_size(self, size: Size) -> Self;
-    fn list_px(self, size: Size) -> Self;
-    fn list_py(self, size: Size) -> Self;
-    /// boyut ile verilen `Size`. uygular.
-    fn size_with(self, size: Size) -> Self;
-    /// tablo hücre boyut (Font boyut, dolgu) ile verilen `Size`. uygular.
-    fn table_cell_size(self, size: Size) -> Self;
-    fn button_text_size(self, size: Size) -> Self;
+pub trait StilBoyutlandirma<T: Styled> {
+    fn input_text_size(self, size: BilesenBoyutu) -> Self;
+    fn input_size(self, size: BilesenBoyutu) -> Self;
+    fn input_pl(self, size: BilesenBoyutu) -> Self;
+    fn input_pr(self, size: BilesenBoyutu) -> Self;
+    fn input_px(self, size: BilesenBoyutu) -> Self;
+    fn input_py(self, size: BilesenBoyutu) -> Self;
+    fn input_h(self, size: BilesenBoyutu) -> Self;
+    fn list_size(self, size: BilesenBoyutu) -> Self;
+    fn list_px(self, size: BilesenBoyutu) -> Self;
+    fn list_py(self, size: BilesenBoyutu) -> Self;
+    /// boyut ile verilen `BilesenBoyutu`. uygular.
+    fn size_with(self, size: BilesenBoyutu) -> Self;
+    /// tablo hücre boyut (Font boyut, dolgu) ile verilen `BilesenBoyutu`. uygular.
+    fn table_cell_size(self, size: BilesenBoyutu) -> Self;
+    fn button_text_size(self, size: BilesenBoyutu) -> Self;
 }
 
-impl<T: Styled> StyleSized<T> for T {
+impl<T: Styled> StilBoyutlandirma<T> for T {
     #[inline]
-    fn input_text_size(self, size: Size) -> Self {
+    fn input_text_size(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::XSmall => self.text_xs(),
-            Size::Small => self.text_sm(),
-            Size::Medium => self.text_sm(),
-            Size::Large => self.text_base(),
-            Size::Size(size) => self.text_size(size * 0.875),
+            BilesenBoyutu::CokKucuk => self.text_xs(),
+            BilesenBoyutu::Kucuk => self.text_sm(),
+            BilesenBoyutu::Orta => self.text_sm(),
+            BilesenBoyutu::Buyuk => self.text_base(),
+            BilesenBoyutu::Ozel(size) => self.text_size(size * 0.875),
         }
     }
 
     #[inline]
-    fn input_size(self, size: Size) -> Self {
+    fn input_size(self, size: BilesenBoyutu) -> Self {
         self.input_px(size).input_py(size).input_h(size)
     }
 
     #[inline]
-    fn input_pl(self, size: Size) -> Self {
+    fn input_pl(self, size: BilesenBoyutu) -> Self {
         self.pl(size.input_px())
     }
 
     #[inline]
-    fn input_pr(self, size: Size) -> Self {
+    fn input_pr(self, size: BilesenBoyutu) -> Self {
         self.pr(size.input_px())
     }
 
     #[inline]
-    fn input_px(self, size: Size) -> Self {
+    fn input_px(self, size: BilesenBoyutu) -> Self {
         self.px(size.input_px())
     }
 
     #[inline]
-    fn input_py(self, size: Size) -> Self {
+    fn input_py(self, size: BilesenBoyutu) -> Self {
         self.py(size.input_py())
     }
 
     #[inline]
-    fn input_h(self, size: Size) -> Self {
+    fn input_h(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::Large => self.h_11(),
-            Size::Medium => self.h_8(),
-            Size::Small => self.h_6(),
-            Size::XSmall => self.h_5(),
+            BilesenBoyutu::Buyuk => self.h_11(),
+            BilesenBoyutu::Orta => self.h_8(),
+            BilesenBoyutu::Kucuk => self.h_6(),
+            BilesenBoyutu::CokKucuk => self.h_5(),
             _ => self.h_6(),
         }
     }
 
     #[inline]
-    fn list_size(self, size: Size) -> Self {
+    fn list_size(self, size: BilesenBoyutu) -> Self {
         self.list_px(size).list_py(size).input_text_size(size)
     }
 
     #[inline]
-    fn list_px(self, size: Size) -> Self {
+    fn list_px(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::Small => self.px_2(),
+            BilesenBoyutu::Kucuk => self.px_2(),
             _ => self.px_3(),
         }
     }
 
     #[inline]
-    fn list_py(self, size: Size) -> Self {
+    fn list_py(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::Large => self.py_2(),
-            Size::Medium => self.py_1(),
-            Size::Small => self.py_0p5(),
+            BilesenBoyutu::Buyuk => self.py_2(),
+            BilesenBoyutu::Orta => self.py_1(),
+            BilesenBoyutu::Kucuk => self.py_0p5(),
             _ => self.py_1(),
         }
     }
 
     #[inline]
-    fn size_with(self, size: Size) -> Self {
+    fn size_with(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::Large => self.size_11(),
-            Size::Medium => self.size_8(),
-            Size::Small => self.size_5(),
-            Size::XSmall => self.size_4(),
-            Size::Size(size) => self.size(size),
+            BilesenBoyutu::Buyuk => self.size_11(),
+            BilesenBoyutu::Orta => self.size_8(),
+            BilesenBoyutu::Kucuk => self.size_5(),
+            BilesenBoyutu::CokKucuk => self.size_4(),
+            BilesenBoyutu::Ozel(size) => self.size(size),
         }
     }
 
     #[inline]
-    fn table_cell_size(self, size: Size) -> Self {
+    fn table_cell_size(self, size: BilesenBoyutu) -> Self {
         let padding = size.table_cell_padding();
         match size {
-            Size::XSmall => self.text_sm(),
-            Size::Small => self.text_sm(),
+            BilesenBoyutu::CokKucuk => self.text_sm(),
+            BilesenBoyutu::Kucuk => self.text_sm(),
             _ => self,
         }
         .pl(padding.left)
@@ -530,10 +533,10 @@ impl<T: Styled> StyleSized<T> for T {
         .pb(padding.bottom)
     }
 
-    fn button_text_size(self, size: Size) -> Self {
+    fn button_text_size(self, size: BilesenBoyutu) -> Self {
         match size {
-            Size::XSmall => self.text_xs(),
-            Size::Small => self.text_sm(),
+            BilesenBoyutu::CokKucuk => self.text_xs(),
+            BilesenBoyutu::Kucuk => self.text_sm(),
             _ => self.text_base(),
         }
     }
@@ -635,58 +638,88 @@ pub trait Daraltilabilir {
 mod tests {
     use gpui::px;
 
-    use crate::Size;
+    use crate::BilesenBoyutu;
 
     #[test]
     fn test_size_max_min() {
-        assert_eq!(Size::Small.min(Size::XSmall), Size::Small);
-        assert_eq!(Size::XSmall.min(Size::Small), Size::Small);
-        assert_eq!(Size::Small.min(Size::Medium), Size::Medium);
-        assert_eq!(Size::Medium.min(Size::Large), Size::Large);
-        assert_eq!(Size::Large.min(Size::Small), Size::Large);
+        assert_eq!(
+            BilesenBoyutu::Kucuk.min(BilesenBoyutu::CokKucuk),
+            BilesenBoyutu::Kucuk
+        );
+        assert_eq!(
+            BilesenBoyutu::CokKucuk.min(BilesenBoyutu::Kucuk),
+            BilesenBoyutu::Kucuk
+        );
+        assert_eq!(
+            BilesenBoyutu::Kucuk.min(BilesenBoyutu::Orta),
+            BilesenBoyutu::Orta
+        );
+        assert_eq!(
+            BilesenBoyutu::Orta.min(BilesenBoyutu::Buyuk),
+            BilesenBoyutu::Buyuk
+        );
+        assert_eq!(
+            BilesenBoyutu::Buyuk.min(BilesenBoyutu::Kucuk),
+            BilesenBoyutu::Buyuk
+        );
 
         assert_eq!(
-            Size::Size(px(10.)).min(Size::Size(px(20.))),
-            Size::Size(px(20.))
+            BilesenBoyutu::Ozel(px(10.)).min(BilesenBoyutu::Ozel(px(20.))),
+            BilesenBoyutu::Ozel(px(20.))
         );
 
         // Min
-        assert_eq!(Size::Small.max(Size::XSmall), Size::XSmall);
-        assert_eq!(Size::XSmall.max(Size::Small), Size::XSmall);
-        assert_eq!(Size::Small.max(Size::Medium), Size::Small);
-        assert_eq!(Size::Medium.max(Size::Large), Size::Medium);
-        assert_eq!(Size::Large.max(Size::Small), Size::Small);
+        assert_eq!(
+            BilesenBoyutu::Kucuk.max(BilesenBoyutu::CokKucuk),
+            BilesenBoyutu::CokKucuk
+        );
+        assert_eq!(
+            BilesenBoyutu::CokKucuk.max(BilesenBoyutu::Kucuk),
+            BilesenBoyutu::CokKucuk
+        );
+        assert_eq!(
+            BilesenBoyutu::Kucuk.max(BilesenBoyutu::Orta),
+            BilesenBoyutu::Kucuk
+        );
+        assert_eq!(
+            BilesenBoyutu::Orta.max(BilesenBoyutu::Buyuk),
+            BilesenBoyutu::Orta
+        );
+        assert_eq!(
+            BilesenBoyutu::Buyuk.max(BilesenBoyutu::Kucuk),
+            BilesenBoyutu::Kucuk
+        );
 
         assert_eq!(
-            Size::Size(px(10.)).max(Size::Size(px(20.))),
-            Size::Size(px(10.))
+            BilesenBoyutu::Ozel(px(10.)).max(BilesenBoyutu::Ozel(px(20.))),
+            BilesenBoyutu::Ozel(px(10.))
         );
     }
 
     #[test]
     fn test_size_as_str() {
-        assert_eq!(Size::XSmall.as_str(), "xs");
-        assert_eq!(Size::Small.as_str(), "sm");
-        assert_eq!(Size::Medium.as_str(), "md");
-        assert_eq!(Size::Large.as_str(), "lg");
-        assert_eq!(Size::Size(px(15.)).as_str(), "custom");
+        assert_eq!(BilesenBoyutu::CokKucuk.as_str(), "xs");
+        assert_eq!(BilesenBoyutu::Kucuk.as_str(), "sm");
+        assert_eq!(BilesenBoyutu::Orta.as_str(), "md");
+        assert_eq!(BilesenBoyutu::Buyuk.as_str(), "lg");
+        assert_eq!(BilesenBoyutu::Ozel(px(15.)).as_str(), "custom");
     }
 
     #[test]
     fn test_size_from_str() {
-        assert_eq!(Size::from_str("xs"), Size::XSmall);
-        assert_eq!(Size::from_str("xsmall"), Size::XSmall);
-        assert_eq!(Size::from_str("sm"), Size::Small);
-        assert_eq!(Size::from_str("small"), Size::Small);
-        assert_eq!(Size::from_str("md"), Size::Medium);
-        assert_eq!(Size::from_str("medium"), Size::Medium);
-        assert_eq!(Size::from_str("lg"), Size::Large);
-        assert_eq!(Size::from_str("large"), Size::Large);
-        assert_eq!(Size::from_str("unknown"), Size::Medium);
+        assert_eq!(BilesenBoyutu::from_str("xs"), BilesenBoyutu::CokKucuk);
+        assert_eq!(BilesenBoyutu::from_str("xsmall"), BilesenBoyutu::CokKucuk);
+        assert_eq!(BilesenBoyutu::from_str("sm"), BilesenBoyutu::Kucuk);
+        assert_eq!(BilesenBoyutu::from_str("small"), BilesenBoyutu::Kucuk);
+        assert_eq!(BilesenBoyutu::from_str("md"), BilesenBoyutu::Orta);
+        assert_eq!(BilesenBoyutu::from_str("medium"), BilesenBoyutu::Orta);
+        assert_eq!(BilesenBoyutu::from_str("lg"), BilesenBoyutu::Buyuk);
+        assert_eq!(BilesenBoyutu::from_str("large"), BilesenBoyutu::Buyuk);
+        assert_eq!(BilesenBoyutu::from_str("unknown"), BilesenBoyutu::Orta);
 
         // Case insensitive
-        assert_eq!(Size::from_str("XS"), Size::XSmall);
-        assert_eq!(Size::from_str("SMALL"), Size::Small);
-        assert_eq!(Size::from_str("Md"), Size::Medium);
+        assert_eq!(BilesenBoyutu::from_str("XS"), BilesenBoyutu::CokKucuk);
+        assert_eq!(BilesenBoyutu::from_str("SMALL"), BilesenBoyutu::Kucuk);
+        assert_eq!(BilesenBoyutu::from_str("Md"), BilesenBoyutu::Orta);
     }
 }

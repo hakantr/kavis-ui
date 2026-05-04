@@ -1,4 +1,4 @@
-use crate::{EtkinTema, Sizable, Size};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema};
 use gpui::{
     AnyElement, App, AppContext, Context, Entity, Hsla, IntoElement, Radians, Render, RenderOnce,
     SharedString, StyleRefinement, Styled, Svg, Transformation, Window,
@@ -48,7 +48,7 @@ pub struct Simge {
     style: StyleRefinement,
     path: SharedString,
     text_color: Option<Hsla>,
-    size: Option<Size>,
+    size: Option<BilesenBoyutu>,
     rotation: Option<Radians>,
 }
 
@@ -127,8 +127,8 @@ impl Styled for Simge {
     }
 }
 
-impl Sizable for Simge {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Simge {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = Some(size.into());
         self
     }
@@ -147,11 +147,11 @@ impl RenderOnce for Simge {
             .text_color(text_color)
             .when(!has_base_size, |this| this.size(text_size))
             .when_some(self.size, |this, size| match size {
-                Size::Size(px) => this.size(px),
-                Size::XSmall => this.size_3(),
-                Size::Small => this.size_3p5(),
-                Size::Medium => this.size_4(),
-                Size::Large => this.size_6(),
+                BilesenBoyutu::Ozel(px) => this.size(px),
+                BilesenBoyutu::CokKucuk => this.size_3(),
+                BilesenBoyutu::Kucuk => this.size_3p5(),
+                BilesenBoyutu::Orta => this.size_4(),
+                BilesenBoyutu::Buyuk => this.size_6(),
             })
             .path(self.path)
     }
@@ -176,11 +176,11 @@ impl Render for Simge {
             .text_color(text_color)
             .when(!has_base_size, |this| this.size(text_size))
             .when_some(self.size, |this, size| match size {
-                Size::Size(px) => this.size(px),
-                Size::XSmall => this.size_3(),
-                Size::Small => this.size_3p5(),
-                Size::Medium => this.size_4(),
-                Size::Large => this.size_6(),
+                BilesenBoyutu::Ozel(px) => this.size(px),
+                BilesenBoyutu::CokKucuk => this.size_3(),
+                BilesenBoyutu::Kucuk => this.size_3p5(),
+                BilesenBoyutu::Orta => this.size_4(),
+                BilesenBoyutu::Buyuk => this.size_6(),
             })
             .path(self.path.clone())
             .when_some(self.rotation, |this, rotation| {

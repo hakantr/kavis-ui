@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema, StyledExt,
+    EtkinTema, StilUzantisi,
     group_box::{GrupKutusu, GrupKutusuVaryantlari},
     label::Etiket,
     setting::{AyarOgesi, RenderOptions},

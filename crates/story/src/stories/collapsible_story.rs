@@ -7,13 +7,13 @@ use gpui::{
 use kavis_ui::group_box::{GrupKutusu, GrupKutusuVaryantlari as _};
 use kavis_ui::label::Etiket;
 use kavis_ui::tag::Cip;
-use kavis_ui::{EtkinTema, SimgeAdi, StyledExt, h_flex};
 use kavis_ui::{
-    Sizable,
+    Boyutlandirilabilir,
     button::{Dugme, DugmeVaryantlari},
     collapsible::Daraltilabilir,
     v_flex,
 };
+use kavis_ui::{EtkinTema, SimgeAdi, StilUzantisi, h_flex};
 
 use crate::section;
 

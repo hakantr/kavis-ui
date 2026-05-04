@@ -14,7 +14,7 @@ use markdown::mdast;
 use ropey::Rope;
 
 use crate::{
-    EtkinTema as _, Simge, SimgeAdi, StyledExt, h_flex,
+    EtkinTema as _, Simge, SimgeAdi, StilUzantisi, h_flex,
     highlighter::{SozdizimiVurgulayici, VurguTemasi},
     text::{
         CodeBlockActionsFn,

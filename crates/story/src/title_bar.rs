@@ -6,7 +6,8 @@ use gpui::{
     Window, div, px,
 };
 use kavis_ui::{
-    BaslikCubugu, EtkinTema as _, PencereUzantisi as _, Side, SimgeAdi, Sizable as _, Tema,
+    BaslikCubugu, Boyutlandirilabilir as _, EtkinTema as _, PencereUzantisi as _, Side, SimgeAdi,
+    Tema,
     badge::Rozet,
     button::{Dugme, DugmeVaryantlari as _},
     label::Etiket,

@@ -12,7 +12,7 @@ const MAX_MENU_WIDTH: Pixels = px(320.);
 const MAX_MENU_HEIGHT: Pixels = px(480.);
 
 use crate::{
-    EtkinTema, IndexPath, Selectable, actions, h_flex,
+    EtkinTema, IndexPath, Secilebilir, actions, h_flex,
     input::{self, InputState, popovers::editor_popover},
     list::{Liste, ListeDurumu, ListeOlayi, ListeTemsilcisi},
 };
@@ -59,7 +59,7 @@ impl MenuItem {
         }
     }
 }
-impl Selectable for MenuItem {
+impl Secilebilir for MenuItem {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

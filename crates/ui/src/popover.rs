@@ -7,7 +7,7 @@ use gpui::{
 use std::{cell::Cell, rc::Rc};
 
 use crate::{
-    ElementExt, Selectable, StyledExt as _, actions::Cancel, global_state::KureselDurum, v_flex,
+    ElementExt, Secilebilir, StilUzantisi as _, actions::Cancel, global_state::KureselDurum, v_flex,
 };
 
 const CONTEXT: &str = "AcilirKatman";
@@ -84,7 +84,7 @@ impl AcilirKatman {
     /// tetikleyici öğe açılır katman ayarlar.
     pub fn trigger<T>(mut self, trigger: T) -> Self
     where
-        T: Selectable + IntoElement + 'static,
+        T: Secilebilir + IntoElement + 'static,
     {
         self.trigger = Some(Box::new(|is_open, _, _| {
             let selected = trigger.is_selected();
@@ -490,9 +490,7 @@ impl RenderOnce for AcilirKatman {
             let overflow_flip = overflow(flip_top, flip_bot);
             let hysteresis = trigger_bounds.size.height;
 
-            if overflow_current > Pixels::ZERO
-                && overflow_flip + hysteresis < overflow_current
-            {
+            if overflow_current > Pixels::ZERO && overflow_flip + hysteresis < overflow_current {
                 !was_flipped
             } else {
                 was_flipped
@@ -611,10 +609,7 @@ impl RenderOnce for AcilirKatman {
                                     if became_visible {
                                         s.popup_visible = true;
                                     }
-                                    if bounds_changed
-                                        || first_capture
-                                        || became_visible
-                                    {
+                                    if bounds_changed || first_capture || became_visible {
                                         cx.notify();
                                     }
                                     should_request_frame = first_capture || became_visible;

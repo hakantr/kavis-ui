@@ -3,7 +3,7 @@ use gpui::{
     Styled, Window,
 };
 use kavis_ui::{
-    Selectable as _, SimgeAdi, Sizable as _, Size,
+    BilesenBoyutu, Boyutlandirilabilir as _, Secilebilir as _, SimgeAdi,
     alert::Uyari,
     button::{Dugme, DugmeGrubu},
     dock::PanelControl,
@@ -14,7 +14,7 @@ use kavis_ui::{
 use crate::section;
 
 pub struct AlertStory {
-    size: Size,
+    size: BilesenBoyutu,
     banner_visible: bool,
     focus_handle: gpui::FocusHandle,
 }
@@ -22,7 +22,7 @@ pub struct AlertStory {
 impl AlertStory {
     fn new(_: &mut Window, cx: &mut Context<Self>) -> Self {
         Self {
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             banner_visible: true,
             focus_handle: cx.focus_handle(),
         }
@@ -32,7 +32,7 @@ impl AlertStory {
         cx.new(|cx| Self::new(window, cx))
     }
 
-    fn set_size(&mut self, size: Size, _: &mut Window, cx: &mut Context<Self>) {
+    fn set_size(&mut self, size: BilesenBoyutu, _: &mut Window, cx: &mut Context<Self>) {
         self.size = size;
         cx.notify();
     }
@@ -73,29 +73,29 @@ impl Render for AlertStory {
                     .child(
                         Dugme::new("xsmall")
                             .label("Çok Küçük")
-                            .selected(self.size == Size::XSmall),
+                            .selected(self.size == BilesenBoyutu::CokKucuk),
                     )
                     .child(
                         Dugme::new("small")
                             .label("Küçük")
-                            .selected(self.size == Size::Small),
+                            .selected(self.size == BilesenBoyutu::Kucuk),
                     )
                     .child(
                         Dugme::new("medium")
                             .label("Orta")
-                            .selected(self.size == Size::Medium),
+                            .selected(self.size == BilesenBoyutu::Orta),
                     )
                     .child(
                         Dugme::new("large")
                             .label("Büyük")
-                            .selected(self.size == Size::Large),
+                            .selected(self.size == BilesenBoyutu::Buyuk),
                     )
                     .on_click(cx.listener(|this, selecteds: &Vec<usize>, window, cx| {
                         let size = match selecteds[0] {
-                            0 => Size::XSmall,
-                            1 => Size::Small,
-                            2 => Size::Medium,
-                            3 => Size::Large,
+                            0 => BilesenBoyutu::CokKucuk,
+                            1 => BilesenBoyutu::Kucuk,
+                            2 => BilesenBoyutu::Orta,
+                            3 => BilesenBoyutu::Buyuk,
                             _ => unreachable!(),
                         };
                         this.set_size(size, window, cx);

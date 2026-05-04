@@ -3,7 +3,7 @@ use gpui::{
     ParentElement as _, Render, SharedString, Styled as _, Window, actions, div, px,
 };
 use kavis_ui::{
-    EtkinTema as _, Side, SimgeAdi, StyledExt,
+    EtkinTema as _, Side, SimgeAdi, StilUzantisi,
     button::Dugme,
     h_flex,
     menu::{ContextMenuExt, DropdownMenu as _, PopupMenuItem},

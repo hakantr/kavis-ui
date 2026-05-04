@@ -7,7 +7,8 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    EtkinTema as _, Renklendir as _, Selectable, Simge, Sizable, Size, StyleSized,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, Renklendir as _, Secilebilir, Simge,
+    StilBoyutlandirma,
     actions::Confirm,
     divider::Ayirici,
     h_flex,
@@ -335,7 +336,7 @@ pub struct RenkSecici {
     featured_colors: Option<Vec<Hsla>>,
     label: Option<SharedString>,
     icon: Option<Simge>,
-    size: Size,
+    size: BilesenBoyutu,
     anchor: Anchor,
 }
 
@@ -347,7 +348,7 @@ impl RenkSecici {
             style: StyleRefinement::default(),
             state: state.clone(),
             featured_colors: None,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             label: None,
             icon: None,
             anchor: Anchor::TopLeft,
@@ -723,8 +724,8 @@ impl RenkSecici {
     }
 }
 
-impl Sizable for RenkSecici {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for RenkSecici {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -793,12 +794,12 @@ struct ColorPickerButton {
     selected: bool,
     icon: Option<Simge>,
     value: Option<Hsla>,
-    size: Size,
+    size: BilesenBoyutu,
     label: Option<SharedString>,
     tooltip: Option<SharedString>,
 }
 
-impl Selectable for ColorPickerButton {
+impl Secilebilir for ColorPickerButton {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -809,8 +810,8 @@ impl Selectable for ColorPickerButton {
     }
 }
 
-impl Sizable for ColorPickerButton {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for ColorPickerButton {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

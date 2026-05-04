@@ -1,4 +1,4 @@
-use crate::{Simge, SimgeAdi, Sizable, Size};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, Simge, SimgeAdi};
 use gpui::{
     Animation, AnimationExt as _, App, Hsla, IntoElement, ParentElement, RenderOnce, Styled as _,
     Transformation, Window, div, ease_in_out, percentage, prelude::FluentBuilder as _,
@@ -8,7 +8,7 @@ use instant::Duration;
 /// Bir cycling yükleme spinner.
 #[derive(IntoElement)]
 pub struct DonerGosterge {
-    size: Size,
+    size: BilesenBoyutu,
     icon: Simge,
     speed: Duration,
     color: Option<Hsla>,
@@ -18,7 +18,7 @@ impl DonerGosterge {
     /// Yeni bir yükleme spinner oluşturur.
     pub fn new() -> Self {
         Self {
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             speed: Duration::from_secs_f64(0.8),
             icon: Simge::new(SimgeAdi::Loader),
             color: None,
@@ -42,8 +42,8 @@ impl DonerGosterge {
     }
 }
 
-impl Sizable for DonerGosterge {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for DonerGosterge {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

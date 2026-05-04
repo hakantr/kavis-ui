@@ -2,7 +2,7 @@ use gpui::{
     AnyElement, App, IntoElement, ParentElement, RenderOnce, StyleRefinement, Styled, Window,
 };
 
-use crate::{EtkinTema as _, StyledExt as _, v_flex};
+use crate::{EtkinTema as _, StilUzantisi as _, v_flex};
 
 /// içerik kapsayıcı için bir iletişim kutusu.
 #[derive(IntoElement)]

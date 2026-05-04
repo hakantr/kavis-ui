@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema as _, Simge, SimgeAdi, Size, h_flex,
+    BilesenBoyutu, EtkinTema as _, Simge, SimgeAdi, h_flex,
     menu::PopupMenu,
     table::{Column, ColumnGroup, ColumnSort, TabloDurumu, loading::Loading},
 };
@@ -151,7 +151,7 @@ pub trait TabloTemsilcisi: Sized + 'static {
     /// Boyut, tablonun boyutudur.
     fn render_loading(
         &mut self,
-        size: Size,
+        size: BilesenBoyutu,
         window: &mut Window,
         cx: &mut Context<TabloDurumu<Self>>,
     ) -> impl IntoElement {

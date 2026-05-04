@@ -5,7 +5,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, EtkinTema as _, Simge, Sizable, Size, StyledExt as _,
+    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, Simge, StilUzantisi as _,
     stepper::trigger::AdimlayiciTetikleyicisi,
 };
 
@@ -19,7 +19,7 @@ pub struct AdimlayiciOgesi {
     children: Vec<AnyElement>,
     layout: Axis,
     disabled: bool,
-    size: Size,
+    size: BilesenBoyutu,
     is_last: bool,
     text_center: bool,
     on_click: Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>,
@@ -34,7 +34,7 @@ impl AdimlayiciOgesi {
             icon: None,
             layout: Axis::Horizontal,
             disabled: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             is_last: false,
             text_center: false,
             children: Vec::new(),
@@ -98,8 +98,8 @@ impl ParentElement for AdimlayiciOgesi {
     }
 }
 
-impl Sizable for AdimlayiciOgesi {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for AdimlayiciOgesi {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -115,9 +115,9 @@ impl RenderOnce for AdimlayiciOgesi {
     fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
         let is_passed = self.step < self.checked_step;
         let icon_size = match self.size {
-            Size::XSmall => px(8.),
-            Size::Small => px(18.),
-            Size::Large => px(32.),
+            BilesenBoyutu::CokKucuk => px(8.),
+            BilesenBoyutu::Kucuk => px(18.),
+            BilesenBoyutu::Buyuk => px(32.),
             _ => px(24.),
         };
 
@@ -166,7 +166,7 @@ impl RenderOnce for AdimlayiciOgesi {
 /// Varsayılan olarak `absolute` konumlandırılır.
 #[derive(IntoElement)]
 struct StepperSeparator {
-    size: Size,
+    size: BilesenBoyutu,
     checked: bool,
     icon_size: Pixels,
     layout: Axis,
@@ -177,7 +177,7 @@ struct StepperSeparator {
 impl StepperSeparator {
     fn new() -> Self {
         Self {
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             checked: false,
             icon_size: px(24.),
             layout: Axis::Horizontal,
@@ -186,7 +186,7 @@ impl StepperSeparator {
         }
     }
 
-    fn with_size(mut self, size: Size) -> Self {
+    fn with_size(mut self, size: BilesenBoyutu) -> Self {
         self.size = size;
         self
     }
@@ -223,8 +223,8 @@ impl RenderOnce for StepperSeparator {
         let icon_size = self.icon_size;
         let text_center = self.text_center;
         let separator_wide = match self.size {
-            Size::XSmall => px(1.5),
-            Size::Large => px(3.),
+            BilesenBoyutu::CokKucuk => px(1.5),
+            BilesenBoyutu::Buyuk => px(3.),
             _ => px(2.),
         };
 

@@ -8,7 +8,7 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema, StyledExt,
+    EtkinTema, StilUzantisi,
     animation::{Transition, ease_in_out_cubic, ease_out_cubic},
     h_flex,
     kbd::KlavyeTusu,

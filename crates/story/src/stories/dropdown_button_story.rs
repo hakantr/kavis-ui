@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::section;
 use kavis_ui::{
-    Disableable, EtkinTema, Selectable as _, Sizable as _, Tema,
+    Boyutlandirilabilir as _, DevreDisiBirakilabilir, EtkinTema, Secilebilir as _, Tema,
     button::{AcilirDugme, Dugme, DugmeVaryantlari as _},
     checkbox::OnayKutusu,
     h_flex, v_flex,

@@ -3,7 +3,7 @@ use gpui::{
     RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, div,
 };
 
-use crate::{EtkinTema as _, StyledExt};
+use crate::{EtkinTema as _, StilUzantisi};
 
 /// Bir Link öğe gibi bir `<a>` etiket içinde HTML.
 #[derive(IntoElement)]

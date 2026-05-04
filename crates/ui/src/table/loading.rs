@@ -1,17 +1,19 @@
-use crate::{EtkinTema, Size, h_flex, skeleton::Iskelet, v_flex};
+use crate::{BilesenBoyutu, EtkinTema, h_flex, skeleton::Iskelet, v_flex};
 use gpui::{IntoElement, ParentElement as _, RenderOnce, Styled, prelude::FluentBuilder as _};
 
 #[derive(IntoElement)]
 pub(super) struct Loading {
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl Loading {
     pub(super) fn new() -> Self {
-        Self { size: Size::Medium }
+        Self {
+            size: BilesenBoyutu::Orta,
+        }
     }
 
-    pub(super) fn size(mut self, size: Size) -> Self {
+    pub(super) fn size(mut self, size: BilesenBoyutu) -> Self {
         self.size = size;
         self
     }
@@ -20,25 +22,25 @@ impl Loading {
 #[derive(IntoElement)]
 struct LoadingRow {
     header: bool,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl LoadingRow {
     fn header() -> Self {
         Self {
             header: true,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
         }
     }
 
     fn row() -> Self {
         Self {
             header: false,
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
         }
     }
 
-    fn size(mut self, size: Size) -> Self {
+    fn size(mut self, size: BilesenBoyutu) -> Self {
         self.size = size;
         self
     }

@@ -1,7 +1,7 @@
 use gpui::{App, Styled};
 
 use crate::{
-    EtkinTema as _, Simge, SimgeAdi, Sizable as _,
+    Boyutlandirilabilir as _, EtkinTema as _, Simge, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
 };
 

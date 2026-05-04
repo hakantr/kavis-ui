@@ -10,8 +10,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    EtkinTema, FocusTrapElement as _, PencereUzantisi as _, Placement, SimgeAdi, Sizable,
-    StyledExt as _,
+    Boyutlandirilabilir, EtkinTema, FocusTrapElement as _, PencereUzantisi as _, Placement,
+    SimgeAdi, StilUzantisi as _,
     actions::Cancel,
     button::{Dugme, DugmeVaryantlari as _},
     dialog::overlay_color,

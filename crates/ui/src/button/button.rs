@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    Disableable, EtkinTema, FocusableExt as _, Renklendir as _, Selectable, Simge, SimgeAdi,
-    Sizable, Size, StyleSized, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, FocusableExt as _,
+    Renklendir as _, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
     button::DugmeSimgesi,
     h_flex,
     tooltip::{AracIpucu, ManagedTooltipExt as _},
@@ -196,7 +196,7 @@ pub struct Dugme {
     border_corners: Corners<bool>,
     border_edges: Edges<bool>,
     dropdown_caret: bool,
-    size: Size,
+    size: BilesenBoyutu,
     compact: bool,
     tooltip: Option<(
         SharedString,
@@ -242,7 +242,7 @@ impl Dugme {
                 bottom_left: true,
             },
             border_edges: Edges::all(true),
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             tooltip: None,
             tooltip_builder: None,
             on_click: None,
@@ -394,14 +394,14 @@ impl Dugme {
     }
 }
 
-impl Disableable for Dugme {
+impl DevreDisiBirakilabilir for Dugme {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Selectable for Dugme {
+impl Secilebilir for Dugme {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -412,8 +412,8 @@ impl Selectable for Dugme {
     }
 }
 
-impl Sizable for Dugme {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Dugme {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -452,7 +452,7 @@ impl RenderOnce for Dugme {
         let hoverable = self.hoverable();
         let normal_style = style.normal(self.outline, cx);
         let icon_size = match self.size {
-            Size::Size(v) => Size::Size(v * 0.75),
+            BilesenBoyutu::Ozel(v) => BilesenBoyutu::Ozel(v * 0.75),
             _ => self.size,
         };
 
@@ -492,17 +492,19 @@ impl RenderOnce for Dugme {
                 if self.label.is_none() && self.children.is_empty() {
                     // Simge Dugme
                     match self.size {
-                        Size::Size(px) => this.size(px),
-                        Size::XSmall => this.size_5(),
-                        Size::Small => this.size_6(),
-                        Size::Large | Size::Medium => this.size_8(),
+                        BilesenBoyutu::Ozel(px) => this.size(px),
+                        BilesenBoyutu::CokKucuk => this.size_5(),
+                        BilesenBoyutu::Kucuk => this.size_6(),
+                        BilesenBoyutu::Buyuk | BilesenBoyutu::Orta => this.size_8(),
                     }
                 } else {
                     // Normal Dugme
                     match self.size {
-                        Size::Size(size) => this.px(size * 0.2),
-                        Size::XSmall => this.h_5().px_1().when(self.compact, |this| this.min_w_5()),
-                        Size::Small => this
+                        BilesenBoyutu::Ozel(size) => this.px(size * 0.2),
+                        BilesenBoyutu::CokKucuk => {
+                            this.h_5().px_1().when(self.compact, |this| this.min_w_5())
+                        }
+                        BilesenBoyutu::Kucuk => this
                             .h_6()
                             .px_3()
                             .when(self.compact, |this| this.min_w_6().px_1p5()),
@@ -606,8 +608,8 @@ impl RenderOnce for Dugme {
                     .justify_center()
                     .button_text_size(self.size)
                     .map(|this| match self.size {
-                        Size::XSmall => this.gap_1(),
-                        Size::Small => this.gap_1(),
+                        BilesenBoyutu::CokKucuk => this.gap_1(),
+                        BilesenBoyutu::Kucuk => this.gap_1(),
                         _ => this.gap_2(),
                     })
                     .when_some(self.icon, |this, icon| {
@@ -1007,7 +1009,7 @@ mod tests {
         assert_eq!(button.label, Some("Save Changes".into()));
         assert_eq!(button.variant, DugmeVaryanti::Primary);
         assert!(button.outline);
-        assert_eq!(button.size, Size::Large);
+        assert_eq!(button.size, BilesenBoyutu::Buyuk);
         assert!(button.tooltip.is_some());
         assert!(button.compact);
         assert!(!button.loading);

@@ -118,9 +118,7 @@ fn language_menu(_: &App) -> MenuItem {
     let locale = rust_i18n::locale().to_string();
     MenuItem::Submenu(Menu {
         name: "Dil".into(),
-        items: vec![
-            MenuItem::action("English", SelectLocale("en".into())).checked(locale == "en"),
-        ],
+        items: vec![MenuItem::action("English", SelectLocale("en".into())).checked(locale == "en")],
         disabled: false,
     })
 }

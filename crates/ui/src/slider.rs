@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::{AxisExt, ElementExt, EtkinTema, StyledExt, h_flex};
+use crate::{AxisExt, ElementExt, EtkinTema, StilUzantisi, h_flex};
 use gpui::{
     Along, App, AppContext as _, Axis, Background, Bounds, Context, Corners, DefiniteLength,
     DragMoveEvent, Empty, Entity, EntityId, EventEmitter, Hsla, InteractiveElement, IntoElement,

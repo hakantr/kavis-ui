@@ -2,7 +2,7 @@ use gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled, Window,
 };
 use kavis_ui::{
-    EtkinTema, Selectable as _, SimgeAdi, Sizable as _, Size,
+    BilesenBoyutu, Boyutlandirilabilir as _, EtkinTema, Secilebilir as _, SimgeAdi,
     button::{Dugme, DugmeGrubu},
     h_flex,
     rating::Puanlama,
@@ -13,7 +13,7 @@ use crate::section;
 
 pub struct RatingStory {
     focus_handle: gpui::FocusHandle,
-    size: Size,
+    size: BilesenBoyutu,
     value: usize,
 }
 
@@ -39,7 +39,7 @@ impl RatingStory {
     fn new(_: &mut Window, cx: &mut Context<Self>) -> Self {
         Self {
             focus_handle: cx.focus_handle(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             value: 3,
         }
     }
@@ -68,29 +68,29 @@ impl Render for RatingStory {
                         .child(
                             Dugme::new("xsmall")
                                 .label("XSmall")
-                                .selected(self.size == Size::XSmall),
+                                .selected(self.size == BilesenBoyutu::CokKucuk),
                         )
                         .child(
                             Dugme::new("small")
                                 .label("Small")
-                                .selected(self.size == Size::Small),
+                                .selected(self.size == BilesenBoyutu::Kucuk),
                         )
                         .child(
                             Dugme::new("medium")
                                 .label("Medium")
-                                .selected(self.size == Size::Medium),
+                                .selected(self.size == BilesenBoyutu::Orta),
                         )
                         .child(
                             Dugme::new("large")
                                 .label("Large")
-                                .selected(self.size == Size::Large),
+                                .selected(self.size == BilesenBoyutu::Buyuk),
                         )
                         .on_click(cx.listener(|this, selecteds: &Vec<usize>, _, cx| {
                             let size = match selecteds[0] {
-                                0 => Size::XSmall,
-                                1 => Size::Small,
-                                2 => Size::Medium,
-                                3 => Size::Large,
+                                0 => BilesenBoyutu::CokKucuk,
+                                1 => BilesenBoyutu::Kucuk,
+                                2 => BilesenBoyutu::Orta,
+                                3 => BilesenBoyutu::Buyuk,
                                 _ => unreachable!(),
                             };
                             this.size = size;

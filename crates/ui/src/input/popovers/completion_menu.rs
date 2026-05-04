@@ -13,7 +13,7 @@ const MAX_MENU_HEIGHT: Pixels = px(240.);
 const POPOVER_GAP: Pixels = px(4.);
 
 use crate::{
-    EtkinTema, IndexPath, Selectable, actions, h_flex,
+    EtkinTema, IndexPath, Secilebilir, actions, h_flex,
     input::{
         self, InputState, RopeExt,
         popovers::{editor_popover, render_markdown},
@@ -65,7 +65,7 @@ impl CompletionMenuItem {
         self
     }
 }
-impl Selectable for CompletionMenuItem {
+impl Secilebilir for CompletionMenuItem {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

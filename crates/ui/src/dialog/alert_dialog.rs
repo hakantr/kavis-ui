@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use crate::{
-    PencereUzantisi as _, StyledExt as _,
+    PencereUzantisi as _, StilUzantisi as _,
     dialog::{
         IletisimAciklamasi, IletisimAltligi, IletisimBasligi, IletisimBaslikMetni,
         IletisimDugmesiOzellikleri, IletisimKutusu,

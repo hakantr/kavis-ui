@@ -1,4 +1,4 @@
-use crate::{EtkinTema, Sizable, Size, StyledExt};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi};
 use gpui::prelude::FluentBuilder as _;
 use gpui::{
     Animation, AnimationExt as _, AnyElement, App, ElementId, Hsla, InteractiveElement as _,
@@ -19,7 +19,7 @@ pub struct DaireselIlerleme {
     style: StyleRefinement,
     color: Option<Hsla>,
     value: f32,
-    size: Size,
+    size: BilesenBoyutu,
     children: Vec<AnyElement>,
     loading: bool,
 }
@@ -32,7 +32,7 @@ impl DaireselIlerleme {
             value: Default::default(),
             color: None,
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             children: Vec::new(),
             loading: false,
         }
@@ -138,8 +138,8 @@ impl Styled for DaireselIlerleme {
     }
 }
 
-impl Sizable for DaireselIlerleme {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for DaireselIlerleme {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -168,11 +168,11 @@ impl RenderOnce for DaireselIlerleme {
             .justify_center()
             .line_height(relative(1.))
             .map(|this| match self.size {
-                Size::XSmall => this.size_2(),
-                Size::Small => this.size_3(),
-                Size::Medium => this.size_4(),
-                Size::Large => this.size_5(),
-                Size::Size(s) => this.size(s * 0.75),
+                BilesenBoyutu::CokKucuk => this.size_2(),
+                BilesenBoyutu::Kucuk => this.size_3(),
+                BilesenBoyutu::Orta => this.size_4(),
+                BilesenBoyutu::Buyuk => this.size_5(),
+                BilesenBoyutu::Ozel(s) => this.size(s * 0.75),
             })
             .refine_style(&self.style)
             .children(self.children)

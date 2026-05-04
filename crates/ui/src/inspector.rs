@@ -14,7 +14,7 @@ use lsp_types::{
 use ropey::Rope;
 
 use crate::{
-    EtkinTema, Selectable, SimgeAdi, Sizable, TITLE_BAR_HEIGHT,
+    Boyutlandirilabilir, EtkinTema, Secilebilir, SimgeAdi, TITLE_BAR_HEIGHT,
     alert::Uyari,
     button::{Dugme, DugmeVaryantlari},
     clipboard::Pano,
@@ -286,7 +286,7 @@ impl StyleMethods {
         static STYLE_METHODS: OnceLock<StyleMethods> = OnceLock::new();
         STYLE_METHODS.get_or_init(|| {
             let table: Vec<_> = [
-                crate::styled_ext_reflection::methods::<StyleRefinement>(),
+                crate::stil_uzantisi_reflection::methods::<StyleRefinement>(),
                 gpui::styled_reflection::methods::<StyleRefinement>(),
             ]
             .into_iter()

@@ -4,7 +4,7 @@ use std::time::Duration;
 use gpui::{actions, prelude::FluentBuilder as _, *};
 use kavis_ui::TemaModu;
 use kavis_ui::{
-    BaslikCubugu, EtkinTema, KokGorunum, Simge, SimgeAdi, Sizable, Tema,
+    BaslikCubugu, Boyutlandirilabilir, EtkinTema, KokGorunum, Simge, SimgeAdi, Tema,
     chart::AreaChart,
     h_flex,
     progress::Ilerleme,

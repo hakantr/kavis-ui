@@ -9,8 +9,8 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    EtkinTema as _, FocusTrapElement as _, KokGorunum, PencereUzantisi as _, SimgeAdi,
-    Sizable as _, StyledExt, TITLE_BAR_HEIGHT,
+    Boyutlandirilabilir as _, EtkinTema as _, FocusTrapElement as _, KokGorunum,
+    PencereUzantisi as _, SimgeAdi, StilUzantisi, TITLE_BAR_HEIGHT,
     animation::cubic_bezier,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari as _},
     dialog::{IletisimBaslikMetni, IletisimIcerigi},

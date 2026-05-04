@@ -77,7 +77,7 @@ pub mod theme;
 pub mod tooltip;
 pub mod tree;
 
-pub use crate::Disableable;
+pub use crate::DevreDisiBirakilabilir;
 pub use bilesenler::*;
 pub use cekirdek::*;
 pub use element_ext::*;

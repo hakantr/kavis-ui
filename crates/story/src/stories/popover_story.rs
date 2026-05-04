@@ -4,7 +4,7 @@ use gpui::{
     Render, Styled as _, Window, actions, div, px,
 };
 use kavis_ui::{
-    EtkinTema, PencereUzantisi, StyledExt,
+    EtkinTema, PencereUzantisi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari as _},
     divider::Ayirici,
     h_flex,

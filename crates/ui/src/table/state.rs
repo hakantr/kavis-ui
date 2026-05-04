@@ -1,7 +1,8 @@
 use std::{ops::Range, rc::Rc, time::Duration};
 
 use crate::{
-    ElementExt, EtkinTema, SanalListeKaydirmaTutamaci, Simge, SimgeAdi, StyleSized as _, StyledExt,
+    ElementExt, EtkinTema, SanalListeKaydirmaTutamaci, Simge, SimgeAdi, StilBoyutlandirma as _,
+    StilUzantisi,
     actions::{
         Cancel, SelectDown, SelectFirst, SelectLast, SelectNextColumn, SelectPageDown,
         SelectPageUp, SelectPrevColumn, SelectUp,

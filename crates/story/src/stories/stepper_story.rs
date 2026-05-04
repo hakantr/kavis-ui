@@ -3,7 +3,7 @@ use gpui::{
     Subscription, Window,
 };
 use kavis_ui::{
-    Selectable as _, SimgeAdi, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, Secilebilir as _, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeGrubu},
     checkbox::OnayKutusu,
     h_flex,
@@ -15,7 +15,7 @@ use crate::section;
 
 pub struct StepperStory {
     focus_handle: gpui::FocusHandle,
-    size: Size,
+    size: BilesenBoyutu,
     stepper0_step: usize,
     stepper1_step: usize,
     stepper2_step: usize,
@@ -46,7 +46,7 @@ impl StepperStory {
     fn new(_: &mut Window, cx: &mut Context<Self>) -> Self {
         Self {
             focus_handle: cx.focus_handle(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             stepper0_step: 1,
             stepper1_step: 0,
             stepper2_step: 2,
@@ -78,29 +78,29 @@ impl Render for StepperStory {
                             .child(
                                 Dugme::new("xsmall")
                                     .label("Çok Küçük")
-                                    .selected(self.size == Size::XSmall),
+                                    .selected(self.size == BilesenBoyutu::CokKucuk),
                             )
                             .child(
                                 Dugme::new("small")
                                     .label("Küçük")
-                                    .selected(self.size == Size::Small),
+                                    .selected(self.size == BilesenBoyutu::Kucuk),
                             )
                             .child(
                                 Dugme::new("medium")
                                     .label("Orta")
-                                    .selected(self.size == Size::Medium),
+                                    .selected(self.size == BilesenBoyutu::Orta),
                             )
                             .child(
                                 Dugme::new("large")
                                     .label("Büyük")
-                                    .selected(self.size == Size::Large),
+                                    .selected(self.size == BilesenBoyutu::Buyuk),
                             )
                             .on_click(cx.listener(|this, selecteds: &Vec<usize>, _, cx| {
                                 let size = match selecteds[0] {
-                                    0 => Size::XSmall,
-                                    1 => Size::Small,
-                                    2 => Size::Medium,
-                                    3 => Size::Large,
+                                    0 => BilesenBoyutu::CokKucuk,
+                                    1 => BilesenBoyutu::Kucuk,
+                                    2 => BilesenBoyutu::Orta,
+                                    3 => BilesenBoyutu::Buyuk,
                                     _ => unreachable!(),
                                 };
                                 this.size = size;

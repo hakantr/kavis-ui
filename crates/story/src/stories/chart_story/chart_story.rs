@@ -4,7 +4,7 @@ use gpui::{
     prelude::FluentBuilder, px,
 };
 use kavis_ui::{
-    EtkinTema, StyledExt,
+    EtkinTema, StilUzantisi,
     chart::{AreaChart, BarChart, CandlestickChart, LineChart, PieChart},
     divider::Ayirici,
     dock::PanelControl,

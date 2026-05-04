@@ -5,7 +5,7 @@ use gpui::{
     Render, Size, Styled, UniformListScrollHandle, Window, div, px, size, uniform_list,
 };
 use kavis_ui::{
-    EtkinTema as _, Selectable,
+    EtkinTema as _, Secilebilir,
     button::{Dugme, DugmeGrubu},
     h_flex,
     scroll::KaydirilabilirOge,

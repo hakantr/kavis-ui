@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, Sizable, StyledExt,
+    AxisExt, Boyutlandirilabilir, StilUzantisi,
     button::Dugme,
     menu::{DropdownMenu, PopupMenuItem},
     setting::{

@@ -23,7 +23,7 @@ use super::{
     DisplayMap, MASK_CHAR, blink_cursor::BlinkCursor, change::Change, element::TextElement,
     mask_pattern::MaskPattern, mode::InputMode, number_input,
 };
-use crate::Size;
+use crate::BilesenBoyutu;
 use crate::actions::{SelectDown, SelectLeft, SelectRight, SelectUp};
 #[cfg(not(target_family = "wasm"))]
 use crate::highlighter::DilKaydi;
@@ -320,7 +320,7 @@ pub struct InputState {
     pub(super) last_bounds: Option<Bounds<Pixels>>,
     pub(super) last_selected_range: Option<Selection>,
     pub(super) selecting: bool,
-    pub(super) size: Size,
+    pub(super) size: BilesenBoyutu,
     pub(super) disabled: bool,
     pub(super) masked: bool,
     pub(super) clean_on_escape: bool,
@@ -465,7 +465,7 @@ impl InputState {
             hover_definition: HoverDefinition::default(),
             silent_replace_text: false,
             emit_events: true,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             _subscriptions,
             _context_menu_task: Task::ready(Ok(())),
             _pending_update: false,

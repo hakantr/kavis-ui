@@ -3,7 +3,7 @@ use gpui::{
     RenderOnce, StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _, relative,
 };
 
-use crate::{EtkinTema, StyledExt};
+use crate::{EtkinTema, StilUzantisi};
 
 /// Klavye kısayollarını göstermek için etiket.
 #[derive(IntoElement, Clone, Debug)]

@@ -1,8 +1,9 @@
 use std::{rc::Rc, time::Duration};
 
 use crate::{
-    Disableable, EtkinTema, FocusableExt, Selectable, SimgeAdi, Sizable, Size, StyledExt as _,
-    icon::AdliSimge, text::Text, tooltip::ComponentTooltip, v_flex,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, FocusableExt,
+    Secilebilir, SimgeAdi, StilUzantisi as _, icon::AdliSimge, text::Text,
+    tooltip::ComponentTooltip, v_flex,
 };
 use gpui::{
     Animation, AnimationExt, AnyElement, App, Div, ElementId, InteractiveElement, IntoElement,
@@ -20,7 +21,7 @@ pub struct OnayKutusu {
     children: Vec<AnyElement>,
     checked: bool,
     disabled: bool,
-    size: Size,
+    size: BilesenBoyutu,
     tab_stop: bool,
     tab_index: isize,
     on_click: Option<Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
@@ -38,7 +39,7 @@ impl OnayKutusu {
             children: Vec::new(),
             checked: false,
             disabled: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             on_click: None,
             tab_stop: true,
             tab_index: 0,
@@ -110,14 +111,14 @@ impl Styled for OnayKutusu {
     }
 }
 
-impl Disableable for OnayKutusu {
+impl DevreDisiBirakilabilir for OnayKutusu {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Selectable for OnayKutusu {
+impl Secilebilir for OnayKutusu {
     fn selected(self, selected: bool) -> Self {
         self.checked(selected)
     }
@@ -133,8 +134,8 @@ impl ParentElement for OnayKutusu {
     }
 }
 
-impl Sizable for OnayKutusu {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for OnayKutusu {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -142,7 +143,7 @@ impl Sizable for OnayKutusu {
 
 pub(crate) fn checkbox_check_icon(
     id: ElementId,
-    size: Size,
+    size: BilesenBoyutu,
     checked: bool,
     disabled: bool,
     window: &mut Window,
@@ -160,10 +161,10 @@ pub(crate) fn checkbox_check_icon(
         .top_px()
         .left_px()
         .map(|this| match size {
-            Size::XSmall => this.size_2(),
-            Size::Small => this.size_2p5(),
-            Size::Medium => this.size_3(),
-            Size::Large => this.size_3p5(),
+            BilesenBoyutu::CokKucuk => this.size_2(),
+            BilesenBoyutu::Kucuk => this.size_2p5(),
+            BilesenBoyutu::Orta => this.size_3(),
+            BilesenBoyutu::Buyuk => this.size_3p5(),
             _ => this.size_3(),
         })
         .text_color(color)
@@ -235,10 +236,10 @@ impl RenderOnce for OnayKutusu {
                 .line_height(relative(1.))
                 .text_color(cx.theme().foreground)
                 .map(|this| match self.size {
-                    Size::XSmall => this.text_xs(),
-                    Size::Small => this.text_sm(),
-                    Size::Medium => this.text_base(),
-                    Size::Large => this.text_lg(),
+                    BilesenBoyutu::CokKucuk => this.text_xs(),
+                    BilesenBoyutu::Kucuk => this.text_sm(),
+                    BilesenBoyutu::Orta => this.text_base(),
+                    BilesenBoyutu::Buyuk => this.text_lg(),
                     _ => this,
                 })
                 .when(self.disabled, |this| {
@@ -251,10 +252,10 @@ impl RenderOnce for OnayKutusu {
                     div()
                         .relative()
                         .map(|this| match self.size {
-                            Size::XSmall => this.size_3(),
-                            Size::Small => this.size_3p5(),
-                            Size::Medium => this.size_4(),
-                            Size::Large => this.size(rems(1.125)),
+                            BilesenBoyutu::CokKucuk => this.size_3(),
+                            BilesenBoyutu::Kucuk => this.size_3p5(),
+                            BilesenBoyutu::Orta => this.size_4(),
+                            BilesenBoyutu::Buyuk => this.size(rems(1.125)),
                             _ => this.size_4(),
                         })
                         .flex_shrink_0()

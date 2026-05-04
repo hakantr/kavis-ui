@@ -9,7 +9,7 @@ use gpui::{
 use std::{cell::Cell, rc::Rc};
 
 use crate::{
-    Disableable, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, StilUzantisi,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari},
 };
 
@@ -27,12 +27,12 @@ pub struct DugmeGrubu {
     pub(super) compact: bool,
     pub(super) outline: bool,
     pub(super) variant: Option<DugmeVaryanti>,
-    pub(super) size: Option<Size>,
+    pub(super) size: Option<BilesenBoyutu>,
 
     on_click: Option<Box<dyn Fn(&Vec<usize>, &mut Window, &mut App) + 'static>>,
 }
 
-impl Disableable for DugmeGrubu {
+impl DevreDisiBirakilabilir for DugmeGrubu {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -106,16 +106,16 @@ impl DugmeGrubu {
     ///
     /// ```ignore
     /// DugmeGrubu::new("size-button")
-    ///    .child(Dugme::new("large").label("Large").selected(self.size == Size::Large))
-    ///    .child(Dugme::new("medium").label("Medium").selected(self.size == Size::Medium))
-    ///    .child(Dugme::new("small").label("Small").selected(self.size == Size::Small))
+    ///    .child(Dugme::new("large").label("Large").selected(self.size == BilesenBoyutu::Buyuk))
+    ///    .child(Dugme::new("medium").label("Medium").selected(self.size == BilesenBoyutu::Orta))
+    ///    .child(Dugme::new("small").label("Small").selected(self.size == BilesenBoyutu::Kucuk))
     ///    .on_click(cx.listener(|view, clicks: &Vec<usize>, _, cx| {
     ///        if clicks.contains(&0) {
-    ///            view.size = Size::Large;
+    ///            view.size = BilesenBoyutu::Buyuk;
     ///        } else if clicks.contains(&1) {
-    ///            view.size = Size::Medium;
+    ///            view.size = BilesenBoyutu::Orta;
     ///        } else if clicks.contains(&2) {
-    ///            view.size = Size::Small;
+    ///            view.size = BilesenBoyutu::Kucuk;
     ///        }
     ///        cx.notify();
     ///    }))
@@ -129,8 +129,8 @@ impl DugmeGrubu {
     }
 }
 
-impl Sizable for DugmeGrubu {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for DugmeGrubu {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = Some(size.into());
         self
     }
@@ -283,7 +283,7 @@ mod tests {
 
         assert_eq!(group.children.len(), 3);
         assert_eq!(group.variant, Some(DugmeVaryanti::Primary));
-        assert_eq!(group.size, Some(Size::Large));
+        assert_eq!(group.size, Some(BilesenBoyutu::Buyuk));
         assert!(group.outline);
         assert!(group.compact);
         assert!(group.multiple);

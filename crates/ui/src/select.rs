@@ -8,8 +8,8 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    Disableable, ElementExt as _, EtkinTema, IndexPath, Selectable, Simge, SimgeAdi, Sizable, Size,
-    StyleSized, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, ElementExt as _, EtkinTema,
+    IndexPath, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
     actions::{Cancel, Confirm, SelectDown, SelectUp},
     global_state::KureselDurum,
     h_flex,
@@ -202,7 +202,7 @@ where
         let size = self
             .state
             .upgrade()
-            .map_or(Size::Medium, |state| state.read(cx).options.size);
+            .map_or(BilesenBoyutu::Orta, |state| state.read(cx).options.size);
 
         if let Some(item) = self.delegate.item(ix) {
             let list_item = SelectListItem::new(ix.row)
@@ -309,7 +309,7 @@ pub enum SecimOlayi<D: SecimTemsilcisi + 'static> {
 
 struct SelectOptions {
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     icon: Option<Simge>,
     cleanable: bool,
     placeholder: Option<SharedString>,
@@ -326,7 +326,7 @@ impl Default for SelectOptions {
     fn default() -> Self {
         Self {
             style: StyleRefinement::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             icon: None,
             cleanable: false,
             placeholder: None,
@@ -999,11 +999,11 @@ where
     }
 }
 
-impl<D> Sizable for Secim<D>
+impl<D> Boyutlandirilabilir for Secim<D>
 where
     D: SecimTemsilcisi + 'static,
 {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.options.size = size.into();
         self
     }
@@ -1063,7 +1063,7 @@ where
 #[derive(IntoElement)]
 struct SelectListItem {
     id: ElementId,
-    size: Size,
+    size: BilesenBoyutu,
     style: StyleRefinement,
     selected: bool,
     disabled: bool,
@@ -1074,7 +1074,7 @@ impl SelectListItem {
     pub fn new(ix: usize) -> Self {
         Self {
             id: ("select-item", ix).into(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             style: StyleRefinement::default(),
             selected: false,
             disabled: false,
@@ -1089,14 +1089,14 @@ impl ParentElement for SelectListItem {
     }
 }
 
-impl Disableable for SelectListItem {
+impl DevreDisiBirakilabilir for SelectListItem {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
     }
 }
 
-impl Selectable for SelectListItem {
+impl Secilebilir for SelectListItem {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self
@@ -1107,8 +1107,8 @@ impl Selectable for SelectListItem {
     }
 }
 
-impl Sizable for SelectListItem {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for SelectListItem {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

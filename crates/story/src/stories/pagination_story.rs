@@ -3,7 +3,7 @@ use gpui::{
     Styled, Window,
 };
 use kavis_ui::{
-    Disableable, Selectable as _, Sizable, Size,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, Secilebilir as _,
     button::{Dugme, DugmeGrubu},
     pagination::Sayfalama,
     v_flex,
@@ -16,7 +16,7 @@ pub struct PaginationStory {
     many_pages_page: usize,
     compact_page: usize,
     focus_handle: FocusHandle,
-    size: Size,
+    size: BilesenBoyutu,
 }
 
 impl super::Story for PaginationStory {
@@ -40,11 +40,11 @@ impl PaginationStory {
             many_pages_page: 1,
             compact_page: 3,
             focus_handle: cx.focus_handle(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
         })
     }
 
-    fn set_size(&mut self, size: Size, _: &mut Window, cx: &mut Context<Self>) {
+    fn set_size(&mut self, size: BilesenBoyutu, _: &mut Window, cx: &mut Context<Self>) {
         self.size = size;
         cx.notify();
     }
@@ -69,30 +69,30 @@ impl Render for PaginationStory {
                     .child(
                         Dugme::new("xsmall")
                             .label("XSmall")
-                            .selected(self.size == Size::XSmall),
+                            .selected(self.size == BilesenBoyutu::CokKucuk),
                     )
                     .child(
                         Dugme::new("small")
                             .label("Small")
-                            .selected(self.size == Size::Small),
+                            .selected(self.size == BilesenBoyutu::Kucuk),
                     )
                     .child(
                         Dugme::new("medium")
                             .label("Medium")
-                            .selected(self.size == Size::Medium),
+                            .selected(self.size == BilesenBoyutu::Orta),
                     )
                     .child(
                         Dugme::new("large")
                             .label("Large")
-                            .selected(self.size == Size::Large),
+                            .selected(self.size == BilesenBoyutu::Buyuk),
                     )
                     .on_click(cx.listener(|this, selecteds: &Vec<usize>, window, cx| {
                         let size = match selecteds[0] {
-                            0 => Size::XSmall,
-                            1 => Size::Small,
-                            2 => Size::Medium,
-                            3 => Size::Large,
-                            _ => Size::Medium,
+                            0 => BilesenBoyutu::CokKucuk,
+                            1 => BilesenBoyutu::Kucuk,
+                            2 => BilesenBoyutu::Orta,
+                            3 => BilesenBoyutu::Buyuk,
+                            _ => BilesenBoyutu::Orta,
                         };
                         this.set_size(size, window, cx);
                     })),

@@ -5,7 +5,9 @@ use gpui::{
     StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _,
 };
 
-use crate::{AxisExt, Sizable, Size, StyledExt as _, stepper::AdimlayiciOgesi};
+use crate::{
+    AxisExt, BilesenBoyutu, Boyutlandirilabilir, StilUzantisi as _, stepper::AdimlayiciOgesi,
+};
 
 /// Bir step-ile-step ilerleme için kullanıcılar için navigate üzerinden bir seri steps veya stages.
 #[derive(IntoElement)]
@@ -16,7 +18,7 @@ pub struct Adimlayici {
     step: usize,
     layout: Axis,
     disabled: bool,
-    size: Size,
+    size: BilesenBoyutu,
     text_center: bool,
     on_click: Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>,
 }
@@ -33,7 +35,7 @@ impl Adimlayici {
             step: 0,
             layout: Axis::Horizontal,
             disabled: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             text_center: false,
             on_click: Rc::new(|_, _, _| {}),
         }
@@ -93,8 +95,8 @@ impl Adimlayici {
     }
 }
 
-impl Sizable for Adimlayici {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Adimlayici {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }

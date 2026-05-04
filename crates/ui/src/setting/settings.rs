@@ -1,5 +1,5 @@
 use crate::{
-    SimgeAdi, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, SimgeAdi, StilUzantisi,
     group_box::GrupKutusuVaryanti,
     input::{Input, InputState},
     resizable::{h_resizable, resizable_panel},
@@ -29,7 +29,7 @@ pub struct Ayarlar {
     id: ElementId,
     pages: Vec<AyarSayfasi>,
     group_variant: GrupKutusuVaryanti,
-    size: Size,
+    size: BilesenBoyutu,
     sidebar_width: Pixels,
     sidebar_style: StyleRefinement,
     default_selected_index: SecimIndeksi,
@@ -43,7 +43,7 @@ impl Ayarlar {
             id: id.into(),
             pages: vec![],
             group_variant: GrupKutusuVaryanti::default(),
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             sidebar_width: px(250.0),
             sidebar_style: StyleRefinement::default(),
             default_selected_index: SecimIndeksi::default(),
@@ -224,8 +224,8 @@ impl Ayarlar {
     }
 }
 
-impl Sizable for Ayarlar {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Ayarlar {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -244,7 +244,7 @@ pub struct RenderOptions {
     pub page_ix: usize,
     pub group_ix: usize,
     pub item_ix: usize,
-    pub size: Size,
+    pub size: BilesenBoyutu,
     pub group_variant: GrupKutusuVaryanti,
     pub layout: Axis,
 }

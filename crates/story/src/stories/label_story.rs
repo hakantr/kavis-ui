@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    SimgeAdi, StyledExt,
+    SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari as _},
     checkbox::OnayKutusu,
     green_500, h_flex,

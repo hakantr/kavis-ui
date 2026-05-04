@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use kavis_ui::{
-    EtkinTema, Simge, SimgeAdi, Sizable, Size, StyledExt,
+    BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Simge, SimgeAdi, StilUzantisi,
     badge::Rozet,
     button::{Dugme, DugmeVaryantlari},
     divider::Ayirici,
@@ -41,12 +41,21 @@ impl ZedWorkspaceStory {
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let tag = match state {
-            "Running" => Cip::info().outline().with_size(Size::Small).child(state),
-            "Review" => Cip::warning().outline().with_size(Size::Small).child(state),
-            "Done" => Cip::success().outline().with_size(Size::Small).child(state),
+            "Running" => Cip::info()
+                .outline()
+                .with_size(BilesenBoyutu::Kucuk)
+                .child(state),
+            "Review" => Cip::warning()
+                .outline()
+                .with_size(BilesenBoyutu::Kucuk)
+                .child(state),
+            "Done" => Cip::success()
+                .outline()
+                .with_size(BilesenBoyutu::Kucuk)
+                .child(state),
             _ => Cip::secondary()
                 .outline()
-                .with_size(Size::Small)
+                .with_size(BilesenBoyutu::Kucuk)
                 .child(state),
         };
 
@@ -70,7 +79,7 @@ impl ZedWorkspaceStory {
                 h_flex()
                     .min_w_0()
                     .gap_2()
-                    .child(Simge::new(icon).with_size(Size::Small))
+                    .child(Simge::new(icon).with_size(BilesenBoyutu::Kucuk))
                     .child(div().flex_1().truncate().child(title))
                     .child(tag),
             )
@@ -98,7 +107,7 @@ impl ZedWorkspaceStory {
             .px_2()
             .rounded(cx.theme().radius / 2.)
             .hover(|this| this.bg(cx.theme().accent))
-            .child(Simge::new(SimgeAdi::File).with_size(Size::Small))
+            .child(Simge::new(SimgeAdi::File).with_size(BilesenBoyutu::Kucuk))
             .child(
                 v_flex()
                     .min_w_0()
@@ -152,7 +161,12 @@ impl ZedWorkspaceStory {
                             .gap_2()
                             .child(Simge::new(SimgeAdi::Bot))
                             .child("Ajan Paneli")
-                            .child(Cip::info().outline().with_size(Size::Small).child("ACP")),
+                            .child(
+                                Cip::info()
+                                    .outline()
+                                    .with_size(BilesenBoyutu::Kucuk)
+                                    .child("ACP"),
+                            ),
                     )
                     .child(
                         h_flex()
@@ -181,13 +195,13 @@ impl ZedWorkspaceStory {
                                     .child(
                                         Cip::success()
                                             .outline()
-                                            .with_size(Size::Small)
+                                            .with_size(BilesenBoyutu::Kucuk)
                                             .child("Düşünme: Yüksek"),
                                     )
                                     .child(
                                         Cip::secondary()
                                             .outline()
-                                            .with_size(Size::Small)
+                                            .with_size(BilesenBoyutu::Kucuk)
                                             .child("Vercel AI Gateway"),
                                     ),
                             )
@@ -213,7 +227,7 @@ impl ZedWorkspaceStory {
                                     .child(
                                         Cip::warning()
                                             .outline()
-                                            .with_size(Size::Small)
+                                            .with_size(BilesenBoyutu::Kucuk)
                                             .child("İzin gerekli"),
                                     ),
                             )
@@ -235,7 +249,7 @@ impl ZedWorkspaceStory {
                                 h_flex().justify_between().child("Dal farkı").child(
                                     Cip::secondary()
                                         .outline()
-                                        .with_size(Size::Small)
+                                        .with_size(BilesenBoyutu::Kucuk)
                                         .child("bölünmüş görünüm"),
                                 ),
                             )
@@ -278,7 +292,7 @@ impl ZedWorkspaceStory {
                             .child(
                                 Cip::secondary()
                                     .outline()
-                                    .with_size(Size::Small)
+                                    .with_size(BilesenBoyutu::Kucuk)
                                     .child("sağ dock"),
                             ),
                     )
@@ -319,9 +333,9 @@ impl ZedWorkspaceStory {
                             .border_color(cx.theme().border)
                             .child(h_flex().gap_2().child(SimgeAdi::Github).child("Git"))
                             .child(
-                                Rozet::new()
-                                    .count(4)
-                                    .child(Simge::new(SimgeAdi::Bell).with_size(Size::Small)),
+                                Rozet::new().count(4).child(
+                                    Simge::new(SimgeAdi::Bell).with_size(BilesenBoyutu::Kucuk),
+                                ),
                             ),
                     )
                     .child(
@@ -345,7 +359,7 @@ impl ZedWorkspaceStory {
                                 h_flex().justify_between().child("Yer imleri").child(
                                     Cip::success()
                                         .outline()
-                                        .with_size(Size::Small)
+                                        .with_size(BilesenBoyutu::Kucuk)
                                         .child("kalıcı"),
                                 ),
                             ),
@@ -421,17 +435,17 @@ impl Render for ZedWorkspaceStory {
                             .child(
                                 h_flex()
                                     .gap_2()
-                                    .child(Cip::success().with_size(Size::Small).child("120 fps"))
+                                    .child(Cip::success().with_size(BilesenBoyutu::Kucuk).child("120 fps"))
                                     .child(
                                         Cip::info()
                                             .outline()
-                                            .with_size(Size::Small)
+                                            .with_size(BilesenBoyutu::Kucuk)
                                             .child("Paralel ajanlar"),
                                     )
                                     .child(
                                         Cip::secondary()
                                             .outline()
-                                            .with_size(Size::Small)
+                                            .with_size(BilesenBoyutu::Kucuk)
                                             .child("Zed 1.0"),
                                     ),
                             ),

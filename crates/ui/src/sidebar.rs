@@ -1,5 +1,5 @@
 use crate::{
-    Daraltilabilir, EtkinTema, Side, Simge, SimgeAdi, Sizable, StyledExt,
+    Boyutlandirilabilir, Daraltilabilir, EtkinTema, Side, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari},
     h_flex,
     scroll::KaydirilabilirOge,

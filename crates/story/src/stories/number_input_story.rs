@@ -6,7 +6,7 @@ use regex::Regex;
 
 use crate::section;
 use kavis_ui::{
-    Disableable, EtkinTema, SimgeAdi, Sizable,
+    Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, SimgeAdi,
     button::{Dugme, DugmeVaryantlari},
     input::{InputEvent, InputState, MaskPattern, NumberInput, NumberInputEvent, StepAction},
     v_flex,

@@ -5,7 +5,7 @@ use gpui::{
     Styled, StyledText, Window, div, prelude::FluentBuilder, rems,
 };
 
-use crate::{EtkinTema, StyledExt};
+use crate::{EtkinTema, StilUzantisi};
 
 const MASKED: &'static str = "•";
 

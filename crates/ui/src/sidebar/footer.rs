@@ -3,7 +3,7 @@ use gpui::{
     prelude::FluentBuilder as _,
 };
 
-use crate::{Daraltilabilir, EtkinTema as _, Selectable, h_flex, menu::DropdownMenu};
+use crate::{Daraltilabilir, EtkinTema as _, Secilebilir, h_flex, menu::DropdownMenu};
 
 /// Footer için [`super::YanCubuk`].
 #[derive(IntoElement)]
@@ -24,7 +24,7 @@ impl YanCubukAltligi {
     }
 }
 
-impl Selectable for YanCubukAltligi {
+impl Secilebilir for YanCubukAltligi {
     fn selected(mut self, selected: bool) -> Self {
         self.selected = selected;
         self

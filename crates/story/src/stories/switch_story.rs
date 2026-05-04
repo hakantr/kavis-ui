@@ -4,7 +4,8 @@ use gpui::{
 };
 
 use kavis_ui::{
-    Disableable as _, EtkinTema, Sizable, h_flex, label::Etiket, switch::Anahtar, v_flex,
+    Boyutlandirilabilir, DevreDisiBirakilabilir as _, EtkinTema, h_flex, label::Etiket,
+    switch::Anahtar, v_flex,
 };
 
 use crate::section;

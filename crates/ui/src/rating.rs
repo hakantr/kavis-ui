@@ -1,5 +1,8 @@
 use crate::theme::EtkinTema;
-use crate::{Disableable, Simge, SimgeAdi, Sizable, Size, StyledExt, h_flex};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, Simge, SimgeAdi, StilUzantisi,
+    h_flex,
+};
 use std::rc::Rc;
 
 use gpui::{
@@ -13,7 +16,7 @@ use gpui::{ClickEvent, Hsla, StatefulInteractiveElement};
 pub struct Puanlama {
     id: ElementId,
     style: StyleRefinement,
-    size: Size,
+    size: BilesenBoyutu,
     disabled: bool,
     value: usize,
     max: usize,
@@ -27,7 +30,7 @@ impl Puanlama {
         Self {
             id: id.into(),
             style: StyleRefinement::default(),
-            size: Size::Medium,
+            size: BilesenBoyutu::Orta,
             disabled: false,
             value: 0,
             max: 5,
@@ -37,7 +40,7 @@ impl Puanlama {
     }
 
     /// star boyut ayarlar.
-    pub fn with_size(mut self, size: impl Into<Size>) -> Self {
+    pub fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -87,14 +90,14 @@ impl Styled for Puanlama {
     }
 }
 
-impl Sizable for Puanlama {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Puanlama {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
 }
 
-impl Disableable for Puanlama {
+impl DevreDisiBirakilabilir for Puanlama {
     fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self

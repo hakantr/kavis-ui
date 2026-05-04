@@ -3,7 +3,7 @@ use gpui::{
     StyleRefinement, Styled, Window, div, relative,
 };
 
-use crate::StyledExt as _;
+use crate::StilUzantisi as _;
 
 /// başlık öğe için bir iletişim kutusu başlık.
 #[derive(IntoElement)]

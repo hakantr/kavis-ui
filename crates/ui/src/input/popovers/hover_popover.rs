@@ -8,7 +8,7 @@ use gpui::{
 };
 
 use crate::{
-    StyledExt,
+    StilUzantisi,
     input::{InputState, popovers::render_markdown},
 };
 

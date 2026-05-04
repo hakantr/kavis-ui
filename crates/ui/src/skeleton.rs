@@ -1,4 +1,4 @@
-use crate::{EtkinTema, StyledExt};
+use crate::{EtkinTema, StilUzantisi};
 use gpui::{
     Animation, AnimationExt, IntoElement, RenderOnce, StyleRefinement, Styled, bounce, div,
     ease_in_out,

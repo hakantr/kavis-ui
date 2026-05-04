@@ -13,7 +13,8 @@ use gpui::{
 };
 
 use crate::{
-    Edges, EtkinTema as _, Simge, SimgeAdi, Sizable as _, StyledExt, TITLE_BAR_HEIGHT,
+    Boyutlandirilabilir as _, Edges, EtkinTema as _, Simge, SimgeAdi, StilUzantisi,
+    TITLE_BAR_HEIGHT,
     animation::cubic_bezier,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex, v_flex,

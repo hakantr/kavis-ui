@@ -16,7 +16,7 @@ use gpui::{
 };
 
 use crate::{
-    EtkinTema, StyledExt as _,
+    EtkinTema, StilUzantisi as _,
     text::{MetinGorunumu, MetinGorunumuStili},
 };
 

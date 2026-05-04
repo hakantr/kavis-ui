@@ -3,7 +3,7 @@ use gpui::{
     Window, div, prelude::FluentBuilder as _, px,
 };
 use kavis_ui::{
-    EtkinTema, Selectable, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema, Secilebilir, SimgeAdi,
     button::Dugme,
     h_flex,
     progress::{DaireselIlerleme, Ilerleme},

@@ -10,7 +10,7 @@ use gpui::{
 use ropey::Rope;
 
 use crate::{
-    Disableable, ElementExt, EtkinTema, Selectable, SimgeAdi, Sizable,
+    Boyutlandirilabilir, DevreDisiBirakilabilir, ElementExt, EtkinTema, Secilebilir, SimgeAdi,
     actions::SelectUp,
     button::{Dugme, DugmeVaryantlari},
     h_flex,

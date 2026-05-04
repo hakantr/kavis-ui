@@ -1,4 +1,4 @@
-use crate::{RenkAdi, Sizable, Size, StyledExt, theme::EtkinTema as _};
+use crate::{BilesenBoyutu, Boyutlandirilabilir, RenkAdi, StilUzantisi, theme::EtkinTema as _};
 use gpui::{
     AbsoluteLength, AnyElement, App, Hsla, InteractiveElement as _, IntoElement, ParentElement,
     RenderOnce, StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _, relative, rems,
@@ -126,7 +126,7 @@ pub struct Cip {
     style: StyleRefinement,
     variant: CipVaryanti,
     outline: bool,
-    size: Size,
+    size: BilesenBoyutu,
     rounded: Option<AbsoluteLength>,
     children: Vec<AnyElement>,
 }
@@ -137,7 +137,7 @@ impl Cip {
             style: StyleRefinement::default(),
             variant: CipVaryanti::default(),
             outline: false,
-            size: Size::default(),
+            size: BilesenBoyutu::default(),
             rounded: None,
             children: Vec::new(),
         }
@@ -212,8 +212,8 @@ impl Cip {
     }
 }
 
-impl Sizable for Cip {
-    fn with_size(mut self, size: impl Into<Size>) -> Self {
+impl Boyutlandirilabilir for Cip {
+    fn with_size(mut self, size: impl Into<BilesenBoyutu>) -> Self {
         self.size = size.into();
         self
     }
@@ -242,7 +242,7 @@ impl RenderOnce for Cip {
         let border = self.variant.border(cx);
         let rounded = self.rounded.unwrap_or(
             match self.size {
-                Size::XSmall | Size::Small => cx.theme().radius / 2.,
+                BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => cx.theme().radius / 2.,
                 _ => cx.theme().radius,
             }
             .into(),
@@ -255,7 +255,7 @@ impl RenderOnce for Cip {
             .line_height(relative(1.))
             .text_xs()
             .map(|this| match self.size {
-                Size::XSmall | Size::Small => this.px_1p5().py_0p5(),
+                BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => this.px_1p5().py_0p5(),
                 _ => this.px_2p5().py_1(),
             })
             .bg(bg)
