@@ -17,7 +17,7 @@ use kavis_ui::{
     button::Dugme,
     checkbox::OnayKutusu,
     h_flex,
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     label::Etiket,
     menu::{AcilirMenu, AcilirMenuTetikleyici},
     spinner::DonerGosterge,
@@ -747,8 +747,8 @@ impl TabloTemsilcisi for StockTableDelegate {
 
 pub struct DataTableStory {
     table: Entity<TabloDurumu<StockTableDelegate>>,
-    num_stocks_input: Entity<InputState>,
-    num_extra_cols_input: Entity<InputState>,
+    num_stocks_input: Entity<GirdiDurumu>,
+    num_extra_cols_input: Entity<GirdiDurumu>,
     stripe: bool,
     refresh_data: bool,
     size: BilesenBoyutu,
@@ -788,7 +788,7 @@ impl DataTableStory {
 
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let num_stocks_input = cx.new(|cx| {
-            let mut input = InputState::new(window, cx)
+            let mut input = GirdiDurumu::new(window, cx)
                 .placeholder("Gösterilecek hisse sayısını girin")
                 .validate(|s, _| s.parse::<usize>().is_ok());
             input.set_value("5000", window, cx);
@@ -796,7 +796,7 @@ impl DataTableStory {
         });
 
         let num_extra_cols_input = cx.new(|cx| {
-            let mut input = InputState::new(window, cx)
+            let mut input = GirdiDurumu::new(window, cx)
                 .placeholder("Ek sütunlar")
                 .validate(|s, _| s.parse::<usize>().is_ok());
             input.set_value("0", window, cx);
@@ -859,14 +859,14 @@ impl DataTableStory {
     // Event handler for changes in the number input field
     fn on_num_stocks_input_change(
         &mut self,
-        _: &Entity<InputState>,
-        event: &InputEvent,
+        _: &Entity<GirdiDurumu>,
+        event: &GirdiOlayi,
         _: &mut Window,
         cx: &mut Context<Self>,
     ) {
         match event {
             // Update when the user presses Enter or the input loses focus
-            InputEvent::PressEnter { .. } | InputEvent::Blur => {
+            GirdiOlayi::PressEnter { .. } | GirdiOlayi::Blur => {
                 let text = self.num_stocks_input.read(cx).value().to_string();
                 if let Ok(total_count) = text.parse::<usize>() {
                     if total_count == self.table.read(cx).delegate().stocks.len() {
@@ -885,13 +885,13 @@ impl DataTableStory {
 
     fn on_num_extra_cols_input_change(
         &mut self,
-        _: &Entity<InputState>,
-        event: &InputEvent,
+        _: &Entity<GirdiDurumu>,
+        event: &GirdiOlayi,
         _: &mut Window,
         cx: &mut Context<Self>,
     ) {
         match event {
-            InputEvent::PressEnter { .. } | InputEvent::Blur => {
+            GirdiOlayi::PressEnter { .. } | GirdiOlayi::Blur => {
                 let text = self.num_extra_cols_input.read(cx).value().to_string();
                 if let Ok(count) = text.parse::<usize>() {
                     self.table.update(cx, |table, cx| {
@@ -1273,14 +1273,14 @@ impl Render for DataTableStory {
                                 .child(
                                     h_flex()
                                         .min_w_24()
-                                        .child(Input::new(&self.num_stocks_input).small())
+                                        .child(Girdi::new(&self.num_stocks_input).small())
                                         .into_any_element(),
                                 )
                                 .child(Etiket::new("Ek Sütunlar:"))
                                 .child(
                                     h_flex()
                                         .min_w_24()
-                                        .child(Input::new(&self.num_extra_cols_input).small())
+                                        .child(Girdi::new(&self.num_extra_cols_input).small())
                                         .into_any_element(),
                                 )
                                 .when(delegate.loading, |this| {

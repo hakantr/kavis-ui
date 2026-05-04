@@ -7,7 +7,7 @@ use kavis_ui::{
     PencereUzantisi,
     clipboard::Pano,
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     label::Etiket,
     v_flex,
 };
@@ -16,7 +16,7 @@ use crate::section;
 
 pub struct ClipboardStory {
     focus_handle: gpui::FocusHandle,
-    url_state: Entity<InputState>,
+    url_state: Entity<GirdiDurumu>,
     masked: bool,
 }
 
@@ -37,7 +37,7 @@ impl super::Story for ClipboardStory {
 impl ClipboardStory {
     pub(crate) fn new(window: &mut Window, cx: &mut App) -> Self {
         let url_state =
-            cx.new(|cx| InputState::new(window, cx).default_value("https://github.com"));
+            cx.new(|cx| GirdiDurumu::new(window, cx).default_value("https://github.com"));
 
         Self {
             url_state,
@@ -87,8 +87,8 @@ impl Render for ClipboardStory {
                 ),
             )
             .child(
-                section("With in an Input").max_w_md().child(
-                    Input::new(&self.url_state).suffix(
+                section("With in an Girdi").max_w_md().child(
+                    Girdi::new(&self.url_state).suffix(
                         Pano::new("clipboard2")
                             .value_fn({
                                 let state = self.url_state.clone();

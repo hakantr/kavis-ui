@@ -11,7 +11,7 @@ use kavis_ui::{
     divider::Ayirici,
     form::{field, v_form},
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     select::{Secim, SecimDurumu},
     switch::Anahtar,
     v_flex,
@@ -20,9 +20,9 @@ use kavis_ui::{
 pub struct FormStory {
     focus_handle: FocusHandle,
     name_prefix_state: Entity<SecimDurumu<Vec<String>>>,
-    name_input: Entity<InputState>,
-    email_input: Entity<InputState>,
-    bio_input: Entity<InputState>,
+    name_input: Entity<GirdiDurumu>,
+    email_input: Entity<GirdiDurumu>,
+    bio_input: Entity<GirdiDurumu>,
     color_state: Entity<RenkSeciciDurumu>,
     subscribe_email: bool,
     date: Entity<TarihSeciciDurumu>,
@@ -69,13 +69,13 @@ impl FormStory {
             )
         });
 
-        let name_input = cx.new(|cx| InputState::new(window, cx).default_value("Jason Lee"));
+        let name_input = cx.new(|cx| GirdiDurumu::new(window, cx).default_value("Jason Lee"));
         let color_state = cx.new(|cx| RenkSeciciDurumu::new(window, cx));
 
         let email_input =
-            cx.new(|cx| InputState::new(window, cx).placeholder("Buraya metin gir..."));
+            cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Buraya metin gir..."));
         let bio_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .auto_grow(5, 20)
                 .placeholder("Buraya metin gir...")
                 .default_value("Hello 世界，this is GPUI component.")
@@ -201,7 +201,7 @@ impl Render for FormStory {
                                 ))
                                 .child(
                                     div().flex_1().child(
-                                        Input::new(&self.name_input).pl_0().appearance(false),
+                                        Girdi::new(&self.name_input).pl_0().appearance(false),
                                     ),
                                 ),
                         ),
@@ -209,14 +209,14 @@ impl Render for FormStory {
                     .child(
                         field()
                             .label("E-posta")
-                            .child(Input::new(&self.email_input))
+                            .child(Girdi::new(&self.email_input))
                             .required(true),
                     )
                     .child(
                         field()
                             .label("Biyografi")
                             .when(self.layout.dikey_mi(), |this| this.items_start())
-                            .child(Input::new(&self.bio_input))
+                            .child(Girdi::new(&self.bio_input))
                             .description_fn(|_, _| {
                                 div().child("Kendinizi anlatmak için en fazla 100 kelime kullanın.")
                             }),

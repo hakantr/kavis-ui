@@ -26,7 +26,7 @@ Paragraflar normal metin, **kalın metin**, *italik metin*, `satır içi kod` ve
 
 ```rust
 use gpui::*;
-use kavis_ui::*;
+use kavis_ui::button::{Dugme, DugmeVaryantlari as _};
 
 Dugme::new("kaydet")
     .primary()
@@ -39,7 +39,7 @@ Dugme::new("kaydet")
 | Bileşen | Görev |
 | --- | --- |
 | `Dugme` | Eylem başlatır |
-| `Input` | Metin alır |
+| `Girdi` | Metin alır |
 | `Uyari` | Mesaj gösterir |
 
 ## Görevler

@@ -1,5 +1,8 @@
 use gpui::*;
-use kavis_ui::{EtkinTema as _, KokGorunum, button::*};
+use kavis_ui::{
+    EtkinTema as _, KokGorunum,
+    button::{Dugme, DugmeVaryantlari as _},
+};
 
 struct TooltipTopEdgeExample;
 

@@ -1,12 +1,12 @@
 use gpui::*;
 use kavis_ui::{
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     *,
 };
 use kavis_ui_assets::Varliklar;
 
 pub struct Example {
-    input_state: Entity<InputState>,
+    input_state: Entity<GirdiDurumu>,
     display_text: SharedString,
 
     /// Abonelikleri Example varlığıyla birlikte canlı tutmamız gerekir.
@@ -18,12 +18,12 @@ pub struct Example {
 
 impl Example {
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let input_state = cx.new(|cx| InputState::new(window, cx).placeholder("Enter your name"));
+        let input_state = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Enter your name"));
 
         let _subscriptions = vec![cx.subscribe_in(&input_state, window, {
             let input_state = input_state.clone();
-            move |this, _, ev: &InputEvent, _window, cx| match ev {
-                InputEvent::Change => {
+            move |this, _, ev: &GirdiOlayi, _window, cx| match ev {
+                GirdiOlayi::Change => {
                     let value = input_state.read(cx).value();
                     this.display_text = format!("Hello, {}!", value).into();
                     cx.notify()
@@ -48,7 +48,7 @@ impl Render for Example {
             .size_full()
             .items_center()
             .justify_center()
-            .child(Input::new(&self.input_state))
+            .child(Girdi::new(&self.input_state))
             .child(self.display_text.clone())
     }
 }

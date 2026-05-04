@@ -3,7 +3,7 @@ use kavis_ui::{
     EtkinTema as _, IndexPath, Simge, SimgeAdi, StilUzantisi as _, TemaRengi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     menu::AcilirMenuOgesi,
     scroll::KaydirilabilirOge,
     select::{Secim, SecimDurumu, SecimOgesi, SecimOlayi},
@@ -85,7 +85,7 @@ pub struct ThemeColorsStory {
     sidebar_render_key: usize,
     force_open_state: Option<bool>,
     filter_by_value: Option<Hsla>,
-    filter_input: Entity<InputState>,
+    filter_input: Entity<GirdiDurumu>,
     all_categories: Vec<ColorCategory>,
     categories: Vec<ColorCategory>,
 }
@@ -137,7 +137,7 @@ impl ThemeColorsStory {
             sidebar_render_key: 0,
             force_open_state: None,
             filter_by_value: None,
-            filter_input: cx.new(|cx| InputState::new(window, cx).placeholder("Ara...")),
+            filter_input: cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Ara...")),
             all_categories: Vec::new(),
             categories: Vec::new(),
         };
@@ -158,7 +158,7 @@ impl ThemeColorsStory {
         .detach();
 
         cx.subscribe(&this.filter_input, |this, _, event, cx| {
-            if let InputEvent::Change = event {
+            if let GirdiOlayi::Change = event {
                 this.compute_categories(cx);
                 cx.notify();
             }
@@ -170,7 +170,7 @@ impl ThemeColorsStory {
     }
 
     fn get_theme_colors(&self, cx: &Context<Self>) -> TemaRengi {
-        use kavis_ui::{Tema as UITheme, TemaKaydi};
+        use kavis_ui::{Tema as ArayuzTemasi, TemaKaydi};
 
         if let Some(theme_config) = TemaKaydi::global(cx)
             .themes()
@@ -178,9 +178,9 @@ impl ThemeColorsStory {
             .cloned()
         {
             let mut temp_theme = if theme_config.mode.is_dark() {
-                UITheme::from(TemaRengi::dark().as_ref())
+                ArayuzTemasi::from(TemaRengi::dark().as_ref())
             } else {
-                UITheme::from(TemaRengi::light().as_ref())
+                ArayuzTemasi::from(TemaRengi::light().as_ref())
             };
 
             // Apply the config to get proper colors using the public API
@@ -193,7 +193,7 @@ impl ThemeColorsStory {
     }
 
     fn get_isolated_theme(&self, cx: &App) -> (TemaRengi, bool) {
-        use kavis_ui::{Tema as UITheme, TemaKaydi};
+        use kavis_ui::{Tema as ArayuzTemasi, TemaKaydi};
 
         let registry = TemaKaydi::global(cx);
 
@@ -215,9 +215,9 @@ impl ThemeColorsStory {
         };
 
         let mut temp_theme = if theme_config.mode.is_dark() {
-            UITheme::from(TemaRengi::dark().as_ref())
+            ArayuzTemasi::from(TemaRengi::dark().as_ref())
         } else {
-            UITheme::from(TemaRengi::light().as_ref())
+            ArayuzTemasi::from(TemaRengi::light().as_ref())
         };
 
         temp_theme.apply_config(theme_config);
@@ -397,7 +397,7 @@ impl ThemeColorsStory {
         YanCubuk::new(format!("color-theme-sidebar-{}", self.sidebar_render_key))
             .w(px(300.))
             .border_0()
-            .header(Input::new(&self.filter_input).prefix(SimgeAdi::Search))
+            .header(Girdi::new(&self.filter_input).prefix(SimgeAdi::Search))
             .child(
                 YanCubukMenusu::new().children(categories.iter().enumerate().map(
                     |(

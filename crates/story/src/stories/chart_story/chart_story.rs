@@ -7,7 +7,7 @@ use kavis_ui::{
     EtkinTema, StilUzantisi,
     chart::{AreaChart, BarChart, CandlestickChart, LineChart, PieChart},
     divider::Ayirici,
-    dock::PanelControl,
+    dock::PanelDenetimi,
     h_flex,
     plot::shape::BarAlignment,
     v_flex,
@@ -96,7 +96,7 @@ impl Story for ChartStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

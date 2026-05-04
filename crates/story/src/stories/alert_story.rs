@@ -6,7 +6,7 @@ use kavis_ui::{
     BilesenBoyutu, Boyutlandirilabilir as _, Secilebilir as _, SimgeAdi,
     alert::Uyari,
     button::{Dugme, DugmeGrubu},
-    dock::PanelControl,
+    dock::PanelDenetimi,
     text::markdown,
     v_flex,
 };
@@ -51,7 +51,7 @@ impl super::Story for AlertStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

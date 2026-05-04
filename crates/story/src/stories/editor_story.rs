@@ -1,11 +1,11 @@
 use gpui::{App, AppContext as _, Context, Entity, IntoElement, Render, Styled, Window};
 
-use kavis_ui::input::*;
+use kavis_ui::input::{Girdi, GirdiDurumu, SekmeBoyutu};
 
 const EXAMPLE_CODE: &str = include_str!("./editor_story.rs");
 
 pub struct EditorStory {
-    editor_state: Entity<InputState>,
+    editor_state: Entity<GirdiDurumu>,
 }
 
 impl super::Story for EditorStory {
@@ -33,10 +33,10 @@ impl EditorStory {
 
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let editor_state = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .code_editor("rust")
                 .multi_line(true)
-                .tab_size(TabSize {
+                .tab_size(SekmeBoyutu {
                     tab_size: 4,
                     ..Default::default()
                 })
@@ -49,6 +49,6 @@ impl EditorStory {
 
 impl Render for EditorStory {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-        Input::new(&self.editor_state).size_full()
+        Girdi::new(&self.editor_state).size_full()
     }
 }

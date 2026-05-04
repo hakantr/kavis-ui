@@ -1,6 +1,15 @@
 use gpui::*;
 use itertools::Itertools as _;
-use kavis_ui::{button::*, checkbox::*, divider::*, input::*, select::*, *};
+use kavis_ui::{
+    Boyutlandirilabilir as _, EtkinTema as _, IndexPath, SimgeAdi,
+    button::{Dugme, DugmeVaryantlari as _},
+    checkbox::OnayKutusu,
+    divider::Ayirici,
+    h_flex,
+    input::{Girdi, GirdiDurumu},
+    select::{AranabilirListe, Secim, SecimDurumu, SecimGrubu, SecimOgesi, SecimOlayi},
+    v_flex,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::section;
@@ -37,15 +46,15 @@ impl SecimOgesi for Country {
 
 pub struct SelectStory {
     disabled: bool,
-    country_select: Entity<SecimDurumu<SearchableVec<SecimGrubu<Country>>>>,
-    fruit_select: Entity<SecimDurumu<SearchableVec<&'static str>>>,
+    country_select: Entity<SecimDurumu<AranabilirListe<SecimGrubu<Country>>>>,
+    fruit_select: Entity<SecimDurumu<AranabilirListe<&'static str>>>,
     simple_select1: Entity<SecimDurumu<Vec<&'static str>>>,
-    simple_select2: Entity<SecimDurumu<SearchableVec<&'static str>>>,
+    simple_select2: Entity<SecimDurumu<AranabilirListe<&'static str>>>,
     simple_select3: Entity<SecimDurumu<Vec<SharedString>>>,
     menu_max_h_select: Entity<SecimDurumu<Vec<&'static str>>>,
     disabled_select: Entity<SecimDurumu<Vec<SharedString>>>,
     appearance_select: Entity<SecimDurumu<Vec<SharedString>>>,
-    input_state: Entity<InputState>,
+    input_state: Entity<GirdiDurumu>,
 }
 
 impl super::Story for SelectStory {
@@ -73,7 +82,8 @@ impl SelectStory {
         let countries =
             serde_json::from_str::<Vec<Country>>(include_str!("../fixtures/countries.json"))
                 .unwrap();
-        let mut grouped_countries: SearchableVec<SecimGrubu<Country>> = SearchableVec::new(vec![]);
+        let mut grouped_countries: AranabilirListe<SecimGrubu<Country>> =
+            AranabilirListe::new(vec![]);
         for (prefix, items) in countries.iter().chunk_by(|c| c.letter_prefix()).into_iter() {
             let items = items.cloned().collect::<Vec<Country>>();
             grouped_countries.push(SecimGrubu::new(prefix.to_string()).items(items));
@@ -102,9 +112,10 @@ impl SelectStory {
                 cx,
             )
         });
-        let input_state = cx.new(|cx| InputState::new(window, cx).placeholder("Telefon numaranız"));
+        let input_state =
+            cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Telefon numaranız"));
 
-        let fruits = SearchableVec::new(vec![
+        let fruits = AranabilirListe::new(vec![
             "Elma",
             "Portakal",
             "Muz",
@@ -135,11 +146,12 @@ impl SelectStory {
                     )
                 }),
                 simple_select2: cx.new(|cx| {
-                    let mut select = SecimDurumu::new(SearchableVec::new(vec![]), None, window, cx)
-                        .searchable(true);
+                    let mut select =
+                        SecimDurumu::new(AranabilirListe::new(vec![]), None, window, cx)
+                            .searchable(true);
 
                     select.set_items(
-                        SearchableVec::new(vec!["Rust", "Go", "C++", "JavaScript"]),
+                        AranabilirListe::new(vec!["Rust", "Go", "C++", "JavaScript"]),
                         window,
                         cx,
                     );
@@ -173,8 +185,8 @@ impl SelectStory {
 
     fn on_select_event(
         &mut self,
-        _: &Entity<SecimDurumu<SearchableVec<SecimGrubu<Country>>>>,
-        event: &SecimOlayi<SearchableVec<SecimGrubu<Country>>>,
+        _: &Entity<SecimDurumu<AranabilirListe<SecimGrubu<Country>>>>,
+        event: &SecimOlayi<AranabilirListe<SecimGrubu<Country>>>,
         _window: &mut Window,
         _cx: &mut Context<Self>,
     ) {
@@ -267,7 +279,7 @@ impl Render for SelectStory {
                 ),
             )
             .child(
-                section("Appearance false with Input").max_w_128().child(
+                section("Appearance false with Girdi").max_w_128().child(
                     h_flex()
                         .border_1()
                         .border_color(cx.theme().input)
@@ -286,7 +298,7 @@ impl Render for SelectStory {
                         .child(Ayirici::vertical())
                         .child(
                             div().flex_1().child(
-                                Input::new(&self.input_state)
+                                Girdi::new(&self.input_state)
                                     .appearance(false)
                                     .pr_3()
                                     .py_2(),

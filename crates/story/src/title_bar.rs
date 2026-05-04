@@ -11,14 +11,14 @@ use kavis_ui::{
     badge::Rozet,
     button::{Dugme, DugmeVaryantlari as _},
     label::Etiket,
-    menu::{AcilirMenuTetikleyici as _, AppMenuBar},
+    menu::{AcilirMenuTetikleyici as _, UygulamaMenuCubugu},
     scroll::KaydirmaCubuguGosterimi,
 };
 
 use crate::{SelectFont, SelectRadius, SelectScrollbarShow, ToggleListActiveHighlight, app_menus};
 
 pub struct AppTitleBar {
-    app_menu_bar: Entity<AppMenuBar>,
+    app_menu_bar: Entity<UygulamaMenuCubugu>,
     font_size_selector: Entity<FontSizeSelector>,
     child: Rc<dyn Fn(&mut Window, &mut App) -> AnyElement>,
     _subscriptions: Vec<Subscription>,

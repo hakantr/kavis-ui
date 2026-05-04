@@ -6,7 +6,7 @@ use kavis_ui::{
         Panel, PanelEvent, PanelInfo, PanelRegistry, PanelState, PanelView, YerlesimAlani,
         YerlesimAlaniDurumu, YerlesimOgesi, YerlesimOlayi, register_panel,
     },
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     scroll::KaydirmaCubuguGosterimi,
 };
 use kavis_ui_assets::Varliklar;
@@ -28,7 +28,7 @@ const TILES_DOCK_AREA: DockAreaTab = DockAreaTab {
 /// - Tüm panellere arama çubuğu ekler.
 struct ContainerPanel {
     panel: Arc<dyn PanelView>,
-    search_state: Entity<InputState>,
+    search_state: Entity<GirdiDurumu>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -79,7 +79,7 @@ impl ContainerPanel {
 
     fn new(panel: Arc<dyn PanelView>, window: &mut Window, cx: &mut App) -> Entity<Self> {
         cx.new(|cx| {
-            let search_state = cx.new(|cx| InputState::new(window, cx).placeholder("Search..."));
+            let search_state = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Search..."));
 
             Self {
                 panel,
@@ -107,7 +107,7 @@ impl Panel for ContainerPanel {
                 .rounded(cx.theme().radius_lg)
                 .border_1()
                 .border_color(cx.theme().input)
-                .child(Input::new(&self.search_state).xsmall().appearance(false))
+                .child(Girdi::new(&self.search_state).xsmall().appearance(false))
                 .into_any_element(),
         )
     }

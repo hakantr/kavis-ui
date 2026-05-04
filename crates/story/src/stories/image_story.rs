@@ -3,7 +3,7 @@ use gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement as _,
     Render, Styled, Window, img,
 };
-use kavis_ui::{dock::PanelControl, v_flex};
+use kavis_ui::{dock::PanelDenetimi, v_flex};
 
 pub struct ImageStory {
     focus_handle: gpui::FocusHandle,
@@ -22,8 +22,8 @@ impl super::Story for ImageStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
-        Some(PanelControl::Toolbar)
+    fn zoomable() -> Option<PanelDenetimi> {
+        Some(PanelDenetimi::Toolbar)
     }
 }
 

@@ -8,7 +8,7 @@ use kavis_ui::{
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari, Gecis},
     checkbox::OnayKutusu,
     clipboard::Pano,
-    dock::PanelControl,
+    dock::PanelDenetimi,
     h_flex,
     radio::Radyo,
     switch::Anahtar,
@@ -57,7 +57,7 @@ impl Story for TooltipStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

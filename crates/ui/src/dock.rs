@@ -21,6 +21,8 @@ pub use state::*;
 pub use tab_panel::*;
 pub use tiles::*;
 
+pub type PanelDenetimi = PanelControl;
+
 use crate::OgeUzantisi;
 
 pub(crate) fn init(cx: &mut App) {

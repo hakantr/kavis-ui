@@ -5,7 +5,7 @@ use kavis_ui::{
     clipboard::Pano,
     h_flex,
     highlighter::Language,
-    input::{Input, InputEvent, InputState, TabSize},
+    input::{Girdi, GirdiDurumu, GirdiOlayi, SekmeBoyutu},
     resizable::{h_resizable, resizable_panel},
     text::markdown,
 };
@@ -13,7 +13,7 @@ use kavis_ui_assets::Varliklar;
 use kavis_ui_story::Open;
 
 pub struct Example {
-    input_state: Entity<InputState>,
+    input_state: Entity<GirdiDurumu>,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -22,10 +22,10 @@ const EXAMPLE: &str = include_str!("./fixtures/test.md");
 impl Example {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let input_state = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .code_editor(Language::Markdown)
                 .line_number(true)
-                .tab_size(TabSize {
+                .tab_size(SekmeBoyutu {
                     tab_size: 2,
                     ..Default::default()
                 })
@@ -41,7 +41,7 @@ impl Example {
             focus_handle.focus(window, cx);
         });
 
-        let _subscriptions = vec![cx.subscribe(&input_state, |_, _, _: &InputEvent, _| {})];
+        let _subscriptions = vec![cx.subscribe(&input_state, |_, _, _: &GirdiOlayi, _| {})];
 
         Self {
             input_state,
@@ -97,7 +97,7 @@ impl Render for Example {
                                 .font_family(cx.theme().mono_font_family.clone())
                                 .text_size(cx.theme().mono_font_size)
                                 .child(
-                                    Input::new(&self.input_state)
+                                    Girdi::new(&self.input_state)
                                         .h_full()
                                         .p_0()
                                         .border_0()

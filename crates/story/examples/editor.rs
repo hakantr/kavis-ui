@@ -16,7 +16,7 @@ use kavis_ui::{
     highlighter::{DilKaydi, DilYapilandirmasi, Language, Tani, TaniOnemi},
     input::{
         self, CodeActionProvider, CompletionProvider, DefinitionProvider, DocumentColorProvider,
-        HoverProvider, Input, InputEvent, InputState, Position, Rope, RopeExt, TabSize,
+        Girdi, GirdiDurumu, GirdiOlayi, Halat, HalatUzantisi, HoverProvider, Position, SekmeBoyutu,
     },
     list::ListeOgesi,
     resizable::{h_resizable, resizable_panel},
@@ -67,9 +67,9 @@ fn init() {
 }
 
 pub struct Example {
-    editor: Entity<InputState>,
+    editor: Entity<GirdiDurumu>,
     tree_state: Entity<AgacDurumu>,
-    go_to_line_state: Entity<InputState>,
+    go_to_line_state: Entity<GirdiDurumu>,
     language: Lang,
     line_number: bool,
     indent_guides: bool,
@@ -155,11 +155,11 @@ fn completion_item(
 impl CompletionProvider for ExampleLspStore {
     fn completions(
         &self,
-        rope: &Rope,
+        rope: &Halat,
         offset: usize,
         trigger: CompletionContext,
         _: &mut Window,
-        cx: &mut Context<InputState>,
+        cx: &mut Context<GirdiDurumu>,
     ) -> Task<Result<CompletionResponse>> {
         let trigger_character = trigger.trigger_character.unwrap_or_default();
         if trigger_character.is_empty() {
@@ -213,15 +213,15 @@ impl CompletionProvider for ExampleLspStore {
 
     fn inline_completion(
         &self,
-        rope: &Rope,
+        rope: &Halat,
         offset: usize,
         _trigger: InlineCompletionContext,
         _window: &mut Window,
-        cx: &mut Context<InputState>,
+        cx: &mut Context<GirdiDurumu>,
     ) -> Task<Result<InlineCompletionResponse>> {
         let rope = rope.clone();
         cx.background_spawn(async move {
-            // Get the current line text before cursor using RopeExt
+            // Get the current line text before cursor using HalatUzantisi
             let point = rope.offset_to_point(offset);
             let line_start = rope.line_start_offset(point.row);
             let current_line = rope.slice(line_start..offset).to_string();
@@ -254,7 +254,7 @@ impl CompletionProvider for ExampleLspStore {
         &self,
         _offset: usize,
         _new_text: &str,
-        _cx: &mut Context<InputState>,
+        _cx: &mut Context<GirdiDurumu>,
     ) -> bool {
         true
     }
@@ -267,7 +267,7 @@ impl CodeActionProvider for ExampleLspStore {
 
     fn code_actions(
         &self,
-        _state: Entity<InputState>,
+        _state: Entity<GirdiDurumu>,
         range: Range<usize>,
         _window: &mut Window,
         _cx: &mut App,
@@ -286,7 +286,7 @@ impl CodeActionProvider for ExampleLspStore {
 
     fn perform_code_action(
         &self,
-        state: Entity<InputState>,
+        state: Entity<GirdiDurumu>,
         action: CodeAction,
         _push_to_history: bool,
         window: &mut Window,
@@ -318,7 +318,7 @@ impl CodeActionProvider for ExampleLspStore {
 impl HoverProvider for ExampleLspStore {
     fn hover(
         &self,
-        text: &Rope,
+        text: &Halat,
         offset: usize,
         _window: &mut Window,
         _cx: &mut App,
@@ -367,7 +367,7 @@ const RUST_DOC_URLS: &[(&str, &str)] = &[
 impl DefinitionProvider for ExampleLspStore {
     fn definitions(
         &self,
-        text: &Rope,
+        text: &Halat,
         offset: usize,
         _window: &mut Window,
         _cx: &mut App,
@@ -436,7 +436,7 @@ impl CodeActionProvider for TextConvertor {
 
     fn code_actions(
         &self,
-        state: Entity<InputState>,
+        state: Entity<GirdiDurumu>,
         range: Range<usize>,
         _window: &mut Window,
         cx: &mut App,
@@ -590,7 +590,7 @@ impl CodeActionProvider for TextConvertor {
 
     fn perform_code_action(
         &self,
-        state: Entity<InputState>,
+        state: Entity<GirdiDurumu>,
         action: CodeAction,
         _push_to_history: bool,
         window: &mut Window,
@@ -622,7 +622,7 @@ impl CodeActionProvider for TextConvertor {
 impl DocumentColorProvider for ExampleLspStore {
     fn document_colors(
         &self,
-        text: &Rope,
+        text: &Halat,
         _window: &mut Window,
         _cx: &mut App,
     ) -> Task<gpui::Result<Vec<lsp_types::ColorInformation>>> {
@@ -692,11 +692,11 @@ impl Example {
         let lsp_store = ExampleLspStore::new();
 
         let editor = cx.new(|cx| {
-            let mut editor = InputState::new(window, cx)
+            let mut editor = GirdiDurumu::new(window, cx)
                 .code_editor(default_language.name().to_string())
                 .line_number(true)
                 .indent_guides(true)
-                .tab_size(TabSize {
+                .tab_size(SekmeBoyutu {
                     tab_size: 4,
                     hard_tabs: false,
                 })
@@ -721,12 +721,12 @@ impl Example {
             focus_handle.focus(window, cx);
         });
 
-        let go_to_line_state = cx.new(|cx| InputState::new(window, cx));
+        let go_to_line_state = cx.new(|cx| GirdiDurumu::new(window, cx));
 
         let tree_state = cx.new(|cx| AgacDurumu::new(cx));
         Self::load_files(tree_state.clone(), PathBuf::from("./"), cx);
 
-        let _subscriptions = vec![cx.subscribe(&editor, |this, _, _: &InputEvent, cx| {
+        let _subscriptions = vec![cx.subscribe(&editor, |this, _, _: &GirdiOlayi, cx| {
             this.lint_document(cx);
         })];
 
@@ -774,7 +774,7 @@ impl Example {
 
             dialog
                 .title("Go to line")
-                .child(Input::new(&input_state))
+                .child(Girdi::new(&input_state))
                 .on_ok({
                     let editor = editor.clone();
                     let input_state = input_state.clone();
@@ -1099,7 +1099,7 @@ impl Render for Example {
                                     .child(self.render_file_tree(window, cx)),
                             )
                             .child(
-                                Input::new(&self.editor)
+                                Girdi::new(&self.editor)
                                     .bordered(false)
                                     .p_0()
                                     .h_full()

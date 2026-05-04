@@ -13,7 +13,7 @@ use kavis_ui::{
     checkbox::OnayKutusu,
     date_picker::{TarihSecici, TarihSeciciDurumu},
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     list::{Liste, ListeDurumu, ListeOgesi, ListeTemsilcisi},
     v_flex,
 };
@@ -157,8 +157,8 @@ pub struct SheetStory {
     placement: Option<Placement>,
     selected_value: Option<SharedString>,
     list: Entity<ListeDurumu<ListItemDeletegate>>,
-    input1: Entity<InputState>,
-    input2: Entity<InputState>,
+    input1: Entity<GirdiDurumu>,
+    input2: Entity<GirdiDurumu>,
     date: Entity<TarihSeciciDurumu>,
     overlay: bool,
     overlay_closable: bool,
@@ -248,9 +248,9 @@ impl SheetStory {
             matches: items.clone(),
         };
         let list = cx.new(|cx| ListeDurumu::new(delegate, window, cx).searchable(true));
-        let input1 = cx.new(|cx| InputState::new(window, cx).placeholder("Adınız"));
+        let input1 = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Adınız"));
         let input2 = cx.new(|cx| {
-            InputState::new(window, cx).placeholder("For test focus back on dialog close.")
+            GirdiDurumu::new(window, cx).placeholder("For test focus back on dialog close.")
         });
         let date = cx.new(|cx| TarihSeciciDurumu::new(window, cx));
 
@@ -288,7 +288,7 @@ impl SheetStory {
                     v_flex()
                         .size_full()
                         .gap_3()
-                        .child(Input::new(&input1))
+                        .child(Girdi::new(&input1))
                         .child(TarihSecici::new(&date).placeholder("Doğum Tarihi"))
                         .child(
                             Dugme::new("send-notification")
@@ -463,7 +463,7 @@ impl Render for SheetStory {
                     .child(
                         section("Focus back test")
                             .max_w_md()
-                            .child(Input::new(&self.input2))
+                            .child(Girdi::new(&self.input2))
                             .child(
                                 Dugme::new("test-action")
                                     .outline()

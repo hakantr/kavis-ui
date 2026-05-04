@@ -371,6 +371,8 @@ pub struct SearchableVec<T> {
     matched_items: Vec<T>,
 }
 
+pub type AranabilirListe<T> = SearchableVec<T>;
+
 impl<T: Clone> SearchableVec<T> {
     pub fn push(&mut self, item: T) {
         self.items.push(item.clone());

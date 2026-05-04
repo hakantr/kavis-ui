@@ -8,7 +8,7 @@ use gpui::{
 use kavis_ui::{
     BaslikCubugu, EtkinTema, KokGorunum, PencereUzantisi, SimgeAdi,
     button::Dugme,
-    dock::{Panel, PanelControl, PanelEvent, PanelInfo, PanelState, TitleStyle, register_panel},
+    dock::{Panel, PanelDenetimi, PanelEvent, PanelInfo, PanelState, TitleStyle, register_panel},
     group_box::{GrupKutusu, GrupKutusuVaryantlari as _},
     h_flex,
     menu::AcilirMenu,
@@ -370,7 +370,7 @@ fn localized_section_title(title: &str) -> SharedString {
     match title {
         "UyariIletisimKutusu" => "Uyarı Penceresi",
         "Alignment" => "Hizalama",
-        "Appearance false with Input" => "Görünüm kapalı, girdi ile",
+        "Appearance false with Girdi" => "Görünüm kapalı, girdi ile",
         "Auto Grow" => "Otomatik Büyüme",
         "Auto Grow with No Wrap" => "Sarmasız Otomatik Büyüme",
         "Avatar Group" => "Avatar Grubu",
@@ -407,7 +407,7 @@ fn localized_section_title(title: &str) -> SharedString {
         "Compact Style" => "Kompakt Stil",
         "Complex use" => "Karmaşık kullanım",
         "Context Menu" => "Bağlam Menüsü",
-        "Currency Input with thousands separator" => "Binlik ayırıcılı para girdisi",
+        "Currency Girdi with thousands separator" => "Binlik ayırıcılı para girdisi",
         "Custom (First 5 days of each month disabled)" => "Özel (Her ayın ilk 5 günü devre dışı)",
         "Custom Appearance" => "Özel Görünüm",
         "Custom Dugme" => "Özel Düğme",
@@ -424,7 +424,7 @@ fn localized_section_title(title: &str) -> SharedString {
         }
         "Custom buttons" => "Özel düğmeler",
         "Date Picker Value" => "Tarih Seçici Değeri",
-        "Date Input" => "Tarih Girişi",
+        "Date Girdi" => "Tarih Girişi",
         "Date Range" => "Tarih Aralığı",
         "Default" => "Varsayılan",
         "Default Open" => "Varsayılan Açık",
@@ -439,7 +439,7 @@ fn localized_section_title(title: &str) -> SharedString {
         "File tree" => "Dosya Ağacı",
         "Fill Style" => "Dolgulu Stil",
         "Focus back test" => "Odağı geri alma testi",
-        "Focused Input" => "Odaklı Girdi",
+        "Focused Girdi" => "Odaklı Girdi",
         "Font Size" => "Yazı Boyutu",
         "Ghost" => "Hayalet",
         "Horizontal Dividers" => "Yatay Ayırıcılar",
@@ -448,10 +448,10 @@ fn localized_section_title(title: &str) -> SharedString {
         "Simge" => "Simge",
         "Simge Dugme" => "Simge Düğmesi",
         "Simge Adimlayici" => "Simgeli Adım Göstergesi",
-        "Input Size" => "Girdi Boyutu",
-        "Input State" => "Girdi Durumu",
-        "Input with mask pattern: (999)-999-9999" => "Maske desenli girdi: (999)-999-9999",
-        "Input with mask pattern: AAA-###-AAA" => "Maske desenli girdi: AAA-###-AAA",
+        "Girdi Size" => "Girdi Boyutu",
+        "Girdi State" => "Girdi Durumu",
+        "Girdi with mask pattern: (999)-999-9999" => "Maske desenli girdi: (999)-999-9999",
+        "Girdi with mask pattern: AAA-###-AAA" => "Maske desenli girdi: AAA-###-AAA",
         "KlavyeTusu" => "Klavye Kısayolu",
         "Keyboard Disabled" => "Klavye Devre Dışı",
         "Etiket" => "Etiket",
@@ -470,7 +470,7 @@ fn localized_section_title(title: &str) -> SharedString {
         "No Wrap" => "Sarma Yok",
         "Normal" => "Normal",
         "Normal Dugme" => "Normal Düğme",
-        "Normal Input" => "Normal Girdi",
+        "Normal Girdi" => "Normal Girdi",
         "Normal SayfaKatmani" => "Normal Kenar Paneli",
         "Normal Size" => "Normal Boyut",
         "Bildirim with Type" => "Türlü Bildirim",
@@ -561,7 +561,7 @@ fn localized_section_title(title: &str) -> SharedString {
         "With Etiket" => "Etiketli",
         "With Ilerleme" => "İlerleme ile",
         "With confirm mode" => "Onay modu ile",
-        "With in an Input" => "Girdi içinde",
+        "With in an Girdi" => "Girdi içinde",
         "With mask pattern" => "Maske deseni ile",
         "With open_alert_dialog" => "open_alert_dialog ile",
         "With preview label" => "Önizleme etiketi ile",
@@ -587,7 +587,7 @@ pub struct StoryContainer {
     story: Option<AnyView>,
     story_klass: Option<SharedString>,
     closable: bool,
-    zoomable: Option<PanelControl>,
+    zoomable: Option<PanelDenetimi>,
     paddings: Pixels,
     on_active: Option<fn(AnyView, bool, &mut Window, &mut App)>,
 }
@@ -626,14 +626,14 @@ fn localized_story_title(title: &'static str) -> &'static str {
         "UzerineGelmeKarti" => "Üzerine Gelme Kartı",
         "Simge" => "Simge",
         "Image" => "Görsel",
-        "Input" => "Girdi",
+        "Girdi" => "Girdi",
         "Introduction" => "Giriş",
         "KlavyeTusu" => "Klavye Kısayolu",
         "Etiket" => "Etiket",
         "Liste" => "Liste",
         "Menu" => "Menü",
         "Bildirim" => "Bildirim",
-        "NumberInput" => "Sayı Girdisi",
+        "SayiGirdisi" => "Sayı Girdisi",
         "OtpInput" => "OTP Girdisi",
         "Sayfalama" => "Sayfalama",
         "AcilirKatman" => "Açılır İçerik",
@@ -778,14 +778,14 @@ fn localized_story_description(description: &'static str) -> &'static str {
         }
         "Form to collect multiple inputs." => "Birden fazla girdi toplamak için form.",
         "Image and SVG image supported." => "Görsel ve SVG görsel desteği.",
-        "Input with multi-line mode." => "Çok satırlı girdi modu.",
+        "Girdi with multi-line mode." => "Çok satırlı girdi modu.",
         "Etiket used to display text or other content." => {
             "Metin veya başka içerik göstermek için kullanılan etiket."
         }
-        "NumberInput design to support + - to adjust the input value." => {
+        "SayiGirdisi design to support + - to adjust the input value." => {
             "Girdi değerini + ve - ile ayarlamayı destekleyen sayı girdisi."
         }
-        "OTP Input uses to one-time password (OTP) input field or number password input field." => {
+        "OTP Girdi uses to one-time password (OTP) input field or number password input field." => {
             "Tek kullanımlık parola (OTP) veya sayısal parola girişi için kullanılır."
         }
         "Sayfalama with page navigation, next and previous links." => {
@@ -828,7 +828,7 @@ impl StoryContainer {
             story: None,
             story_klass: None,
             closable: true,
-            zoomable: Some(PanelControl::default()),
+            zoomable: Some(PanelDenetimi::default()),
             paddings: px(16.),
             on_active: None,
         }
@@ -905,7 +905,7 @@ impl StoryState {
         &'static str,
         &'static str,
         bool,
-        Option<PanelControl>,
+        Option<PanelDenetimi>,
         AnyView,
         fn(AnyView, bool, &mut Window, &mut App),
     ) {
@@ -978,7 +978,7 @@ impl Panel for StoryContainer {
         self.closable
     }
 
-    fn zoomable(&self, _cx: &App) -> Option<PanelControl> {
+    fn zoomable(&self, _cx: &App) -> Option<PanelDenetimi> {
         self.zoomable
     }
 

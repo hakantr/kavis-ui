@@ -36,3 +36,16 @@ pub use otp_input::*;
 pub use rope_ext::{InputEdit, Point, RopeExt, RopeLines};
 pub use ropey::Rope;
 pub use state::*;
+
+pub type Girdi = input::Input;
+pub type GirdiDurumu = state::InputState;
+pub type GirdiOlayi = state::InputEvent;
+pub type SekmeBoyutu = indent::TabSize;
+pub type MaskeDeseni = mask_pattern::MaskPattern;
+pub type SayiGirdisi = number_input::NumberInput;
+pub type SayiGirdisiOlayi = number_input::NumberInputEvent;
+pub type AdimAksiyonu = number_input::StepAction;
+pub type GirdiDuzenlemesi = rope_ext::InputEdit;
+pub type Halat = ropey::Rope;
+pub type HalatSatirlari<'a> = rope_ext::RopeLines<'a>;
+pub use rope_ext::RopeExt as HalatUzantisi;

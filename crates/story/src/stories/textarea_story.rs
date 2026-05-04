@@ -8,17 +8,17 @@ use kavis_ui::{
     Boyutlandirilabilir,
     button::Dugme,
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     v_flex,
 };
 
 pub fn init(_: &mut App) {}
 
 pub struct TextareaStory {
-    textarea: Entity<InputState>,
-    textarea_auto_grow: Entity<InputState>,
-    textarea_no_wrap: Entity<InputState>,
-    textarea_auto_grow_no_wrap: Entity<InputState>,
+    textarea: Entity<GirdiDurumu>,
+    textarea_auto_grow: Entity<GirdiDurumu>,
+    textarea_no_wrap: Entity<GirdiDurumu>,
+    textarea_auto_grow_no_wrap: Entity<GirdiDurumu>,
 }
 
 impl super::Story for TextareaStory {
@@ -27,7 +27,7 @@ impl super::Story for TextareaStory {
     }
 
     fn description() -> &'static str {
-        "Input with multi-line mode."
+        "Girdi with multi-line mode."
     }
 
     fn closable() -> bool {
@@ -46,7 +46,7 @@ impl TextareaStory {
 
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let textarea = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .multi_line(true)
                 .rows(10)
                 .placeholder("Metni buraya girin...")
@@ -57,7 +57,7 @@ impl TextareaStory {
 
                     Kavis UI, GPUI framework için hazırlanmış UI bileşenleri koleksiyonudur.
 
-                    Dugme, Input, OnayKutusu, Radyo, Dropdown, Sekme ve daha fazlasını içerir...
+                    Dugme, Girdi, OnayKutusu, Radyo, Dropdown, Sekme ve daha fazlasını içerir...
 
                     Kavis UI kullanılarak oluşturulmuş bir uygulama örneği aşağıdadır.
 
@@ -76,7 +76,7 @@ impl TextareaStory {
         });
 
         let textarea_no_wrap = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .multi_line(true)
                 .rows(6)
                 .soft_wrap(false)
@@ -84,7 +84,7 @@ impl TextareaStory {
         });
 
         let textarea_auto_grow = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .auto_grow(1, 5)
                 .placeholder("Metni buraya girin...")
                 .default_value(
@@ -100,7 +100,7 @@ impl TextareaStory {
         });
 
         let textarea_auto_grow_no_wrap = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .auto_grow(1, 5)
                 .soft_wrap(false)
                 .placeholder("Metni buraya girin...")
@@ -156,7 +156,7 @@ impl Render for TextareaStory {
                     v_flex()
                         .gap_2()
                         .w_full()
-                        .child(Input::new(&self.textarea).h(px(320.)))
+                        .child(Girdi::new(&self.textarea).h(px(320.)))
                         .child(
                             h_flex()
                                 .justify_between()
@@ -189,17 +189,17 @@ impl Render for TextareaStory {
             .child(
                 section("No Wrap")
                     .max_w_md()
-                    .child(Input::new(&self.textarea_no_wrap).h(px(200.))),
+                    .child(Girdi::new(&self.textarea_no_wrap).h(px(200.))),
             )
             .child(
                 section("Auto Grow")
                     .max_w_md()
-                    .child(Input::new(&self.textarea_auto_grow)),
+                    .child(Girdi::new(&self.textarea_auto_grow)),
             )
             .child(
                 section("Auto Grow with No Wrap")
                     .max_w_md()
-                    .child(Input::new(&self.textarea_auto_grow_no_wrap)),
+                    .child(Girdi::new(&self.textarea_auto_grow_no_wrap)),
             )
     }
 }

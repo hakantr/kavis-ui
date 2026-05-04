@@ -1,5 +1,8 @@
 use gpui::*;
-use kavis_ui::{button::*, h_flex, v_flex, *};
+use kavis_ui::{
+    EtkinTema as _, KokGorunum, OdakTuzagiOgesi as _, StilUzantisi as _, button::Dugme, h_flex,
+    v_flex,
+};
 
 pub struct Example {
     trap1_handle: FocusHandle,

@@ -4,7 +4,7 @@ use gpui::{
 };
 use kavis_ui::{
     Boyutlandirilabilir as _, EtkinTema as _, Simge, SimgeAdi, avatar::Avatar, badge::Rozet,
-    dock::PanelControl, v_flex,
+    dock::PanelDenetimi, v_flex,
 };
 
 use crate::section;
@@ -38,7 +38,7 @@ impl super::Story for BadgeStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

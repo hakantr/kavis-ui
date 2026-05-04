@@ -9,7 +9,7 @@ use gpui::{
 use kavis_ui::{
     EtkinTema as _, SimgeAdi,
     button::Dugme,
-    dock::PanelControl,
+    dock::PanelDenetimi,
     h_flex,
     label::Etiket,
     list::ListeOgesi,
@@ -128,7 +128,7 @@ impl Story for TreeStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

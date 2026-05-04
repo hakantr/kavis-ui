@@ -5,7 +5,7 @@ use gpui::{
 use kavis_ui::{
     Boyutlandirilabilir, EtkinTema as _, Simge, SimgeAdi,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari},
-    dock::PanelControl,
+    dock::PanelDenetimi,
     h_flex, neutral_500, v_flex,
 };
 
@@ -40,7 +40,7 @@ impl super::Story for IconStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

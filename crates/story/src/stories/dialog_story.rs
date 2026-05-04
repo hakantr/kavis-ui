@@ -13,7 +13,7 @@ use kavis_ui::{
         IletisimKapat, IletisimKutusu,
     },
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     select::{Secim, SecimDurumu},
     table::{Column, TabloDurumu, TabloTemsilcisi, VeriTablosu},
     text::markdown,
@@ -25,8 +25,8 @@ use crate::{TestAction, section};
 pub struct DialogStory {
     focus_handle: FocusHandle,
     selected_value: Option<SharedString>,
-    input1: Entity<InputState>,
-    input2: Entity<InputState>,
+    input1: Entity<GirdiDurumu>,
+    input2: Entity<GirdiDurumu>,
     date: Entity<TarihSeciciDurumu>,
     select: Entity<SecimDurumu<Vec<String>>>,
     table: Entity<TabloDurumu<MyTable>>,
@@ -103,9 +103,9 @@ impl DialogStory {
     }
 
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let input1 = cx.new(|cx| InputState::new(window, cx).placeholder("Adınız"));
+        let input1 = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Adınız"));
         let input2 = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("İletişim kutusu kapanınca odağın geri dönmesini test etmek için.")
         });
         let date = cx.new(|cx| TarihSeciciDurumu::new(window, cx));
@@ -210,7 +210,7 @@ impl DialogStory {
                                         "Bu bir iletişim kutusudur; \
                                         buraya herhangi bir içerik koyabilirsiniz.",
                                     )
-                                    .child(Input::new(&input1))
+                                    .child(Girdi::new(&input1))
                                     .child(Secim::new(&select))
                                     .child(TarihSecici::new(&date).placeholder("Doğum Tarihi")),
                             )
@@ -252,7 +252,7 @@ impl DialogStory {
     fn render_focus_back_test(&self, _cx: &mut Context<Self>) -> impl IntoElement {
         section("Focus back test")
             .max_w_md()
-            .child(Input::new(&self.input2))
+            .child(Girdi::new(&self.input2))
             .child(
                 Dugme::new("test-action")
                     .outline()

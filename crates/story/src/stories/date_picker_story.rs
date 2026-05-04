@@ -257,7 +257,7 @@ impl Render for DatePickerStory {
                 ),
             )
             .child(
-                section("Date Input")
+                section("Date Girdi")
                     .max_w_128()
                     .child(TarihGirdisi::new(&self.date_input).cleanable(true))
                     .child(

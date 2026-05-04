@@ -4,39 +4,45 @@ use gpui::{
 };
 
 use crate::section;
-use kavis_ui::{button::*, input::*, *};
+use kavis_ui::{
+    Boyutlandirilabilir as _, EtkinTema as _, PencereUzantisi as _, Simge, SimgeAdi,
+    button::{Dugme, DugmeVaryantlari as _},
+    h_flex,
+    input::{self, Girdi, GirdiDurumu, GirdiOlayi, MaskeDeseni},
+    v_flex,
+};
 
 const CODE_EXAMPLE: &str = r#"{"single_line":"code editor"}"#;
 
 pub fn init(_: &mut App) {}
 
 pub struct InputStory {
-    input1: Entity<InputState>,
-    input2: Entity<InputState>,
-    input_esc: Entity<InputState>,
-    input_text_centered: Entity<InputState>,
-    input_text_right: Entity<InputState>,
-    mask_input: Entity<InputState>,
-    disabled_input: Entity<InputState>,
-    prefix_input1: Entity<InputState>,
-    suffix_input1: Entity<InputState>,
-    both_input1: Entity<InputState>,
-    large_input: Entity<InputState>,
-    small_input: Entity<InputState>,
-    phone_input: Entity<InputState>,
-    mask_input2: Entity<InputState>,
-    currency_input: Entity<InputState>,
-    custom_input: Entity<InputState>,
-    custom_menu_input: Entity<InputState>,
-    code_input: Entity<InputState>,
-    color_input: Entity<InputState>,
+    input1: Entity<GirdiDurumu>,
+    input2: Entity<GirdiDurumu>,
+    input_esc: Entity<GirdiDurumu>,
+    input_text_centered: Entity<GirdiDurumu>,
+    input_text_right: Entity<GirdiDurumu>,
+    mask_input: Entity<GirdiDurumu>,
+    disabled_input: Entity<GirdiDurumu>,
+    prefix_input1: Entity<GirdiDurumu>,
+    suffix_input1: Entity<GirdiDurumu>,
+    both_input1: Entity<GirdiDurumu>,
+    large_input: Entity<GirdiDurumu>,
+    small_input: Entity<GirdiDurumu>,
+    phone_input: Entity<GirdiDurumu>,
+    mask_input2: Entity<GirdiDurumu>,
+    currency_input: Entity<GirdiDurumu>,
+    custom_input: Entity<GirdiDurumu>,
+    custom_menu_input: Entity<GirdiDurumu>,
+    code_input: Entity<GirdiDurumu>,
+    color_input: Entity<GirdiDurumu>,
 
     _subscriptions: Vec<Subscription>,
 }
 
 impl super::Story for InputStory {
     fn title() -> &'static str {
-        "Input"
+        "Girdi"
     }
 
     fn closable() -> bool {
@@ -55,56 +61,56 @@ impl InputStory {
 
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let input1 = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .default_value("Hello 世界，this is GPUI component, this is a long text.")
         });
 
-        let input2 = cx.new(|cx| InputState::new(window, cx).placeholder("Buraya metin gir..."));
+        let input2 = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Buraya metin gir..."));
         let input_esc = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Metin gir ve ESC ile temizle")
                 .clean_on_escape()
         });
 
         let mask_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .masked(true)
                 .placeholder("Parolanızı girin...")
                 .default_value("this-is-password-中文🚀🎉")
         });
 
-        let prefix_input1 = cx.new(|cx| InputState::new(window, cx).placeholder("Bir şey ara..."));
+        let prefix_input1 = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Bir şey ara..."));
         let suffix_input1 = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Bu girdi yalnızca [a-zA-Z0-9] karakterlerini destekler.")
                 .pattern(regex::Regex::new(r"^[a-zA-Z0-9]*$").unwrap())
         });
         let both_input1 = cx.new(|cx| {
-            InputState::new(window, cx).placeholder("Bu girdinin ön eki ve son eki var.")
+            GirdiDurumu::new(window, cx).placeholder("Bu girdinin ön eki ve son eki var.")
         });
 
-        let phone_input = cx.new(|cx| InputState::new(window, cx).mask_pattern("(999)-999-9999"));
-        let mask_input2 = cx.new(|cx| InputState::new(window, cx).mask_pattern("AAA-###-AAA"));
+        let phone_input = cx.new(|cx| GirdiDurumu::new(window, cx).mask_pattern("(999)-999-9999"));
+        let mask_input2 = cx.new(|cx| GirdiDurumu::new(window, cx).mask_pattern("AAA-###-AAA"));
         let currency_input = cx.new(|cx| {
-            InputState::new(window, cx).mask_pattern(MaskPattern::localized_number(Some(3)))
+            GirdiDurumu::new(window, cx).mask_pattern(MaskeDeseni::localized_number(Some(3)))
         });
         let custom_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Özel girdi monospace kullanır, 0123456789.")
                 .baglam_menusu(false)
         });
 
         let custom_menu_input =
-            cx.new(|cx| InputState::new(window, cx).placeholder("Özel bağlam menülü girdi..."));
+            cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Özel bağlam menülü girdi..."));
 
         let color_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Bir şey yaz...")
                 .default_value("Özel metin rengi girdisi")
         });
 
         let code_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .code_editor("json")
                 .multi_line(false)
                 .show_whitespaces(true)
@@ -112,13 +118,13 @@ impl InputStory {
         });
 
         let input_text_centered = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Ortalanmış yerleşimi test etmek için metin gir...")
                 .default_value("Ortalanmış Metin")
         });
 
         let input_text_right = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Sağa hizalı yerleşimi test etmek için metin gir...")
                 .default_value("Sağa Hizalı Metin")
         });
@@ -135,10 +141,10 @@ impl InputStory {
             input_esc,
             mask_input,
             disabled_input: cx
-                .new(|cx| InputState::new(window, cx).default_value("Bu devre dışı girdidir")),
-            large_input: cx.new(|cx| InputState::new(window, cx).placeholder("Büyük girdi")),
+                .new(|cx| GirdiDurumu::new(window, cx).default_value("Bu devre dışı girdidir")),
+            large_input: cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Büyük girdi")),
             small_input: cx.new(|cx| {
-                InputState::new(window, cx)
+                GirdiDurumu::new(window, cx)
                     .validate(|s, _| s.parse::<f32>().is_ok())
                     .placeholder("ondalıklı sayıyı sınırlamak için doğrula.")
             }),
@@ -160,13 +166,13 @@ impl InputStory {
 
     fn on_input_event(
         &mut self,
-        state: &Entity<InputState>,
-        event: &InputEvent,
+        state: &Entity<GirdiDurumu>,
+        event: &GirdiOlayi,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         match event {
-            InputEvent::Change => {
+            GirdiOlayi::Change => {
                 let text = state.read(cx).value();
                 if state == &self.input2 {
                     println!("Devre dışı girdi değeri ayarlandı: {}", text);
@@ -177,11 +183,11 @@ impl InputStory {
                     println!("Değişiklik: {}", text)
                 }
             }
-            InputEvent::PressEnter { secondary } => {
+            GirdiOlayi::PressEnter { secondary } => {
                 println!("Enter basıldı, ikincil: {}", secondary)
             }
-            InputEvent::Focus => println!("Odaklandı"),
-            InputEvent::Blur => println!("Odaktan çıktı"),
+            GirdiOlayi::Focus => println!("Odaklandı"),
+            GirdiOlayi::Blur => println!("Odaktan çıktı"),
         };
     }
 
@@ -200,16 +206,16 @@ impl Render for InputStory {
             .justify_start()
             .gap_3()
             .child(
-                section("Normal Input")
+                section("Normal Girdi")
                     .max_w_md()
-                    .child(Input::new(&self.input1).cleanable(true))
-                    .child(Input::new(&self.input2)),
+                    .child(Girdi::new(&self.input1).cleanable(true))
+                    .child(Girdi::new(&self.input2)),
             )
             .child(
-                section("Input State")
+                section("Girdi State")
                     .max_w_md()
-                    .child(Input::new(&self.disabled_input).disabled(true))
-                    .child(Input::new(&self.mask_input).mask_toggle().cleanable(true)),
+                    .child(Girdi::new(&self.disabled_input).disabled(true))
+                    .child(Girdi::new(&self.mask_input).mask_toggle().cleanable(true)),
             )
             .child(
                 section("Text Align").max_w_lg().child(
@@ -217,42 +223,42 @@ impl Render for InputStory {
                         .w_full()
                         .gap_4()
                         .flex_wrap()
-                        .child(Input::new(&self.input_text_centered).text_center().flex_1())
-                        .child(Input::new(&self.input_text_right).text_right().flex_1()),
+                        .child(Girdi::new(&self.input_text_centered).text_center().flex_1())
+                        .child(Girdi::new(&self.input_text_right).text_right().flex_1()),
                 ),
             )
             .child(
                 section("Prefix and Suffix")
                     .max_w_md()
                     .child(
-                        Input::new(&self.prefix_input1)
+                        Girdi::new(&self.prefix_input1)
                             .cleanable(true)
                             .prefix(Simge::new(SimgeAdi::Search).small()),
                     )
                     .child(
-                        Input::new(&self.both_input1)
+                        Girdi::new(&self.both_input1)
                             .cleanable(true)
                             .prefix(div().child(Simge::new(SimgeAdi::Search).small()))
                             .suffix(Dugme::new("info").ghost().icon(SimgeAdi::Info).xsmall()),
                     )
                     .child(
-                        Input::new(&self.suffix_input1)
+                        Girdi::new(&self.suffix_input1)
                             .cleanable(true)
                             .suffix(Dugme::new("info").ghost().icon(SimgeAdi::Info).xsmall()),
                     ),
             )
             .child(
-                section("Currency Input with thousands separator")
+                section("Currency Girdi with thousands separator")
                     .max_w_md()
-                    .child(Input::new(&self.currency_input))
+                    .child(Girdi::new(&self.currency_input))
                     .child(
                         div().child(format!("Değer: {:?}", self.currency_input.read(cx).value())),
                     ),
             )
             .child(
-                section("Input with mask pattern: (999)-999-9999")
+                section("Girdi with mask pattern: (999)-999-9999")
                     .max_w_md()
-                    .child(Input::new(&self.phone_input))
+                    .child(Girdi::new(&self.phone_input))
                     .child(
                         v_flex()
                             .child(format!("Değer: {:?}", self.phone_input.read(cx).value()))
@@ -263,9 +269,9 @@ impl Render for InputStory {
                     ),
             )
             .child(
-                section("Input with mask pattern: AAA-###-AAA")
+                section("Girdi with mask pattern: AAA-###-AAA")
                     .max_w_md()
-                    .child(Input::new(&self.mask_input2))
+                    .child(Girdi::new(&self.mask_input2))
                     .child(
                         v_flex()
                             .child(format!("Değer: {:?}", self.mask_input2.read(cx).value()))
@@ -276,18 +282,18 @@ impl Render for InputStory {
                     ),
             )
             .child(
-                section("Input Size")
+                section("Girdi Size")
                     .max_w_md()
-                    .child(Input::new(&self.large_input).large())
-                    .child(Input::new(&self.small_input).small()),
+                    .child(Girdi::new(&self.large_input).large())
+                    .child(Girdi::new(&self.small_input).small()),
             )
             .child(
                 section("Cleanable and ESC to clean")
                     .max_w_md()
-                    .child(Input::new(&self.input_esc).cleanable(true)),
+                    .child(Girdi::new(&self.input_esc).cleanable(true)),
             )
             .child(
-                section("Focused Input")
+                section("Focused Girdi")
                     .max_w_md()
                     .whitespace_normal()
                     .overflow_hidden()
@@ -307,11 +313,11 @@ impl Render for InputStory {
                         .bg(cx.theme().secondary)
                         .text_color(cx.theme().secondary_foreground)
                         .w_full()
-                        .child(Input::new(&self.custom_input).appearance(false)),
+                        .child(Girdi::new(&self.custom_input).appearance(false)),
                 ),
             )
             .child(section("Custom Context Menu").max_w_md().child(
-                Input::new(&self.custom_menu_input).baglam_menusu(|menu, _, _| {
+                Girdi::new(&self.custom_menu_input).baglam_menusu(|menu, _, _| {
                     menu.menu("Özel Eylem", Box::new(input::SelectAll))
                         .separator()
                         .menu("Kopyala", Box::new(input::Copy))
@@ -321,11 +327,11 @@ impl Render for InputStory {
             .child(
                 section("Custom Text Color")
                     .max_w_md()
-                    .child(Input::new(&self.color_input).text_color(cx.theme().info)),
+                    .child(Girdi::new(&self.color_input).text_color(cx.theme().info)),
             )
             .child(
                 section("Single line code editor").max_w_md().child(
-                    Input::new(&self.code_input).suffix(
+                    Girdi::new(&self.code_input).suffix(
                         Dugme::new("code-reset")
                             .ghost()
                             .label("Sıfırla")

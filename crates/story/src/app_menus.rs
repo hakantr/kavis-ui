@@ -1,13 +1,13 @@
 use gpui::{App, Entity, Menu, MenuItem, SharedString};
-use kavis_ui::{EtkinTema as _, KureselDurum, Tema, TemaKaydi, TemaModu, menu::AppMenuBar};
+use kavis_ui::{EtkinTema as _, KureselDurum, Tema, TemaKaydi, TemaModu, menu::UygulamaMenuCubugu};
 
 use crate::{
     About, Open, Quit, SelectLocale, ToggleSearch,
     themes::{SwitchTheme, SwitchThemeMode},
 };
 
-pub fn init(title: impl Into<SharedString>, cx: &mut App) -> Entity<AppMenuBar> {
-    let app_menu_bar = AppMenuBar::new(cx);
+pub fn init(title: impl Into<SharedString>, cx: &mut App) -> Entity<UygulamaMenuCubugu> {
+    let app_menu_bar = UygulamaMenuCubugu::new(cx);
     let title: SharedString = title.into();
     update_app_menu(title.clone(), app_menu_bar.clone(), cx);
 
@@ -33,7 +33,11 @@ pub fn init(title: impl Into<SharedString>, cx: &mut App) -> Entity<AppMenuBar> 
     app_menu_bar
 }
 
-fn update_app_menu(title: impl Into<SharedString>, app_menu_bar: Entity<AppMenuBar>, cx: &mut App) {
+fn update_app_menu(
+    title: impl Into<SharedString>,
+    app_menu_bar: Entity<UygulamaMenuCubugu>,
+    cx: &mut App,
+) {
     let title: SharedString = title.into();
 
     cx.set_menus(build_menus(title.clone(), cx));

@@ -1,28 +1,40 @@
 use gpui::{prelude::*, *};
 use kavis_ui::{
     EtkinTema as _, Simge, SimgeAdi, h_flex,
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     resizable::{h_resizable, resizable_panel},
     sidebar::{YanCubuk, YanCubukBasligi, YanCubukGrubu, YanCubukMenuOgesi, YanCubukMenusu},
     v_flex,
 };
 
-use crate::*;
+use crate::{
+    AccordionStory, AlertDialogStory, AlertStory, AvatarStory, BadgeStory, BreadcrumbStory,
+    ButtonStory, CalendarStory, ChartStory, CheckboxStory, ClipboardStory, CollapsibleStory,
+    ColorPickerStory, DataTableStory, DatePickerStory, DescriptionListStory, DialogStory,
+    DividerStory, DropdownButtonStory, EditorStory, FormStory, GroupBoxStory, HoverCardStory,
+    IconStory, ImageStory, InputStory, KbdStory, LabelStory, ListStory, MenuStory,
+    NotificationStory, NumberInputStory, OtpInputStory, PaginationStory, PopoverStory,
+    ProgressStory, RadioStory, RatingStory, ResizableStory, ScrollbarStory, SelectStory,
+    SettingsStory, SheetStory, SidebarStory, SkeletonStory, SliderStory, SpinnerStory,
+    StepperStory, StoryContainer, SwitchStory, TableStory, TabsStory, TagStory, TextareaStory,
+    ThemeColorsStory, ToggleStory, TooltipStory, TreeStory, VirtualListStory, WelcomeStory,
+    ZedWorkspaceStory,
+};
 
 pub struct Gallery {
     stories: Vec<(&'static str, Vec<Entity<StoryContainer>>)>,
     active_group_index: Option<usize>,
     active_index: Option<usize>,
     collapsed: bool,
-    search_input: Entity<InputState>,
+    search_input: Entity<GirdiDurumu>,
     _subscriptions: Vec<Subscription>,
 }
 
 impl Gallery {
     pub fn new(init_story: Option<&str>, window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let search_input = cx.new(|cx| InputState::new(window, cx).placeholder("Ara..."));
+        let search_input = cx.new(|cx| GirdiDurumu::new(window, cx).placeholder("Ara..."));
         let _subscriptions = vec![cx.subscribe(&search_input, |this, _, e, cx| match e {
-            InputEvent::Change => {
+            GirdiOlayi::Change => {
                 this.active_group_index = Some(0);
                 this.active_index = Some(0);
                 cx.notify()
@@ -241,7 +253,7 @@ impl Render for Gallery {
                                             .flex_1()
                                             .mx_1()
                                             .child(
-                                                Input::new(&self.search_input)
+                                                Girdi::new(&self.search_input)
                                                     .appearance(false)
                                                     .cleanable(true),
                                             ),

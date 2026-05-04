@@ -8,7 +8,7 @@ use kavis_ui::{
     button::Dugme,
     checkbox::OnayKutusu,
     description_list::{AciklamaListesi, AciklamaOgesi},
-    dock::PanelControl,
+    dock::PanelDenetimi,
     text::MetinGorunumu,
     v_flex,
 };
@@ -35,7 +35,7 @@ impl DescriptionListStory {
                 "Açıklama",
                 "[GPUI](https://gpui.rs) kullanarak masaüstü uygulamaları geliştirmek için UI bileşenleri.\
                 \n\n \
-                **Dugme**, **Input**, **Tablo**, **Liste**, **Secim**, **TarihSecici** gibi birçok kullanışlı UI bileşeni içerir. \
+                **Dugme**, **Girdi**, **Tablo**, **Liste**, **Secim**, **TarihSecici** gibi birçok kullanışlı UI bileşeni içerir. \
                 \n\n \
                 Kavis UI ile yerel masaüstü uygulamanızı kolayca oluşturabilirsiniz.
                 ",
@@ -104,7 +104,7 @@ impl super::Story for DescriptionListStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

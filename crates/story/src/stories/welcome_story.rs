@@ -2,7 +2,7 @@ use gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, Render, Styled as _, Window, px,
 };
 
-use kavis_ui::{dock::PanelControl, text::markdown};
+use kavis_ui::{dock::PanelDenetimi, text::markdown};
 
 use crate::Story;
 
@@ -35,7 +35,7 @@ impl Story for WelcomeStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 

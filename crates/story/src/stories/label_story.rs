@@ -8,7 +8,7 @@ use kavis_ui::{
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari as _},
     checkbox::OnayKutusu,
     green_500, h_flex,
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     label::{Etiket, HighlightsMatch},
     v_flex,
 };
@@ -19,7 +19,7 @@ pub struct LabelStory {
     focus_handle: gpui::FocusHandle,
     masked: bool,
     highlights_text: SharedString,
-    highlights_input: Entity<InputState>,
+    highlights_input: Entity<GirdiDurumu>,
     prefix: bool,
     _subscriptions: Vec<Subscription>,
 }
@@ -41,15 +41,15 @@ impl super::Story for LabelStory {
 impl LabelStory {
     pub(crate) fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let highlights_input = cx.new(|cx| {
-            InputState::new(window, cx)
+            GirdiDurumu::new(window, cx)
                 .placeholder("Etikette vurgulanacak metni girin")
                 .clean_on_escape()
         });
 
         let _subscriptions =
             vec![
-                cx.subscribe(&highlights_input, |this, state, e: &InputEvent, cx| {
-                    if let InputEvent::Change = e {
+                cx.subscribe(&highlights_input, |this, state, e: &GirdiOlayi, cx| {
+                    if let GirdiOlayi::Change = e {
                         this.highlights_text = state.read(cx).value();
                         cx.notify();
                     }
@@ -97,7 +97,7 @@ impl Render for LabelStory {
             .child(
                 h_flex()
                     .gap_x_3()
-                    .child(Input::new(&self.highlights_input).w_1_3())
+                    .child(Girdi::new(&self.highlights_input).w_1_3())
                     .child(
                         OnayKutusu::new("prefix")
                             .label("Ön Ek")

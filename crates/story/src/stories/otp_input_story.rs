@@ -7,7 +7,7 @@ use kavis_ui::{
     Boyutlandirilabilir, DevreDisiBirakilabilir as _, StilUzantisi,
     checkbox::OnayKutusu,
     h_flex,
-    input::{InputEvent, OtpInput, OtpState},
+    input::{GirdiOlayi, OtpInput, OtpState},
     v_flex,
 };
 
@@ -33,7 +33,7 @@ impl super::Story for OtpInputStory {
     }
 
     fn description() -> &'static str {
-        "OTP Input uses to one-time password (OTP) input field or number password input field."
+        "OTP Girdi uses to one-time password (OTP) input field or number password input field."
     }
 
     fn closable() -> bool {
@@ -54,8 +54,8 @@ impl OtpInputStory {
         let otp_state = cx.new(|cx| OtpState::new(6, window, cx).masked(true));
 
         let _subscriptions = vec![
-            cx.subscribe(&otp_state, |this, state, ev: &InputEvent, cx| match ev {
-                InputEvent::Change => {
+            cx.subscribe(&otp_state, |this, state, ev: &GirdiOlayi, cx| match ev {
+                GirdiOlayi::Change => {
                     let text = state.read(cx).value();
                     this.otp_value = Some(text.clone());
                     cx.notify();

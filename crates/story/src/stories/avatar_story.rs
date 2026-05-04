@@ -5,7 +5,7 @@ use gpui::{
 use kavis_ui::{
     Boyutlandirilabilir as _, EtkinTema, SimgeAdi, StilUzantisi,
     avatar::{Avatar, AvatarGroup},
-    dock::PanelControl,
+    dock::PanelDenetimi,
     v_flex,
 };
 
@@ -40,7 +40,7 @@ impl super::Story for AvatarStory {
         Self::view(window, cx)
     }
 
-    fn zoomable() -> Option<PanelControl> {
+    fn zoomable() -> Option<PanelDenetimi> {
         None
     }
 }

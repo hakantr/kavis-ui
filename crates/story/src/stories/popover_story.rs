@@ -8,7 +8,7 @@ use kavis_ui::{
     button::{Dugme, DugmeVaryantlari as _},
     divider::Ayirici,
     h_flex,
-    input::{Input, InputState},
+    input::{Girdi, GirdiDurumu},
     list::{Liste, ListeDurumu, ListeOgesi, ListeTemsilcisi},
     popover::AcilirKatman,
     v_flex,
@@ -46,14 +46,14 @@ pub fn init(cx: &mut App) {
 
 struct Form {
     parent: Entity<PopoverStory>,
-    input1: Entity<InputState>,
+    input1: Entity<GirdiDurumu>,
 }
 
 impl Form {
     fn new(parent: Entity<PopoverStory>, window: &mut Window, cx: &mut App) -> Entity<Self> {
         cx.new(|cx| Self {
             parent,
-            input1: cx.new(|cx| InputState::new(window, cx)),
+            input1: cx.new(|cx| GirdiDurumu::new(window, cx)),
         })
     }
 }
@@ -117,7 +117,7 @@ impl Render for Form {
             .size_full()
             .child("Bu bir form kapsayıcısıdır.")
             .child("Açılır içeriği kapatmak için gönder düğmesine tıklayın.")
-            .child(Input::new(&self.input1))
+            .child(Girdi::new(&self.input1))
             .child(
                 Dugme::new("submit")
                     .label("Gönder")

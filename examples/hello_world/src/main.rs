@@ -1,5 +1,8 @@
 use gpui::*;
-use kavis_ui::{button::*, *};
+use kavis_ui::{
+    EtkinTema as _, KokGorunum, StilUzantisi as _,
+    button::{Dugme, DugmeVaryantlari as _},
+};
 
 pub struct Example;
 impl Render for Example {

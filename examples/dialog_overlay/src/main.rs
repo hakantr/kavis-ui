@@ -1,5 +1,8 @@
 use gpui::*;
-use kavis_ui::{button::*, menu::BaglamMenusuUzantisi, *};
+use kavis_ui::{
+    BaslikCubugu, KokGorunum, PencereUzantisi as _, StilUzantisi as _, button::Dugme, h_flex,
+    menu::BaglamMenusuUzantisi,
+};
 use kavis_ui_assets::Varliklar;
 
 actions!(class_menu, [Open, Delete, Export, Info]);

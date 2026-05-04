@@ -2,14 +2,14 @@ use gpui::*;
 use gpui_wry::WebGorunumu;
 use kavis_ui::{
     EtkinTema as _, KokGorunum, h_flex,
-    input::{Input, InputEvent, InputState},
+    input::{Girdi, GirdiDurumu, GirdiOlayi},
     v_flex,
 };
 
 pub struct Example {
     focus_handle: FocusHandle,
     webview: Entity<WebGorunumu>,
-    address_input: Entity<InputState>,
+    address_input: Entity<GirdiDurumu>,
 }
 
 impl Example {
@@ -52,7 +52,7 @@ impl Example {
         });
 
         let address_input = cx.new(|cx| {
-            InputState::new(window, cx).default_value("https://hakantr.github.io/kavis-ui")
+            GirdiDurumu::new(window, cx).default_value("https://hakantr.github.io/kavis-ui")
         });
 
         let url = address_input.read(cx).value().clone();
@@ -69,8 +69,8 @@ impl Example {
 
             cx.subscribe(
                 &address_input,
-                |this: &mut Self, input, event: &InputEvent, cx| match event {
-                    InputEvent::PressEnter { .. } => {
+                |this: &mut Self, input, event: &GirdiOlayi, cx| match event {
+                    GirdiOlayi::PressEnter { .. } => {
                         let url = input.read(cx).value().clone();
                         this.webview.update(cx, |view, _| {
                             view.load_url(&url);
@@ -115,7 +115,7 @@ impl Render for Example {
                 h_flex()
                     .gap_2()
                     .items_center()
-                    .child(Input::new(&self.address_input)),
+                    .child(Girdi::new(&self.address_input)),
             )
             .child(
                 div()

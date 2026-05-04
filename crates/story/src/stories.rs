@@ -1,5 +1,5 @@
 use gpui::{AnyView, App, AppContext as _, Entity, Hsla, Pixels, Render, Window, px};
-use kavis_ui::dock::PanelControl;
+use kavis_ui::dock::PanelDenetimi;
 
 mod accordion_story;
 mod alert_dialog_story;
@@ -152,8 +152,8 @@ pub trait Story: Render + Sized {
         true
     }
 
-    fn zoomable() -> Option<PanelControl> {
-        Some(PanelControl::default())
+    fn zoomable() -> Option<PanelDenetimi> {
+        Some(PanelDenetimi::default())
     }
 
     fn title_bg() -> Option<Hsla> {
