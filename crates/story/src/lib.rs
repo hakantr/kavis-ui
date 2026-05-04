@@ -402,7 +402,6 @@ fn localized_section_title(title: &str) -> SharedString {
         "Color Simge" => "Renkli Simge",
         "Color Picker" => "Renk Seçici",
         "Color Tags" => "Renk Etiketleri",
-        "Combination Dividers" => "Birleşik Ayırıcılar",
         "Compact Style" => "Kompakt Stil",
         "Complex use" => "Karmaşık kullanım",
         "Context Menu" => "Bağlam Menüsü",
@@ -441,7 +440,6 @@ fn localized_section_title(title: &str) -> SharedString {
         "Focused Girdi" => "Odaklı Girdi",
         "Font Size" => "Yazı Boyutu",
         "Ghost" => "Hayalet",
-        "Horizontal Dividers" => "Yatay Ayırıcılar",
         "Horizontal Kaydirici" => "Yatay Kaydırıcı",
         "Horizontal Adimlayici" => "Yatay Adım Göstergesi",
         "Simge" => "Simge",
@@ -548,7 +546,6 @@ fn localized_section_title(title: &str) -> SharedString {
         "Unique with Key" => "Anahtarlı Benzersiz",
         "Update Available" => "Güncelleme Var",
         "User Profile Preview" => "Kullanıcı Profili Önizlemesi",
-        "Vertical Dividers" => "Dikey Ayırıcılar",
         "Vertical Adimlayici" => "Dikey Adım Göstergesi",
         "Vertical with Range" => "Aralıklı Dikey",
         "With 3 Months" => "3 Ay ile",
@@ -700,9 +697,6 @@ fn localized_story_description(description: &'static str) -> &'static str {
             "Tarih veya tarih aralığı seçmek için tarih seçici."
         }
         "A dialog dialog" => "İçerik ve eylemler göstermek için iletişim kutusu.",
-        "A divider that can be either vertical or horizontal." => {
-            "Dikey veya yatay kullanılabilen ayırıcı."
-        }
         "A hover card displays content when hovering over a trigger element, with configurable delays." => {
             "Tetikleyici öğenin üzerine gelindiğinde, ayarlanabilir gecikmelerle içerik gösteren kart."
         }

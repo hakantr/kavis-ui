@@ -142,6 +142,17 @@ Upstream `49b4ad41` commit'inde `Divider`'dan ileri taşınan iç adlandırmalar
 - `crates/ui/src/text/node.rs` markdown blok render'ındaki `div().id("divider")` → `div().id("ayirici")`. (`BlockNode::Ayirici` varyantıyla tutarlı.)
 - `BlockNode::Ayirici` varyantı upstream'de `BlockNode::HorizontalRule` olarak yeniden adlandırıldı, ancak `pub(crate)` iç tip olduğu için fork tercihi olarak Türkçe `Ayirici` korunuyor (semantik olarak hem ayırıcı hem yatay çizgi anlamlarını kapsıyor).
 
+## Temizlenen Ölü i18n Anahtarları
+
+`crates/story/src/lib.rs` içinde `divider_story` döneminden kalan, artık çağrılmayan dört anahtar kaldırıldı:
+
+- `"Combination Dividers" => "Birleşik Ayırıcılar"`
+- `"Horizontal Dividers" => "Yatay Ayırıcılar"`
+- `"Vertical Dividers" => "Dikey Ayırıcılar"`
+- `"A divider that can be either vertical or horizontal." => "Dikey veya yatay kullanılabilen ayırıcı."`
+
+`ayirici_story.rs` artık Türkçe stringleri (`section("Yatay Ayırıcılar")` vb.) doğrudan render ettiği için bu i18n anahtarları lookup edilmiyordu.
+
 ## Gelecek Merge Kontrol Listesi
 
 1. Upstream tarih filtresini netleştir:
