@@ -9,7 +9,7 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    Boyutlandirilabilir as _, EtkinTema as _, FocusTrapElement as _, KokGorunum,
+    Boyutlandirilabilir as _, EtkinTema as _, KokGorunum, OdakTuzagiOgesi as _,
     PencereUzantisi as _, SimgeAdi, StilUzantisi, TITLE_BAR_HEIGHT,
     animation::cubic_bezier,
     button::{Dugme, DugmeVaryanti, DugmeVaryantlari as _},
@@ -525,7 +525,7 @@ impl RenderOnce for IletisimKutusu {
                         v_flex()
                             .id(layer_ix)
                             .track_focus(&self.focus_handle)
-                            .focus_trap(format!("dialog-{}", layer_ix), &self.focus_handle)
+                            .odak_tuzagi(format!("dialog-{}", layer_ix), &self.focus_handle)
                             .bg(cx.theme().background)
                             .border_1()
                             .border_color(cx.theme().border)

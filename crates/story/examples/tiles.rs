@@ -1,7 +1,7 @@
 use anyhow::{Context as _, Result};
 use gpui::*;
 use kavis_ui::{
-    BaslikCubugu, EtkinTema, KokGorunum, Sizable,
+    BaslikCubugu, Boyutlandirilabilir, EtkinTema, KokGorunum,
     dock::{
         Panel, PanelEvent, PanelInfo, PanelRegistry, PanelState, PanelView, YerlesimAlani,
         YerlesimAlaniDurumu, YerlesimOgesi, YerlesimOlayi, register_panel,

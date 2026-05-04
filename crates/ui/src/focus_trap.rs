@@ -7,11 +7,11 @@ use std::collections::HashMap;
 
 /// Initialize odak trap yönetici olarak bir global
 pub(crate) fn init(cx: &mut App) {
-    cx.set_global(FocusTrapManager::new());
+    cx.set_global(OdakTuzagiYoneticisi::new());
 }
 
 /// Bir uzantı özellik için ekler `focus_trap` işlev için etkileşimli öğeler.
-pub trait FocusTrapElement: InteractiveElement + Sized {
+pub trait OdakTuzagiOgesi: InteractiveElement + Sized {
     /// Bu öğe için odak tuzağını etkinleştirir.
     ///
     /// Etkin olduğunda odak bu kapsayıcı içinde otomatik olarak döner.
@@ -30,34 +30,34 @@ pub trait FocusTrapElement: InteractiveElement + Sized {
     ///     .child(Dugme::new("btn1").label("Dugme 1"))
     ///     .child(Dugme::new("btn2").label("Dugme 2"))
     ///     .child(Dugme::new("btn3").label("Dugme 3"))
-    ///     .focus_trap("trap1", &self.container_focus_handle)
+    ///     .odak_tuzagi("trap1", &self.container_focus_handle)
     /// // Sekme tuşuna basmak döngü yapar: btn1 -> btn2 -> btn3 -> btn1
     /// // Odak bu kapsayıcının dışındaki öğelere kaçmaz
     /// ```
     ///
     /// Bakınız ayrıca: <https://github.com/odak-trap/odak-trap-react>
-    fn focus_trap(
+    fn odak_tuzagi(
         self,
         id: impl Into<ElementId>,
         focus_handle: &FocusHandle,
-    ) -> FocusTrapContainer<Self>
+    ) -> OdakTuzagiKapsayici<Self>
     where
         Self: ParentElement + Styled + Element + 'static,
     {
-        FocusTrapContainer::new(id, focus_handle.clone(), self)
+        OdakTuzagiKapsayici::new(id, focus_handle.clone(), self)
     }
 }
-impl<T: InteractiveElement + Sized> FocusTrapElement for T {}
+impl<T: InteractiveElement + Sized> OdakTuzagiOgesi for T {}
 
 /// Global durum için manage tüm odak trap containers
-pub(crate) struct FocusTrapManager {
+pub(crate) struct OdakTuzagiYoneticisi {
     /// Kapsayıcı öğe ID değerinden odak kapanı bilgisine eşleme.
     traps: HashMap<GlobalElementId, WeakFocusHandle>,
 }
 
-impl Global for FocusTrapManager {}
+impl Global for OdakTuzagiYoneticisi {}
 
-impl FocusTrapManager {
+impl OdakTuzagiYoneticisi {
     /// Yeni bir odak trap yönetici oluşturur.
     fn new() -> Self {
         Self {
@@ -66,11 +66,11 @@ impl FocusTrapManager {
     }
 
     pub(crate) fn global(cx: &App) -> &Self {
-        cx.global::<FocusTrapManager>()
+        cx.global::<OdakTuzagiYoneticisi>()
     }
 
     fn global_mut(cx: &mut App) -> &mut Self {
-        cx.global_mut::<FocusTrapManager>()
+        cx.global_mut::<OdakTuzagiYoneticisi>()
     }
 
     /// kaydeder bir odak trap kapsayıcı
@@ -100,7 +100,7 @@ impl FocusTrapManager {
     }
 }
 
-impl Default for FocusTrapManager {
+impl Default for OdakTuzagiYoneticisi {
     fn default() -> Self {
         Self::new()
     }
@@ -110,13 +110,13 @@ impl Default for FocusTrapManager {
 ///
 /// Bu öğe wraps başka bir öğe ve registers onu olarak bir odak trap kapsayıcı.
 /// Sekme/Shift-Sekme basıldığında odak kapsayıcı içinde otomatik olarak döner.
-pub struct FocusTrapContainer<E: InteractiveElement + ParentElement + Styled + Element> {
+pub struct OdakTuzagiKapsayici<E: InteractiveElement + ParentElement + Styled + Element> {
     id: ElementId,
     focus_handle: FocusHandle,
     base: E,
 }
 
-impl<E: InteractiveElement + ParentElement + Styled + Element> FocusTrapContainer<E> {
+impl<E: InteractiveElement + ParentElement + Styled + Element> OdakTuzagiKapsayici<E> {
     pub(crate) fn new(id: impl Into<ElementId>, focus_handle: FocusHandle, child: E) -> Self {
         Self {
             id: id.into(),
@@ -127,7 +127,7 @@ impl<E: InteractiveElement + ParentElement + Styled + Element> FocusTrapContaine
 }
 
 impl<E: InteractiveElement + ParentElement + Styled + Element> IntoElement
-    for FocusTrapContainer<E>
+    for OdakTuzagiKapsayici<E>
 {
     type Element = Self;
 
@@ -136,31 +136,31 @@ impl<E: InteractiveElement + ParentElement + Styled + Element> IntoElement
     }
 }
 impl<E: InteractiveElement + ParentElement + Styled + Element> ParentElement
-    for FocusTrapContainer<E>
+    for OdakTuzagiKapsayici<E>
 {
     fn extend(&mut self, elements: impl IntoIterator<Item = AnyElement>) {
         self.base.extend(elements);
     }
 }
 impl<E: InteractiveElement + ParentElement + Styled + Element> InteractiveElement
-    for FocusTrapContainer<E>
+    for OdakTuzagiKapsayici<E>
 {
     fn interactivity(&mut self) -> &mut Interactivity {
         self.base.interactivity()
     }
 }
 impl<E: InteractiveElement + ParentElement + Styled + Element> StatefulInteractiveElement
-    for FocusTrapContainer<E>
+    for OdakTuzagiKapsayici<E>
 {
 }
-impl<E: InteractiveElement + ParentElement + Styled + Element> Styled for FocusTrapContainer<E> {
+impl<E: InteractiveElement + ParentElement + Styled + Element> Styled for OdakTuzagiKapsayici<E> {
     fn style(&mut self) -> &mut StyleRefinement {
         self.base.style()
     }
 }
 
 impl<E: InteractiveElement + ParentElement + Styled + Element + 'static> Element
-    for FocusTrapContainer<E>
+    for OdakTuzagiKapsayici<E>
 {
     type RequestLayoutState = E::RequestLayoutState;
     type PrepaintState = E::PrepaintState;
@@ -181,7 +181,7 @@ impl<E: InteractiveElement + ParentElement + Styled + Element + 'static> Element
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
         // Register this focus trap with the manager
-        FocusTrapManager::register_trap(global_id.unwrap(), self.focus_handle.downgrade(), cx);
+        OdakTuzagiYoneticisi::register_trap(global_id.unwrap(), self.focus_handle.downgrade(), cx);
 
         self.base.request_layout(global_id, None, window, cx)
     }

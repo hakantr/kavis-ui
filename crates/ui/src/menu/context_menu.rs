@@ -10,15 +10,15 @@ use gpui::{
 use crate::menu::AcilirMenu;
 
 /// Bir uzantı özellik için adding bir bağlam menü için bir öğe.
-pub trait ContextMenuExt: InteractiveElement + ParentElement + Styled {
+pub trait BaglamMenusuUzantisi: InteractiveElement + ParentElement + Styled {
     /// Bir bağlam menü için öğe ekler.
     ///
-    /// Bu, öğeyi `relative` konumlandırılmış hale getirir ve altına bir `ContextMenu` öğesi ekler.
-    /// `ContextMenu` öğesi `absolute` konumlandırıldığı için üst öğenin yerleşimini etkilemez.
-    fn context_menu(
+    /// Bu, öğeyi `relative` konumlandırılmış hale getirir ve altına bir `BaglamMenusu` öğesi ekler.
+    /// `BaglamMenusu` öğesi `absolute` konumlandırıldığı için üst öğenin yerleşimini etkilemez.
+    fn baglam_menusu(
         mut self,
         f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
-    ) -> ContextMenu<Self>
+    ) -> BaglamMenusu<Self>
     where
         Self: Sized,
     {
@@ -30,14 +30,14 @@ pub trait ContextMenuExt: InteractiveElement + ParentElement + Styled {
             .clone()
             .map(|id| format!("context-menu-{:?}", id))
             .unwrap_or_else(|| format!("context-menu-{:p}", &self as *const _));
-        ContextMenu::new(id, self).menu(f)
+        BaglamMenusu::new(id, self).menu(f)
     }
 }
 
-impl<E: InteractiveElement + ParentElement + Styled> ContextMenuExt for E {}
+impl<E: InteractiveElement + ParentElement + Styled> BaglamMenusuUzantisi for E {}
 
 /// Bir bağlam menü olan olabilir shown üzerinde sağ-tıklama.
-pub struct ContextMenu<E: ParentElement + Styled + Sized> {
+pub struct BaglamMenusu<E: ParentElement + Styled + Sized> {
     id: ElementId,
     element: Option<E>,
     menu: Option<Rc<dyn Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu>>,
@@ -46,7 +46,7 @@ pub struct ContextMenu<E: ParentElement + Styled + Sized> {
     anchor: Anchor,
 }
 
-impl<E: ParentElement + Styled> ContextMenu<E> {
+impl<E: ParentElement + Styled> BaglamMenusu<E> {
     /// Yeni bir bağlam menü ile verilen ID oluşturur.
     pub fn new(id: impl Into<ElementId>, element: E) -> Self {
         Self {
@@ -73,9 +73,9 @@ impl<E: ParentElement + Styled> ContextMenu<E> {
         id: &GlobalElementId,
         window: &mut Window,
         cx: &mut App,
-        f: impl FnOnce(&mut Self, &mut ContextMenuState, &mut Window, &mut App) -> R,
+        f: impl FnOnce(&mut Self, &mut BaglamMenusuDurumu, &mut Window, &mut App) -> R,
     ) -> R {
-        window.with_optional_element_state::<ContextMenuState, _>(
+        window.with_optional_element_state::<BaglamMenusuDurumu, _>(
             Some(id),
             |element_state, window| {
                 let mut element_state = element_state.unwrap().unwrap_or_default();
@@ -86,7 +86,7 @@ impl<E: ParentElement + Styled> ContextMenu<E> {
     }
 }
 
-impl<E: ParentElement + Styled> ParentElement for ContextMenu<E> {
+impl<E: ParentElement + Styled> ParentElement for BaglamMenusu<E> {
     fn extend(&mut self, elements: impl IntoIterator<Item = AnyElement>) {
         if let Some(element) = &mut self.element {
             element.extend(elements);
@@ -94,7 +94,7 @@ impl<E: ParentElement + Styled> ParentElement for ContextMenu<E> {
     }
 }
 
-impl<E: ParentElement + Styled> Styled for ContextMenu<E> {
+impl<E: ParentElement + Styled> Styled for BaglamMenusu<E> {
     fn style(&mut self) -> &mut StyleRefinement {
         if let Some(element) = &mut self.element {
             element.style()
@@ -104,7 +104,7 @@ impl<E: ParentElement + Styled> Styled for ContextMenu<E> {
     }
 }
 
-impl<E: ParentElement + Styled + IntoElement + 'static> IntoElement for ContextMenu<E> {
+impl<E: ParentElement + Styled + IntoElement + 'static> IntoElement for BaglamMenusu<E> {
     type Element = Self;
 
     fn into_element(self) -> Self::Element {
@@ -112,23 +112,23 @@ impl<E: ParentElement + Styled + IntoElement + 'static> IntoElement for ContextM
     }
 }
 
-struct ContextMenuSharedState {
+struct BaglamMenusuPaylasimliDurum {
     menu_view: Option<Entity<AcilirMenu>>,
     open: bool,
     position: Point<Pixels>,
     _subscription: Option<Subscription>,
 }
 
-pub struct ContextMenuState {
+pub struct BaglamMenusuDurumu {
     element: Option<AnyElement>,
-    shared_state: Rc<RefCell<ContextMenuSharedState>>,
+    shared_state: Rc<RefCell<BaglamMenusuPaylasimliDurum>>,
 }
 
-impl Default for ContextMenuState {
+impl Default for BaglamMenusuDurumu {
     fn default() -> Self {
         Self {
             element: None,
-            shared_state: Rc::new(RefCell::new(ContextMenuSharedState {
+            shared_state: Rc::new(RefCell::new(BaglamMenusuPaylasimliDurum {
                 menu_view: None,
                 open: false,
                 position: Default::default(),
@@ -138,8 +138,8 @@ impl Default for ContextMenuState {
     }
 }
 
-impl<E: ParentElement + Styled + IntoElement + 'static> Element for ContextMenu<E> {
-    type RequestLayoutState = ContextMenuState;
+impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu<E> {
+    type RequestLayoutState = BaglamMenusuDurumu;
     type PrepaintState = Hitbox;
 
     fn id(&self) -> Option<ElementId> {
@@ -163,7 +163,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for ContextMenu<
             id.unwrap(),
             window,
             cx,
-            |this, state: &mut ContextMenuState, window, cx| {
+            |this, state: &mut BaglamMenusuDurumu, window, cx| {
                 let (position, open) = {
                     let shared_state = state.shared_state.borrow();
                     (shared_state.position, shared_state.open)
@@ -222,7 +222,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for ContextMenu<
 
                 (
                     layout_id,
-                    ContextMenuState {
+                    BaglamMenusuDurumu {
                         element: Some(element),
                         ..Default::default()
                     },
@@ -267,7 +267,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for ContextMenu<
             id.unwrap(),
             window,
             cx,
-            |_view, state: &mut ContextMenuState, window, _| {
+            |_view, state: &mut BaglamMenusuDurumu, window, _| {
                 let shared_state = state.shared_state.clone();
 
                 let hitbox = hitbox.clone();

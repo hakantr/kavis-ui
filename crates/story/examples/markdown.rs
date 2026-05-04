@@ -1,6 +1,6 @@
 use gpui::{prelude::FluentBuilder as _, *};
 use kavis_ui::{
-    EtkinTema as _, SimgeAdi, Sizable as _,
+    Boyutlandirilabilir as _, EtkinTema as _, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     clipboard::Pano,
     h_flex,

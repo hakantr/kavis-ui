@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, Boyutlandirilabilir, StilUzantisi,
+    Boyutlandirilabilir, EksenUzantisi, StilUzantisi,
     button::Dugme,
     menu::{AcilirMenuOgesi, AcilirMenuTetikleyici},
     setting::{
@@ -58,7 +58,7 @@ where
             .unwrap_or_else(|| old_value.clone().into());
 
         Dugme::new("btn")
-            .when(options.layout.is_vertical(), |this| this.w_full())
+            .when(options.layout.dikey_mi(), |this| this.w_full())
             .label(old_label)
             .dropdown_caret(true)
             .outline()

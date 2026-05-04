@@ -208,7 +208,7 @@ impl Render for TreeStory {
                                         })
                                     },
                                 )
-                                .context_menu(|_ix, entry, menu, _window, _cx| {
+                                .baglam_menusu(|_ix, entry, menu, _window, _cx| {
                                     let is_folder = entry.is_folder();
                                     menu.when(!is_folder, |m| m.menu("Aç", Box::new(OpenFile)))
                                         .menu("Yeniden Adlandır", Box::new(Rename))

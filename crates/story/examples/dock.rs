@@ -1,13 +1,13 @@
 use anyhow::{Context as _, Result};
 use gpui::*;
 use kavis_ui::{
-    KokGorunum, SimgeAdi, Sizable,
+    Boyutlandirilabilir, KokGorunum, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     dock::{
         ClosePanel, ToggleZoom, YerlesimAlani, YerlesimAlaniDurumu, YerlesimKonumu, YerlesimOgesi,
         YerlesimOlayi,
     },
-    menu::DropdownMenu,
+    menu::AcilirMenuTetikleyici,
 };
 
 use kavis_ui_assets::Varliklar;
@@ -112,7 +112,7 @@ impl StoryWorkspace {
                         .icon(SimgeAdi::LayoutDashboard)
                         .small()
                         .ghost()
-                        .dropdown_menu({
+                        .acilir_menu({
                             let invisible_panels = AppState::global(cx).invisible_panels.clone();
 
                             move |menu, _, cx| {

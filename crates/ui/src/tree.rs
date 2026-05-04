@@ -11,7 +11,7 @@ use crate::{
     Secilebilir as _, StilUzantisi,
     actions::{Confirm, SelectDown, SelectLeft, SelectRight, SelectUp},
     list::ListeOgesi,
-    menu::{AcilirMenu, ContextMenuExt as _},
+    menu::{AcilirMenu, BaglamMenusuUzantisi as _},
     scroll::KaydirilabilirOge,
 };
 
@@ -437,7 +437,7 @@ impl Render for AgacDurumu {
             .id("tree-state")
             .size_full()
             .relative()
-            .context_menu({
+            .baglam_menusu({
                 let state = state.clone();
                 move |menu, window, cx: &mut Context<AcilirMenu>| {
                     if state.read(cx).context_menu_builder.is_none() {
@@ -557,7 +557,7 @@ impl Agac {
     /// - `ix`: indeks sağ-tıklandığında entry
     /// - `entry`: sağ-tıklandığında ağaç entry
     /// - `menu`: açılır pencere menü oluşturucu
-    pub fn context_menu<F>(mut self, f: F) -> Self
+    pub fn baglam_menusu<F>(mut self, f: F) -> Self
     where
         F: Fn(usize, &AgacGirdisi, AcilirMenu, &mut Window, &mut Context<AgacDurumu>) -> AcilirMenu
             + 'static,

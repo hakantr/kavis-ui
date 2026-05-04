@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    AxisExt as _, EtkinTema, Placement,
+    EksenUzantisi as _, EtkinTema, Placement,
     dock::PanelInfo,
     h_flex,
     resizable::{
@@ -376,7 +376,7 @@ impl StackPanel {
             }
         }
 
-        let panel = if self.axis.is_vertical() {
+        let panel = if self.axis.dikey_mi() {
             self.panels.first()
         } else {
             self.panels.last()

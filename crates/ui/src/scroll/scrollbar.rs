@@ -2,7 +2,7 @@ use std::{cell::Cell, ops::Deref, panic::Location, rc::Rc};
 
 use instant::{Duration, Instant};
 
-use crate::{AxisExt, EtkinTema};
+use crate::{EksenUzantisi, EtkinTema};
 use gpui::{
     Anchor, App, Axis, BorderStyle, Bounds, ContentMask, CursorStyle, Edges, Element, ElementId,
     GlobalElementId, Hitbox, HitboxBehavior, Hsla, InspectorElementId, IntoElement, IsZero,
@@ -159,7 +159,7 @@ impl Deref for ScrollbarState {
 impl ScrollbarStateInner {
     fn with_drag_pos(&self, axis: Axis, pos: Point<Pixels>) -> Self {
         let mut state = *self;
-        if axis.is_vertical() {
+        if axis.dikey_mi() {
             state.drag_pos.y = pos.y;
         } else {
             state.drag_pos.x = pos.x;
@@ -262,13 +262,13 @@ impl From<Axis> for KaydirmaCubuguEkseni {
 impl KaydirmaCubuguEkseni {
     /// Kaydırma çubuğu ekseni dikeyse true döndürür.
     #[inline]
-    pub fn is_vertical(&self) -> bool {
+    pub fn dikey_mi(&self) -> bool {
         matches!(self, Self::Vertical)
     }
 
     /// Kaydırma çubuğu ekseni yataysa true döndürür.
     #[inline]
-    pub fn is_horizontal(&self) -> bool {
+    pub fn yatay_mi(&self) -> bool {
         matches!(self, Self::Horizontal)
     }
 
@@ -543,7 +543,7 @@ impl Element for KaydirmaCubugu {
             .unwrap_or(self.scroll_handle.content_size());
 
         for axis in self.axis.all().into_iter() {
-            let is_vertical = axis.is_vertical();
+            let is_vertical = axis.dikey_mi();
             let (scroll_area_size, container_size, scroll_position) = if is_vertical {
                 (
                     scroll_size.height,
@@ -766,7 +766,7 @@ impl Element for KaydirmaCubugu {
                     let container_size = state.container_size;
                     let thumb_size = state.thumb_size;
                     let margin_end = state.margin_end;
-                    let is_vertical = axis.is_vertical();
+                    let is_vertical = axis.dikey_mi();
 
                     window.set_cursor_style(CursorStyle::default(), &state.bar_hitbox);
 

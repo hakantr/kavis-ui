@@ -212,7 +212,7 @@ where
         let total_height = bounds.size.height.as_f32();
         let axis_gap = if self.label_axis { AXIS_GAP } else { 0. };
         let alignment = self.alignment;
-        let is_horizontal = alignment.is_horizontal();
+        let is_horizontal = alignment.yatay_mi();
 
         // Band scale spans the full extent perpendicular to the value axis.
         let band_extent = if is_horizontal {

@@ -1,8 +1,8 @@
 use gpui::{App, ClickEvent, InteractiveElement, Stateful, Window};
 
-pub trait InteractiveElementExt: InteractiveElement {
+pub trait EtkilesimliOgeUzantisi: InteractiveElement {
     /// dinleyici için bir double tıklama olay ayarlar.
-    fn on_double_click(
+    fn cift_tiklamada(
         mut self,
         listener: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self
@@ -18,4 +18,4 @@ pub trait InteractiveElementExt: InteractiveElement {
     }
 }
 
-impl<E: InteractiveElement> InteractiveElementExt for Stateful<E> {}
+impl<E: InteractiveElement> EtkilesimliOgeUzantisi for Stateful<E> {}

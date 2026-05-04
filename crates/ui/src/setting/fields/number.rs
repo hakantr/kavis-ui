@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, Boyutlandirilabilir, StilUzantisi,
+    Boyutlandirilabilir, EksenUzantisi, StilUzantisi,
     input::{InputEvent, InputState, NumberInput, NumberInputEvent, StepAction},
     setting::{
         HerhangiBirAyarAlani, RenderOptions,
@@ -139,7 +139,7 @@ impl AyarAlaniCizimi for NumberField {
         NumberInput::new(&state.input)
             .with_size(options.size)
             .map(|this| {
-                if options.layout.is_horizontal() {
+                if options.layout.yatay_mi() {
                     this.w_32()
                 } else {
                     this.w_full()

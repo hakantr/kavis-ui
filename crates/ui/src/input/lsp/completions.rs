@@ -10,7 +10,7 @@ use std::{cell::RefCell, ops::Range, rc::Rc, time::Duration};
 
 use crate::input::{
     InputState,
-    popovers::{CompletionMenu, ContextMenu},
+    popovers::{BaglamMenusu, CompletionMenu},
 };
 
 /// varsayılan geciktirme süre için satır içi tamamlamalar.
@@ -131,7 +131,7 @@ impl InputState {
         }
 
         let menu = match self.context_menu_content.as_ref() {
-            Some(ContextMenu::Completion(menu)) => Some(menu),
+            Some(BaglamMenusu::Completion(menu)) => Some(menu),
             _ => None,
         };
 
@@ -140,7 +140,7 @@ impl InputState {
             Some(menu) => menu.clone(),
             None => {
                 let menu = CompletionMenu::new(cx.entity(), window, cx);
-                self.context_menu_content = Some(ContextMenu::Completion(menu.clone()));
+                self.context_menu_content = Some(BaglamMenusu::Completion(menu.clone()));
                 menu
             }
         };

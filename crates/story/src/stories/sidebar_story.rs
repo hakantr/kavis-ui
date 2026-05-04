@@ -371,7 +371,7 @@ impl Render for SidebarStory {
                                     .default_open(ix == 0)
                                     .click_to_toggle(self.click_to_toggle_submenu)
                                     .when(ix == 0, |this| {
-                                        this.context_menu({
+                                        this.baglam_menusu({
                                             move |this, _, _| {
                                                 this.link(
                                                     "Paralel Ajanlar",
@@ -399,7 +399,7 @@ impl Render for SidebarStory {
                                                                 ))
                                                         }
                                                     })
-                                                    .context_menu({
+                                                    .baglam_menusu({
                                                         move |this, _, _| {
                                                             this.label("Bu bir etikettir")
                                                         }

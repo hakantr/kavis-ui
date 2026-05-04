@@ -5,7 +5,7 @@ use gpui::{
 };
 use gpui::{Corners, Pixels};
 
-use crate::AxisExt;
+use crate::EksenUzantisi;
 
 /// Make bir scrollable maske öğe için cover üst öğe görünüm ile fare wheel olay listening.
 ///
@@ -105,7 +105,7 @@ impl Element for KaydirilabilirMaske {
         window: &mut Window,
         _: &mut App,
     ) {
-        let is_horizontal = self.axis.is_horizontal();
+        let is_horizontal = self.axis.yatay_mi();
         let line_height = window.line_height();
         let bounds = hitbox.bounds;
 

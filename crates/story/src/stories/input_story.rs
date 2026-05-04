@@ -91,7 +91,7 @@ impl InputStory {
         let custom_input = cx.new(|cx| {
             InputState::new(window, cx)
                 .placeholder("Özel girdi monospace kullanır, 0123456789.")
-                .context_menu(false)
+                .baglam_menusu(false)
         });
 
         let custom_menu_input =
@@ -311,7 +311,7 @@ impl Render for InputStory {
                 ),
             )
             .child(section("Custom Context Menu").max_w_md().child(
-                Input::new(&self.custom_menu_input).context_menu(|menu, _, _| {
+                Input::new(&self.custom_menu_input).baglam_menusu(|menu, _, _| {
                     menu.menu("Özel Eylem", Box::new(input::SelectAll))
                         .separator()
                         .menu("Kopyala", Box::new(input::Copy))

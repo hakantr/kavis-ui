@@ -437,7 +437,7 @@ impl TabloTemsilcisi for StockTableDelegate {
             })
     }
 
-    fn context_menu(
+    fn baglam_menusu(
         &mut self,
         row_ix: usize,
         menu: AcilirMenu,

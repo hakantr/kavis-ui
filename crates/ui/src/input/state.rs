@@ -34,7 +34,7 @@ use crate::input::{
     HoverDefinition, InlineCompletion, Lsp, Position, RopeExt as _, Selection,
     display_map::LineLayout,
     element::RIGHT_MARGIN,
-    popovers::{ContextMenu, DiagnosticPopover, HoverPopover, InputContextMenu},
+    popovers::{BaglamMenusu, DiagnosticPopover, GirdiBaglamMenusu, HoverPopover},
     search::{self, AramaPaneli},
 };
 use crate::menu::AcilirMenu;
@@ -345,8 +345,8 @@ pub struct InputState {
     /// AcilirKatman
     diagnostic_popover: Option<Entity<DiagnosticPopover>>,
     /// tamamlama/CodeAction bağlam menü
-    pub(super) context_menu_content: Option<ContextMenu>,
-    pub(super) context_menu: Entity<InputContextMenu>,
+    pub(super) context_menu_content: Option<BaglamMenusu>,
+    pub(super) context_menu: Entity<GirdiBaglamMenusu>,
 
     /// Bir isteğe bağlı bağlam menü oluşturucu için allow özel bağlam menü üzerinde girdi.
     ///
@@ -417,7 +417,7 @@ impl InputState {
         ];
 
         let text_style = window.text_style();
-        let mouse_context_menu = InputContextMenu::new(cx.entity(), window, cx);
+        let mouse_context_menu = GirdiBaglamMenusu::new(cx.entity(), window, cx);
 
         Self {
             focus_handle: focus_handle.clone(),
@@ -520,7 +520,7 @@ impl InputState {
     ///
     /// Bağlam menüsü varsayılan olarak etkindir.
     /// Girdide özel bağlam menüsü tanımlıysa bu değer yok sayılır.
-    pub fn context_menu(mut self, enable: bool) -> Self {
+    pub fn baglam_menusu(mut self, enable: bool) -> Self {
         self.enable_context_menu = enable;
         self
     }

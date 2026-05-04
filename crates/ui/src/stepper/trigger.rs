@@ -4,7 +4,9 @@ use gpui::{
     prelude::FluentBuilder as _, px,
 };
 
-use crate::{AxisExt, BilesenBoyutu, EtkinTema as _, Simge, StilBoyutlandirma, StilUzantisi as _};
+use crate::{
+    BilesenBoyutu, EksenUzantisi, EtkinTema as _, Simge, StilBoyutlandirma, StilUzantisi as _,
+};
 
 /// tetikleyici part bir adımlayıcı öğe.
 #[derive(IntoElement)]
@@ -106,8 +108,8 @@ impl RenderOnce for AdimlayiciTetikleyicisi {
 
         div()
             .id(("trigger", self.step))
-            .when(self.layout.is_horizontal(), |this| this.v_flex().gap_1())
-            .when(self.layout.is_vertical(), |this| this.h_flex().gap_2())
+            .when(self.layout.yatay_mi(), |this| this.v_flex().gap_1())
+            .when(self.layout.dikey_mi(), |this| this.h_flex().gap_2())
             .items_start()
             .when(self.text_center, |this| this.items_center())
             .input_text_size(self.size.smaller())

@@ -1,7 +1,7 @@
 use crate::{
     EtkinTema, OgeUzantisi, Placement, StilUzantisi,
     dialog::{ANIMATION_DURATION, IletisimKutusu},
-    focus_trap::FocusTrapManager,
+    focus_trap::OdakTuzagiYoneticisi,
     input::InputState,
     notification::{Bildirim, BildirimListesi},
     sheet::SayfaKatmani,
@@ -421,7 +421,7 @@ impl KokGorunum {
 
     fn on_action_tab(&mut self, _: &Sekme, window: &mut Window, cx: &mut Context<Self>) {
         // Check if we're inside a focus trap
-        if let Some(container_focus_handle) = FocusTrapManager::find_active_trap(window, cx) {
+        if let Some(container_focus_handle) = OdakTuzagiYoneticisi::find_active_trap(window, cx) {
             // We're in a focus trap - try to focus next, then check if we're still inside
             let before_focus = window.focused(cx);
 
@@ -456,7 +456,7 @@ impl KokGorunum {
 
     fn on_action_tab_prev(&mut self, _: &TabPrev, window: &mut Window, cx: &mut Context<Self>) {
         // Check if we're inside a focus trap
-        if let Some(container_focus_handle) = FocusTrapManager::find_active_trap(window, cx) {
+        if let Some(container_focus_handle) = OdakTuzagiYoneticisi::find_active_trap(window, cx) {
             // We're in a focus trap - try to focus previous, then check if we're still inside
             let before_focus = window.focused(cx);
 

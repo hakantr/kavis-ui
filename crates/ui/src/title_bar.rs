@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    Boyutlandirilabilir as _, EtkinTema, InteractiveElementExt as _, Simge, SimgeAdi, StilUzantisi,
-    h_flex,
+    Boyutlandirilabilir as _, EtkilesimliOgeUzantisi as _, EtkinTema, Simge, SimgeAdi,
+    StilUzantisi, h_flex,
 };
 use gpui::{
     AnyElement, App, ClickEvent, Context, Decorations, Hsla, InteractiveElement, IntoElement,
@@ -273,10 +273,10 @@ impl RenderOnce for BaslikCubugu {
                 .bg(cx.theme().title_bar)
                 .refine_style(&self.style)
                 .when(is_linux, |this| {
-                    this.on_double_click(|_, window, _| window.zoom_window())
+                    this.cift_tiklamada(|_, window, _| window.zoom_window())
                 })
                 .when(is_macos, |this| {
-                    this.on_double_click(|_, window, _| window.titlebar_double_click())
+                    this.cift_tiklamada(|_, window, _| window.titlebar_double_click())
                 })
                 .on_mouse_down_out(window.listener_for(&state, |state, _, _, _| {
                     state.should_move = false;

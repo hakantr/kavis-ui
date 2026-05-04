@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use gpui::{StyleRefinement, prelude::FluentBuilder, *};
 use kavis_ui::{
-    ElementExt, EtkinTema, Renklendir as _, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema, OgeUzantisi, Renklendir as _, SimgeAdi,
     button::Dugme,
     checkbox::OnayKutusu,
     group_box::{GrupKutusu, GrupKutusuVaryantlari as _},

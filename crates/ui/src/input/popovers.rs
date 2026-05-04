@@ -20,26 +20,26 @@ use crate::{
     text::{MetinGorunumu, MetinGorunumuStili},
 };
 
-pub(crate) enum ContextMenu {
+pub(crate) enum BaglamMenusu {
     Completion(Entity<CompletionMenu>),
     CodeAction(Entity<CodeActionMenu>),
-    RightClick(Entity<InputContextMenu>),
+    RightClick(Entity<GirdiBaglamMenusu>),
 }
 
-impl ContextMenu {
+impl BaglamMenusu {
     pub(crate) fn is_open(&self, cx: &App) -> bool {
         match self {
-            ContextMenu::Completion(menu) => menu.read(cx).is_open(),
-            ContextMenu::CodeAction(menu) => menu.read(cx).is_open(),
-            ContextMenu::RightClick(menu) => menu.read(cx).is_open(),
+            BaglamMenusu::Completion(menu) => menu.read(cx).is_open(),
+            BaglamMenusu::CodeAction(menu) => menu.read(cx).is_open(),
+            BaglamMenusu::RightClick(menu) => menu.read(cx).is_open(),
         }
     }
 
     pub(crate) fn render(&self) -> impl IntoElement {
         match self {
-            ContextMenu::Completion(menu) => menu.clone().into_any_element(),
-            ContextMenu::CodeAction(menu) => menu.clone().into_any_element(),
-            ContextMenu::RightClick(menu) => menu.clone().into_any_element(),
+            BaglamMenusu::Completion(menu) => menu.clone().into_any_element(),
+            BaglamMenusu::CodeAction(menu) => menu.clone().into_any_element(),
+            BaglamMenusu::RightClick(menu) => menu.clone().into_any_element(),
         }
     }
 }

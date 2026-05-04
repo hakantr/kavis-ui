@@ -5,7 +5,7 @@ use gpui::{
 use std::{any::TypeId, ops::Deref, rc::Rc};
 
 use crate::{
-    AxisExt, EtkinTema as _, StilUzantisi as _,
+    EksenUzantisi, EtkinTema as _, StilUzantisi as _,
     label::Etiket,
     setting::{
         ElementField, HerhangiBirAyarAlani, RenderOptions,
@@ -175,7 +175,7 @@ impl AyarOgesi {
                     .w_full()
                     .overflow_hidden()
                     .map(|this| {
-                        if layout.is_horizontal() {
+                        if layout.yatay_mi() {
                             this.h_flex().justify_between().items_start()
                         } else {
                             this.v_flex()
@@ -185,7 +185,7 @@ impl AyarOgesi {
                     .child(
                         v_flex()
                             .map(|this| {
-                                if layout.is_horizontal() {
+                                if layout.yatay_mi() {
                                     this.flex_1().max_w_3_5()
                                 } else {
                                     this.w_full()

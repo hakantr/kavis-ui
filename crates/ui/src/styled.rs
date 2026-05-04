@@ -542,13 +542,19 @@ impl<T: Styled> StilBoyutlandirma<T> for T {
     }
 }
 
-pub(crate) trait FocusableExt<T: ParentElement + Styled + Sized> {
+pub(crate) trait OdaklanabilirUzantisi<T: ParentElement + Styled + Sized> {
     /// odak ring için öğe. ekler.
-    fn focus_ring(self, is_focused: bool, margins: Pixels, window: &Window, cx: &App) -> Self;
+    fn odak_halkasi(self, is_focused: bool, margins: Pixels, window: &Window, cx: &App) -> Self;
 }
 
-impl<T: ParentElement + Styled + Sized> FocusableExt<T> for T {
-    fn focus_ring(mut self, is_focused: bool, margins: Pixels, window: &Window, cx: &App) -> Self {
+impl<T: ParentElement + Styled + Sized> OdaklanabilirUzantisi<T> for T {
+    fn odak_halkasi(
+        mut self,
+        is_focused: bool,
+        margins: Pixels,
+        window: &Window,
+        cx: &App,
+    ) -> Self {
         if !is_focused {
             return self;
         }

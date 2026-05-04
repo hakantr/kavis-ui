@@ -26,7 +26,7 @@ use gpui::{
 };
 use smallvec::SmallVec;
 
-use crate::{AxisExt, scroll::KaydirmaCubuguTutamaci};
+use crate::{EksenUzantisi, scroll::KaydirmaCubuguTutamaci};
 
 struct VirtualListScrollHandleState {
     axis: Axis,
@@ -259,7 +259,7 @@ impl SanalListe {
         let mut scroll_offset = scroll_offset;
         match scroll_to_item.strategy {
             ScrollStrategy::Center => {
-                if self.axis.is_vertical() {
+                if self.axis.dikey_mi() {
                     scroll_offset.y = content_bounds.top() + content_bounds.size.height.half()
                         - bounds.top()
                         - bounds.size.height.half()
@@ -271,7 +271,7 @@ impl SanalListe {
             }
             _ => {
                 // Ref: https://github.com/zed-industries/zed/blob/0d145289e0867a8d5d63e5e1397a5ca69c9d49c3/crates/gpui/src/elements/div.rs#L3026
-                if self.axis.is_vertical() {
+                if self.axis.dikey_mi() {
                     if bounds.top() + scroll_offset.y < content_bounds.top() {
                         scroll_offset.y = content_bounds.top() - bounds.top()
                     } else if bounds.bottom() + scroll_offset.y > content_bounds.bottom() {
@@ -416,7 +416,7 @@ impl Element for SanalListe {
                                 })
                                 .collect::<Vec<_>>();
 
-                            state.content_size = if self.axis.is_horizontal() {
+                            state.content_size = if self.axis.yatay_mi() {
                                 Size {
                                     width: px(state
                                         .sizes
@@ -451,7 +451,7 @@ impl Element for SanalListe {
                                 window.request_measured_layout(style, {
                                     move |known_dimensions, available_space, _, _| {
                                         let mut size = Size::default();
-                                        if axis.is_horizontal() {
+                                        if axis.yatay_mi() {
                                             size.width = known_dimensions.width.unwrap_or(
                                                 match available_space.width {
                                                     AvailableSpace::Definite(x) => x,

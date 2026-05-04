@@ -6,7 +6,7 @@ use gpui::{
     Window, div, prelude::FluentBuilder as _, px,
 };
 
-use crate::{AxisExt, BilesenBoyutu, EtkinTema as _, StilUzantisi, h_flex, v_flex};
+use crate::{BilesenBoyutu, EksenUzantisi, EtkinTema as _, StilUzantisi, h_flex, v_flex};
 
 #[derive(Clone, Copy)]
 pub(super) struct FieldProps {
@@ -237,7 +237,7 @@ impl RenderOnce for Field {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let layout = self.props.layout;
 
-        let label_width = if layout.is_vertical() {
+        let label_width = if layout.dikey_mi() {
             None
         } else {
             self.props.label_width
@@ -246,7 +246,7 @@ impl RenderOnce for Field {
 
         #[inline]
         fn wrap_div(layout: Axis) -> Div {
-            if layout.is_vertical() {
+            if layout.dikey_mi() {
                 v_flex()
             } else {
                 h_flex()
@@ -263,11 +263,7 @@ impl RenderOnce for Field {
             BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(4.),
             _ => px(4.),
         };
-        let inner_gap = if layout.is_horizontal() {
-            gap
-        } else {
-            gap / 2.
-        };
+        let inner_gap = if layout.yatay_mi() { gap } else { gap / 2. };
 
         v_flex()
             .flex_1()
@@ -331,7 +327,7 @@ impl RenderOnce for Field {
                 // Other
                 wrap_div(layout)
                     .gap(inner_gap)
-                    .when(has_label && layout.is_horizontal(), |this| {
+                    .when(has_label && layout.yatay_mi(), |this| {
                         this.child(
                             // Empty for spacing to align with the input
                             wrap_label(label_width),

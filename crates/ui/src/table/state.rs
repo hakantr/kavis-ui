@@ -8,7 +8,7 @@ use crate::{
         SelectPageUp, SelectPrevColumn, SelectUp,
     },
     h_flex,
-    menu::{AcilirMenu, ContextMenuExt},
+    menu::{AcilirMenu, BaglamMenusuUzantisi},
     scroll::{KaydirilabilirMaske, KaydirmaCubugu},
     v_flex,
 };
@@ -2159,12 +2159,12 @@ where
             .size_full()
             .overflow_hidden()
             .child(self.render_table_header(left_columns_count, window, cx))
-            .context_menu({
+            .baglam_menusu({
                 let view = cx.entity().clone();
                 move |this, window: &mut Window, cx: &mut Context<AcilirMenu>| {
                     if let Some(row_ix) = view.read(cx).right_clicked_row {
                         view.update(cx, |menu, cx| {
-                            menu.delegate_mut().context_menu(row_ix, this, window, cx)
+                            menu.delegate_mut().baglam_menusu(row_ix, this, window, cx)
                         })
                     } else {
                         this

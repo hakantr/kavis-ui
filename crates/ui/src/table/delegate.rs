@@ -98,7 +98,7 @@ pub trait TabloTemsilcisi: Sized + 'static {
     }
 
     /// Verilen satır indeksi için bağlam menüsünü çizer.
-    fn context_menu(
+    fn baglam_menusu(
         &mut self,
         row_ix: usize,
         menu: AcilirMenu,

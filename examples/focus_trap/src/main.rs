@@ -73,7 +73,7 @@ impl Render for Example {
                                     .label("Trap 1 - Dugme 3")
                                     .on_click(|_, _, _| println!("Trap 1 - Dugme 3 clicked")),
                             )
-                            .focus_trap("trap1", &self.trap1_handle),
+                            .odak_tuzagi("trap1", &self.trap1_handle),
                     )
                     .child(
                         div()
@@ -106,7 +106,7 @@ impl Render for Example {
                     .child(div().text_base().font_semibold().child("Focus Trap Area 2"))
                     .child(
                         v_flex()
-                            .focus_trap("trap2", &self.trap2_handle)
+                            .odak_tuzagi("trap2", &self.trap2_handle)
                             .gap_2()
                             .p_4()
                             .grid()

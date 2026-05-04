@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt as _, Boyutlandirilabilir, StilUzantisi,
+    Boyutlandirilabilir, EksenUzantisi as _, StilUzantisi,
     input::{Input, InputEvent, InputState},
     setting::{
         HerhangiBirAyarAlani, RenderOptions,
@@ -76,7 +76,7 @@ where
         Input::new(&state.input)
             .with_size(options.size)
             .map(|this| {
-                if options.layout.is_horizontal() {
+                if options.layout.yatay_mi() {
                     this.w_64()
                 } else {
                     this.w_full()

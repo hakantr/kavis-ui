@@ -412,7 +412,7 @@ impl ThemeColorsStory {
                         YanCubukMenuOgesi::new(category_name.clone())
                             .default_open(is_open)
                             .click_to_open(true)
-                            .context_menu({
+                            .baglam_menusu({
                                 let expand_all = expand_all.clone();
                                 let collapse_all = collapse_all.clone();
                                 move |menu, _, _| {
@@ -455,7 +455,7 @@ impl ThemeColorsStory {
                                                     .flex_shrink_0(),
                                             )
                                     })
-                                    .context_menu(move |menu, _, _| {
+                                    .baglam_menusu(move |menu, _, _| {
                                         let menu_view = color_view.clone();
                                         if is_filtering {
                                             menu.item(

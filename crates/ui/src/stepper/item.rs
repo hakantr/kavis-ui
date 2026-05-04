@@ -5,7 +5,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, Simge, StilUzantisi as _,
+    BilesenBoyutu, Boyutlandirilabilir, EksenUzantisi, EtkinTema as _, Simge, StilUzantisi as _,
     stepper::trigger::AdimlayiciTetikleyicisi,
 };
 
@@ -124,8 +124,8 @@ impl RenderOnce for AdimlayiciOgesi {
         div()
             .id(("stepper-item", self.step))
             .relative()
-            .when(self.layout.is_horizontal(), |this| this.h_flex())
-            .when(self.layout.is_vertical(), |this| this.v_flex())
+            .when(self.layout.yatay_mi(), |this| this.h_flex())
+            .when(self.layout.dikey_mi(), |this| this.v_flex())
             .when(!self.is_last, |this| this.flex_1())
             .when(self.text_center, |this| this.flex_1().justify_center())
             .items_start()
@@ -233,7 +233,7 @@ impl RenderOnce for StepperSeparator {
         div()
             .absolute()
             .flex_1()
-            .when(self.layout.is_horizontal(), |this| {
+            .when(self.layout.yatay_mi(), |this| {
                 this.h(separator_wide).mt(icon_size.half()).map(|this| {
                     if !text_center {
                         this.ml(icon_size + gap).mr(gap).left_0().right_0()
@@ -244,7 +244,7 @@ impl RenderOnce for StepperSeparator {
                     }
                 })
             })
-            .when(self.layout.is_vertical(), |this| {
+            .when(self.layout.dikey_mi(), |this| {
                 this.w(separator_wide).ml(icon_size.half()).map(|this| {
                     if !text_center {
                         this.mt(icon_size + gap).mb(gap).top_0().bottom_0()

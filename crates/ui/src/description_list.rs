@@ -4,7 +4,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema as _, h_flex, text::Text, v_flex,
+    BilesenBoyutu, Boyutlandirilabilir, EksenUzantisi, EtkinTema as _, h_flex, text::Text, v_flex,
 };
 
 /// Bir açıklama liste.
@@ -266,7 +266,7 @@ impl RenderOnce for AciklamaListesi {
             _ => (px(8.), px(4.)),
         };
 
-        let label_width = if self.layout.is_horizontal() {
+        let label_width = if self.layout.yatay_mi() {
             Some(self.label_width)
         } else {
             None
@@ -301,7 +301,7 @@ impl RenderOnce for AciklamaListesi {
 
                             match item {
                                 AciklamaOgesi::Item { label, value, span } => {
-                                    let el = if self.layout.is_vertical() {
+                                    let el = if self.layout.dikey_mi() {
                                         v_flex()
                                     } else {
                                         div().flex().flex_row().h_full()
@@ -312,9 +312,7 @@ impl RenderOnce for AciklamaListesi {
                                         .overflow_x_hidden()
                                         .child(
                                             div()
-                                                .when(self.layout.is_horizontal(), |this| {
-                                                    this.h_full()
-                                                })
+                                                .when(self.layout.yatay_mi(), |this| this.h_full())
                                                 .text_color(
                                                     cx.theme().description_list_label_foreground,
                                                 )
@@ -322,13 +320,13 @@ impl RenderOnce for AciklamaListesi {
                                                 .px(padding_x)
                                                 .py(padding_y)
                                                 .when(self.bordered, |this| {
-                                                    this.when(self.layout.is_horizontal(), |this| {
+                                                    this.when(self.layout.yatay_mi(), |this| {
                                                         this.border_r_1()
                                                             .when(!is_first_col, |this| {
                                                                 this.border_l_1()
                                                             })
                                                     })
-                                                    .when(self.layout.is_vertical(), |this| {
+                                                    .when(self.layout.dikey_mi(), |this| {
                                                         this.border_b_1()
                                                     })
                                                     .border_color(cx.theme().border)

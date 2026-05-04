@@ -10,7 +10,7 @@ use std::{
 use autocorrect::ignorer::Ignorer;
 use gpui::{prelude::FluentBuilder, *};
 use kavis_ui::{
-    EtkinTema, PencereUzantisi, SimgeAdi, Sizable,
+    Boyutlandirilabilir, EtkinTema, PencereUzantisi, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
     highlighter::{DilKaydi, DilYapilandirmasi, Language, Tani, TaniOnemi},

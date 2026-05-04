@@ -9,7 +9,7 @@ use gpui::{
 use rust_i18n::t;
 
 use crate::{
-    AxisExt, Boyutlandirilabilir, EtkinTema, Placement, Secilebilir, SimgeAdi,
+    Boyutlandirilabilir, EksenUzantisi, EtkinTema, Placement, Secilebilir, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
     dock::PanelInfo,
     h_flex,
@@ -1015,7 +1015,7 @@ impl SekmePaneli {
             .index_of_panel(Arc::new(cx.entity().clone()))
             .unwrap_or_default();
 
-        if parent_axis.is_vertical() && placement.is_vertical() {
+        if parent_axis.dikey_mi() && placement.dikey_mi() {
             stack_panel.update(cx, |view, cx| {
                 view.insert_panel_at(
                     Arc::new(new_tab_panel),
@@ -1027,7 +1027,7 @@ impl SekmePaneli {
                     cx,
                 );
             });
-        } else if parent_axis.is_horizontal() && placement.is_horizontal() {
+        } else if parent_axis.yatay_mi() && placement.yatay_mi() {
             stack_panel.update(cx, |view, cx| {
                 view.insert_panel_at(
                     Arc::new(new_tab_panel),

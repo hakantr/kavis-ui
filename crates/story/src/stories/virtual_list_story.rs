@@ -133,12 +133,12 @@ impl VirtualListStory {
                                     .child(
                                         Dugme::new("test-axis-vertical")
                                             .label("Vertical")
-                                            .selected(self.axis.is_vertical()),
+                                            .selected(self.axis.dikey_mi()),
                                     )
                                     .child(
                                         Dugme::new("test-axis-horizontal")
                                             .label("Horizontal")
-                                            .selected(self.axis.is_horizontal()),
+                                            .selected(self.axis.yatay_mi()),
                                     )
                                     .on_click(cx.listener(|view, clicks: &Vec<usize>, _, cx| {
                                         if clicks.contains(&0) {

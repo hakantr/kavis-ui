@@ -1,6 +1,6 @@
 use gpui::*;
 use kavis_ui::{
-    EtkinTema, PencereUzantisi, Selectable, Sizable,
+    Boyutlandirilabilir, EtkinTema, PencereUzantisi, Secilebilir,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
     input::{self, Input, InputEvent, InputState, TabSize},

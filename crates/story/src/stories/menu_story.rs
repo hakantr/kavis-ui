@@ -6,7 +6,7 @@ use kavis_ui::{
     EtkinTema as _, Side, SimgeAdi, StilUzantisi,
     button::Dugme,
     h_flex,
-    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _, ContextMenuExt},
+    menu::{AcilirMenuOgesi, AcilirMenuTetikleyici as _, BaglamMenusuUzantisi},
     v_flex,
 };
 use serde::Deserialize;
@@ -238,7 +238,7 @@ impl Render for MenuStory {
                             .border_dashed()
                             .border_color(cx.theme().border)
                             .child("Bağlam menüsünü açmak için sağ tıklayın")
-                            .context_menu({
+                            .baglam_menusu({
                                 move |this, window, cx| {
                                     this.check_side(check_side.unwrap_or(Side::Left))
                                         .external_link_icon(false)
@@ -290,7 +290,7 @@ impl Render for MenuStory {
                             .border_dashed()
                             .border_color(cx.theme().border)
                             .child("Burada bağlam menülü başka bir alan var.")
-                            .context_menu({
+                            .baglam_menusu({
                                 move |this, _, _| {
                                     this.link("Hakkında", "https://github.com/hakantr/kavis-ui")
                                         .separator()
@@ -312,7 +312,7 @@ impl Render for MenuStory {
                             .border_dashed()
                             .border_color(cx.theme().border)
                             .child("Bağlam menüsü alanı 1")
-                            .context_menu({
+                            .baglam_menusu({
                                 move |this, _, _| {
                                     this.link("Hakkında", "https://github.com/hakantr/kavis-ui")
                                         .separator()

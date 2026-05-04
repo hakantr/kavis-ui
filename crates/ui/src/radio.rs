@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
 use crate::{
-    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema, FocusableExt as _, StilUzantisi,
-    checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::BilesenAracIpucu, v_flex,
+    BilesenBoyutu, Boyutlandirilabilir, EksenUzantisi, EtkinTema, OdaklanabilirUzantisi as _,
+    StilUzantisi, checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::BilesenAracIpucu,
+    v_flex,
 };
 use gpui::{
     AnyElement, App, Axis, Div, ElementId, InteractiveElement, IntoElement, ParentElement,
@@ -170,7 +171,7 @@ impl RenderOnce for Radyo {
                 .items_start()
                 .line_height(relative(1.))
                 .rounded(cx.theme().radius * 0.5)
-                .focus_ring(is_focused, px(2.), window, cx)
+                .odak_halkasi(is_focused, px(2.), window, cx)
                 .map(|this| match self.size {
                     BilesenBoyutu::CokKucuk => this.text_xs(),
                     BilesenBoyutu::Kucuk => this.text_sm(),
@@ -344,7 +345,7 @@ impl RenderOnce for RadyoGrubu {
         let disabled = self.disabled;
         let selected_ix = self.selected_index;
 
-        let base = if self.layout.is_vertical() {
+        let base = if self.layout.dikey_mi() {
             v_flex()
         } else {
             h_flex().w_full().flex_wrap()

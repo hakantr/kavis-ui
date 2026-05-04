@@ -3,7 +3,6 @@ use gpui::{
     Action, App, AppContext, Axis, Context, Entity, FocusHandle, Focusable, IntoElement,
     ParentElement, Render, Styled, Window,
 };
-use kavis_ui::{AxisExt, h_flex, menu::AcilirMenuTetikleyici as _};
 use kavis_ui::{
     BilesenBoyutu, Boyutlandirilabilir as _,
     button::Dugme,
@@ -13,6 +12,7 @@ use kavis_ui::{
     text::MetinGorunumu,
     v_flex,
 };
+use kavis_ui::{EksenUzantisi, h_flex, menu::AcilirMenuTetikleyici as _};
 use serde::Deserialize;
 
 #[derive(Action, Clone, PartialEq, Eq, Deserialize)]
@@ -128,7 +128,7 @@ impl Render for DescriptionListStory {
                     .gap_3()
                     .child(
                         OnayKutusu::new("layout")
-                            .checked(self.layout.is_vertical())
+                            .checked(self.layout.dikey_mi())
                             .label("Dikey Yerleşim")
                             .on_click(cx.listener(|this, checked: &bool, _, cx| {
                                 let new_layout = if *checked {

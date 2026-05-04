@@ -22,14 +22,14 @@ use crate::{
     list::{Liste, ListeDurumu, ListeOlayi, ListeTemsilcisi},
 };
 
-struct ContextMenuDelegate {
+struct BaglamMenusuTemsilcisi {
     query: SharedString,
     menu: Entity<CompletionMenu>,
     items: Vec<Rc<CompletionItem>>,
     selected_ix: usize,
 }
 
-impl ContextMenuDelegate {
+impl BaglamMenusuTemsilcisi {
     fn set_items(&mut self, items: Vec<CompletionItem>) {
         self.items = items.into_iter().map(Rc::new).collect();
         self.selected_ix = 0;
@@ -127,9 +127,9 @@ impl RenderOnce for CompletionMenuItem {
     }
 }
 
-impl EventEmitter<DismissEvent> for ContextMenuDelegate {}
+impl EventEmitter<DismissEvent> for BaglamMenusuTemsilcisi {}
 
-impl ListeTemsilcisi for ContextMenuDelegate {
+impl ListeTemsilcisi for BaglamMenusuTemsilcisi {
     type Item = CompletionMenuItem;
 
     fn items_count(&self, _: usize, _: &gpui::App) -> usize {
@@ -171,7 +171,7 @@ impl ListeTemsilcisi for ContextMenuDelegate {
 pub struct CompletionMenu {
     offset: usize,
     editor: Entity<InputState>,
-    list: Entity<ListeDurumu<ContextMenuDelegate>>,
+    list: Entity<ListeDurumu<BaglamMenusuTemsilcisi>>,
     open: bool,
 
     /// Tamamlamayı tetikleyen ilk karakterin ofseti.
@@ -191,7 +191,7 @@ impl CompletionMenu {
     ) -> Entity<Self> {
         cx.new(|cx| {
             let view = cx.entity();
-            let menu = ContextMenuDelegate {
+            let menu = BaglamMenusuTemsilcisi {
                 query: SharedString::default(),
                 menu: view,
                 items: vec![],

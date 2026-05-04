@@ -6,7 +6,7 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, BilesenBoyutu, Boyutlandirilabilir, StilUzantisi as _, stepper::AdimlayiciOgesi,
+    BilesenBoyutu, Boyutlandirilabilir, EksenUzantisi, StilUzantisi as _, stepper::AdimlayiciOgesi,
 };
 
 /// Bir step-ile-step ilerleme için kullanıcılar için navigate üzerinden bir seri steps veya stages.
@@ -114,8 +114,8 @@ impl RenderOnce for Adimlayici {
         div()
             .id(self.id)
             .w_full()
-            .when(self.layout.is_horizontal(), |this| this.h_flex())
-            .when(self.layout.is_vertical(), |this| this.v_flex())
+            .when(self.layout.yatay_mi(), |this| this.h_flex())
+            .when(self.layout.dikey_mi(), |this| this.v_flex())
             .refine_style(&self.style)
             .children(self.items.into_iter().enumerate().map(|(step, item)| {
                 let is_last = step + 1 == total_items;

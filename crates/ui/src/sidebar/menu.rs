@@ -2,7 +2,7 @@ use crate::{
     Boyutlandirilabilir as _, Daraltilabilir, EtkinTema as _, Simge, SimgeAdi, StilUzantisi,
     button::{Dugme, DugmeVaryantlari as _},
     h_flex,
-    menu::{AcilirMenu, ContextMenuExt},
+    menu::{AcilirMenu, BaglamMenusuUzantisi},
     sidebar::YanCubukOgesi,
     v_flex,
 };
@@ -206,7 +206,7 @@ impl YanCubukMenuOgesi {
     }
 
     /// bağlam menü için menü öğe ayarlar.
-    pub fn context_menu(
+    pub fn baglam_menusu(
         mut self,
         f: impl Fn(AcilirMenu, &mut Window, &mut App) -> AcilirMenu + 'static,
     ) -> Self {
@@ -356,7 +356,7 @@ impl YanCubukOgesi for YanCubukMenuOgesi {
                     })
                     .map(|this| {
                         if let Some(context_menu) = self.context_menu {
-                            this.context_menu(move |menu, window, cx| {
+                            this.baglam_menusu(move |menu, window, cx| {
                                 context_menu(menu, window, cx)
                             })
                             .into_any_element()

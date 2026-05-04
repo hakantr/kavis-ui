@@ -1,7 +1,7 @@
 use std::{rc::Rc, time::Duration};
 
 use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, FocusableExt,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, OdaklanabilirUzantisi,
     Secilebilir, SimgeAdi, StilUzantisi as _, icon::AdliSimge, text::Text,
     tooltip::BilesenAracIpucu, v_flex,
 };
@@ -246,7 +246,7 @@ impl RenderOnce for OnayKutusu {
                     this.text_color(cx.theme().muted_foreground)
                 })
                 .rounded(cx.theme().radius * 0.5)
-                .focus_ring(is_focused, px(2.), window, cx)
+                .odak_halkasi(is_focused, px(2.), window, cx)
                 .refine_style(&self.style)
                 .child(
                     div()

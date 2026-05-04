@@ -1,5 +1,5 @@
 use gpui::*;
-use kavis_ui::{button::*, menu::ContextMenuExt, *};
+use kavis_ui::{button::*, menu::BaglamMenusuUzantisi, *};
 use kavis_ui_assets::Varliklar;
 
 actions!(class_menu, [Open, Delete, Export, Info]);
@@ -61,7 +61,7 @@ impl Render for HelloWorld {
                             .hover(|this| this.bg(gpui::yellow().opacity(0.2)))
                             .child("Hover test here.")
                             .child("Right click to show Context Menu")
-                            .context_menu({
+                            .baglam_menusu({
                                 move |this, _, _| {
                                     this.separator()
                                         .menu("Open", Box::new(Open))

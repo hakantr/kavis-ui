@@ -33,7 +33,7 @@ impl Display for Placement {
 
 impl Placement {
     #[inline]
-    pub fn is_horizontal(&self) -> bool {
+    pub fn yatay_mi(&self) -> bool {
         match self {
             Placement::Left | Placement::Right => true,
             _ => false,
@@ -41,7 +41,7 @@ impl Placement {
     }
 
     #[inline]
-    pub fn is_vertical(&self) -> bool {
+    pub fn dikey_mi(&self) -> bool {
         match self {
             Placement::Top | Placement::Bottom => true,
             _ => false,
@@ -85,33 +85,33 @@ impl Side {
 }
 
 /// Bir özellik için extend [`Axis`] enum ile utility yöntemler.
-pub trait AxisExt {
-    fn is_horizontal(self) -> bool;
-    fn is_vertical(self) -> bool;
+pub trait EksenUzantisi {
+    fn yatay_mi(self) -> bool;
+    fn dikey_mi(self) -> bool;
 }
 
-impl AxisExt for Axis {
+impl EksenUzantisi for Axis {
     #[inline]
-    fn is_horizontal(self) -> bool {
+    fn yatay_mi(self) -> bool {
         self == Axis::Horizontal
     }
 
     #[inline]
-    fn is_vertical(self) -> bool {
+    fn dikey_mi(self) -> bool {
         self == Axis::Vertical
     }
 }
 
 /// Bir özellik için extend [`Length`] enum ile utility yöntemler.
-pub trait LengthExt {
+pub trait UzunlukUzantisi {
     /// [`Length`] için [`Pixels`] temelli üzerinde bir verilen `base_size` ve `rem_size`. dönüştürür.
     ///
     /// [`Length`] değeri [`Length::Auto`] ise `None` döndürür.
-    fn to_pixels(&self, base_size: AbsoluteLength, rem_size: Pixels) -> Option<Pixels>;
+    fn piksele_cevir(&self, base_size: AbsoluteLength, rem_size: Pixels) -> Option<Pixels>;
 }
 
-impl LengthExt for Length {
-    fn to_pixels(&self, base_size: AbsoluteLength, rem_size: Pixels) -> Option<Pixels> {
+impl UzunlukUzantisi for Length {
+    fn piksele_cevir(&self, base_size: AbsoluteLength, rem_size: Pixels) -> Option<Pixels> {
         match self {
             Length::Auto => None,
             Length::Definite(len) => Some(len.to_pixels(base_size, rem_size)),

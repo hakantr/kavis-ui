@@ -3,7 +3,7 @@ use gpui::{App, Context, Hsla, MouseMoveEvent, Task, Window};
 use ropey::Rope;
 use std::rc::Rc;
 
-use crate::input::{InputState, RopeExt, popovers::ContextMenu};
+use crate::input::{InputState, RopeExt, popovers::BaglamMenusu};
 
 mod code_actions;
 mod completions;
@@ -102,17 +102,17 @@ impl InputState {
         let mut handled = false;
 
         match menu {
-            ContextMenu::Completion(menu) => {
+            BaglamMenusu::Completion(menu) => {
                 _ = menu.update(cx, |menu, cx| {
                     handled = menu.handle_action(action, window, cx)
                 });
             }
-            ContextMenu::CodeAction(menu) => {
+            BaglamMenusu::CodeAction(menu) => {
                 _ = menu.update(cx, |menu, cx| {
                     handled = menu.handle_action(action, window, cx)
                 });
             }
-            ContextMenu::RightClick(..) => {}
+            BaglamMenusu::RightClick(..) => {}
         };
 
         handled

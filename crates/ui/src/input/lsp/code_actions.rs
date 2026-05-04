@@ -5,7 +5,7 @@ use std::ops::Range;
 
 use crate::input::{
     InputState, ToggleCodeActions,
-    popovers::{CodeActionItem, CodeActionMenu, ContextMenu},
+    popovers::{BaglamMenusu, CodeActionItem, CodeActionMenu},
 };
 
 pub trait CodeActionProvider {
@@ -54,7 +54,7 @@ impl InputState {
     ) {
         let providers = self.lsp.code_action_providers.clone();
         let menu = match self.context_menu_content.as_ref() {
-            Some(ContextMenu::CodeAction(menu)) => Some(menu),
+            Some(BaglamMenusu::CodeAction(menu)) => Some(menu),
             _ => None,
         };
 
@@ -62,7 +62,7 @@ impl InputState {
             Some(menu) => menu.clone(),
             None => {
                 let menu = CodeActionMenu::new(cx.entity(), window, cx);
-                self.context_menu_content = Some(ContextMenu::CodeAction(menu.clone()));
+                self.context_menu_content = Some(BaglamMenusu::CodeAction(menu.clone()));
                 menu
             }
         };

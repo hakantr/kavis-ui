@@ -162,7 +162,7 @@ impl Input {
     }
 
     /// bağlam menü için girdi ayarlar.
-    pub fn context_menu(
+    pub fn baglam_menusu(
         mut self,
         f: impl Fn(AcilirMenu, &mut Window, &mut Context<AcilirMenu>) -> AcilirMenu + 'static,
     ) -> Self {

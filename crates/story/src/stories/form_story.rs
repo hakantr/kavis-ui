@@ -3,7 +3,7 @@ use gpui::{
     IntoElement, ParentElement as _, Render, Styled, Window, div, prelude::FluentBuilder as _, px,
 };
 use kavis_ui::{
-    AxisExt, BilesenBoyutu, Boyutlandirilabilir, EtkinTema, IndexPath, Secilebilir,
+    BilesenBoyutu, Boyutlandirilabilir, EksenUzantisi, EtkinTema, IndexPath, Secilebilir,
     button::{Dugme, DugmeGrubu},
     checkbox::OnayKutusu,
     color_picker::{RenkSecici, RenkSeciciDurumu},
@@ -107,7 +107,7 @@ impl Focusable for FormStory {
 impl Render for FormStory {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let is_multi_column = self.columns > 1;
-        let is_horizontal = self.layout.is_horizontal();
+        let is_horizontal = self.layout.yatay_mi();
 
         v_flex()
             .id("form-story")
@@ -125,7 +125,7 @@ impl Render for FormStory {
                             .gap_x_3()
                             .child(
                                 Anahtar::new("layout")
-                                    .checked(self.layout.is_horizontal())
+                                    .checked(self.layout.yatay_mi())
                                     .label("Yatay")
                                     .on_click(cx.listener(|this, checked: &bool, _, cx| {
                                         if *checked {
@@ -215,7 +215,7 @@ impl Render for FormStory {
                     .child(
                         field()
                             .label("Biyografi")
-                            .when(self.layout.is_vertical(), |this| this.items_start())
+                            .when(self.layout.dikey_mi(), |this| this.items_start())
                             .child(Input::new(&self.bio_input))
                             .description_fn(|_, _| {
                                 div().child("Kendinizi anlatmak için en fazla 100 kelime kullanın.")
@@ -268,7 +268,7 @@ impl Render for FormStory {
                             .child(
                                 OnayKutusu::new("use-vertical-layout")
                                     .label("Dikey yerleşim")
-                                    .checked(self.layout.is_vertical())
+                                    .checked(self.layout.dikey_mi())
                                     .on_click(cx.listener(|this, checked: &bool, _, cx| {
                                         this.layout = if *checked {
                                             Axis::Vertical

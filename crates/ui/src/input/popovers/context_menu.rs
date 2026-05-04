@@ -8,12 +8,12 @@ use rust_i18n::t;
 use crate::{
     EtkinTema as _,
     global_state::KureselDurum,
-    input::{self, InputState, popovers::ContextMenu},
+    input::{self, InputState, popovers::BaglamMenusu},
     menu::AcilirMenu,
 };
 
 /// Context menü için fare sağ clicks.
-pub(crate) struct InputContextMenu {
+pub(crate) struct GirdiBaglamMenusu {
     editor: Entity<InputState>,
     menu: Entity<AcilirMenu>,
     mouse_position: Point<Pixels>,
@@ -41,7 +41,7 @@ impl InputState {
             self.move_to(offset, None, cx);
         }
 
-        self.context_menu_content = Some(ContextMenu::RightClick(self.context_menu.clone()));
+        self.context_menu_content = Some(BaglamMenusu::RightClick(self.context_menu.clone()));
 
         let is_code_editor = self.mode.is_code_editor();
         if is_code_editor {
@@ -98,7 +98,7 @@ impl InputState {
     }
 }
 
-impl InputContextMenu {
+impl GirdiBaglamMenusu {
     pub(crate) fn new(
         editor: Entity<InputState>,
         window: &mut Window,
@@ -137,7 +137,7 @@ impl InputContextMenu {
     }
 }
 
-impl Render for InputContextMenu {
+impl Render for GirdiBaglamMenusu {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         if !self.open {
             return div().into_any_element();

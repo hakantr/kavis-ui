@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::{AxisExt, EtkinTema, OgeUzantisi, StilUzantisi, h_flex};
+use crate::{EksenUzantisi, EtkinTema, OgeUzantisi, StilUzantisi, h_flex};
 use gpui::{
     Along, App, AppContext as _, Axis, Background, Bounds, Context, Corners, DefiniteLength,
     DragMoveEvent, Empty, Entity, EntityId, EventEmitter, Hsla, InteractiveElement, IntoElement,
@@ -344,7 +344,7 @@ impl KaydiriciDurumu {
         let bounds = self.bounds;
         let step = self.step;
 
-        let inner_pos = if axis.is_horizontal() {
+        let inner_pos = if axis.yatay_mi() {
             position.x - bounds.left()
         } else {
             bounds.bottom() - position.y
@@ -435,10 +435,10 @@ impl Kaydirici {
         div()
             .id(id)
             .absolute()
-            .when(axis.is_horizontal(), |this| {
+            .when(axis.yatay_mi(), |this| {
                 this.top(px(-5.)).left(start).ml(-px(8.))
             })
-            .when(axis.is_vertical(), |this| {
+            .when(axis.dikey_mi(), |this| {
                 this.bottom(start).left(px(-5.)).mb(-px(8.))
             })
             .flex()
@@ -549,8 +549,8 @@ impl RenderOnce for Kaydirici {
             .flex_1()
             .items_center()
             .justify_center()
-            .when(axis.is_vertical(), |this| this.h(px(120.)))
-            .when(axis.is_horizontal(), |this| this.w_full())
+            .when(axis.dikey_mi(), |this| this.h(px(120.)))
+            .when(axis.yatay_mi(), |this| this.w_full())
             .refine_style(&self.style)
             .bg(cx.theme().transparent)
             .text_color(cx.theme().foreground)
@@ -566,7 +566,7 @@ impl RenderOnce for Kaydirici {
                                     let mut is_start = false;
                                     if is_range {
                                         let bar_size = state.bounds.size.along(axis);
-                                        let inner_pos = if axis.is_horizontal() {
+                                        let inner_pos = if axis.yatay_mi() {
                                             e.position.x - state.bounds.left()
                                         } else {
                                             state.bounds.bottom() - e.position.y
@@ -609,29 +609,25 @@ impl RenderOnce for Kaydirici {
                             },
                         ))
                     })
-                    .when(axis.is_horizontal(), |this| {
-                        this.items_center().h_6().w_full()
-                    })
-                    .when(axis.is_vertical(), |this| {
-                        this.justify_center().w_6().h_full()
-                    })
+                    .when(axis.yatay_mi(), |this| this.items_center().h_6().w_full())
+                    .when(axis.dikey_mi(), |this| this.justify_center().w_6().h_full())
                     .flex_shrink_0()
                     .child(
                         div()
                             .id("slider-bar")
                             .relative()
-                            .when(axis.is_horizontal(), |this| this.w_full().h_1p5())
-                            .when(axis.is_vertical(), |this| this.h_full().w_1p5())
+                            .when(axis.yatay_mi(), |this| this.w_full().h_1p5())
+                            .when(axis.dikey_mi(), |this| this.h_full().w_1p5())
                             .bg(bar_color.opacity(0.2))
                             .active(|this| this.bg(bar_color.opacity(0.4)))
                             .corner_radii(radius)
                             .child(
                                 div()
                                     .absolute()
-                                    .when(axis.is_horizontal(), |this| {
+                                    .when(axis.yatay_mi(), |this| {
                                         this.h_full().left(bar_start).right(bar_end)
                                     })
-                                    .when(axis.is_vertical(), |this| {
+                                    .when(axis.dikey_mi(), |this| {
                                         this.w_full().bottom(bar_start).top(bar_end)
                                     })
                                     .bg(bar_color)

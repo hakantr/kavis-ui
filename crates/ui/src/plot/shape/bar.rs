@@ -23,12 +23,12 @@ pub enum BarAlignment {
 }
 
 impl BarAlignment {
-    pub fn is_horizontal(self) -> bool {
+    pub fn yatay_mi(self) -> bool {
         matches!(self, Self::Left | Self::Right)
     }
 
-    pub fn is_vertical(self) -> bool {
-        !self.is_horizontal()
+    pub fn dikey_mi(self) -> bool {
+        !self.yatay_mi()
     }
 
     /// Bu hizalama için çubuğun tabanından ucuna doğru ilerleyen doğrusal gradyan açısını
@@ -186,7 +186,7 @@ impl<T> Bar<T> {
             let base = (self.base)(v);
 
             let bw = self.band_width;
-            let (frame, p1, p2) = if self.alignment.is_vertical() {
+            let (frame, p1, p2) = if self.alignment.dikey_mi() {
                 let x0 = cross;
                 let x1 = cross + bw;
                 let y_min = value.min(base);

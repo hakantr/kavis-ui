@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
 use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, FocusableExt as _,
-    Renklendir as _, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma, StilUzantisi,
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema,
+    OdaklanabilirUzantisi as _, Renklendir as _, Secilebilir, Simge, SimgeAdi, StilBoyutlandirma,
+    StilUzantisi,
     button::DugmeSimgesi,
     h_flex,
     tooltip::{AracIpucu, YonetilenAracIpucuUzantisi as _},
@@ -657,7 +658,7 @@ impl RenderOnce for Dugme {
                     this
                 }
             })
-            .focus_ring(is_focused, px(0.), window, cx)
+            .odak_halkasi(is_focused, px(0.), window, cx)
     }
 }
 

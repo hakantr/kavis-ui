@@ -11,7 +11,8 @@ use gpui::{
 };
 
 use crate::{
-    AxisExt, OgeUzantisi, h_flex, resizable::PANEL_MIN_SIZE, styled::StilUzantisi as _, v_flex,
+    EksenUzantisi, OgeUzantisi, h_flex, resizable::PANEL_MIN_SIZE, styled::StilUzantisi as _,
+    v_flex,
 };
 
 use super::{YenidenBoyutlandirilabilirDurum, resizable_panel, resize_handle};
@@ -132,7 +133,7 @@ impl RenderOnce for YenidenBoyutlandirilabilirPanelGrubu {
             .unwrap_or(window.use_keyed_state(self.id.clone(), cx, |_, _| {
                 YenidenBoyutlandirilabilirDurum::default()
             }));
-        let container = if self.axis.is_horizontal() {
+        let container = if self.axis.yatay_mi() {
             h_flex()
         } else {
             v_flex()
@@ -299,10 +300,10 @@ impl RenderOnce for YenidenBoyutlandirilabilirPanel {
             // panel's runtime size constraints (min/max + `flex_basis` driven
             // by `YenidenBoyutlandirilabilirDurum`) authoritative.
             .refine_style(&self.style)
-            .when(self.axis.is_vertical(), |this| {
+            .when(self.axis.dikey_mi(), |this| {
                 this.min_h(size_range.start).max_h(size_range.end)
             })
-            .when(self.axis.is_horizontal(), |this| {
+            .when(self.axis.yatay_mi(), |this| {
                 this.min_w(size_range.start).max_w(size_range.end)
             })
             // 1. initial_size is None, to use auto size.

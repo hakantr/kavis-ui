@@ -10,7 +10,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    Boyutlandirilabilir, EtkinTema, FocusTrapElement as _, PencereUzantisi as _, Placement,
+    Boyutlandirilabilir, EtkinTema, OdakTuzagiOgesi as _, PencereUzantisi as _, Placement,
     SimgeAdi, StilUzantisi as _,
     actions::Cancel,
     button::{Dugme, DugmeVaryantlari as _},
@@ -192,7 +192,7 @@ impl RenderOnce for SayfaKatmani {
                             .id("sheet")
                             .key_context(CONTEXT)
                             .track_focus(&self.focus_handle)
-                            .focus_trap("sheet", &self.focus_handle)
+                            .odak_tuzagi("sheet", &self.focus_handle)
                             .on_action({
                                 let on_close = self.on_close.clone();
                                 move |_: &Cancel, window, cx| {
@@ -210,7 +210,7 @@ impl RenderOnce for SayfaKatmani {
                             .refine_style(&self.style)
                             .map(|this| {
                                 // Set the size of the sheet.
-                                if placement.is_horizontal() {
+                                if placement.yatay_mi() {
                                     this.w(self.size)
                                 } else {
                                     this.h(self.size)

@@ -6,7 +6,7 @@ use gpui::{
     StatefulInteractiveElement, Styled as _, Window, div, prelude::FluentBuilder as _, px,
 };
 
-use crate::{AxisExt as _, EtkinTema as _, dock::YerlesimKonumu};
+use crate::{EksenUzantisi as _, EtkinTema as _, dock::YerlesimKonumu};
 
 pub(crate) const HANDLE_PADDING: Pixels = px(4.);
 pub(crate) const HANDLE_SIZE: Pixels = px(1.);
@@ -135,7 +135,7 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
                             .pl(HANDLE_PADDING)
                     }
                     _ => this
-                        .when(axis.is_horizontal(), |this| {
+                        .when(axis.yatay_mi(), |this| {
                             this.cursor_col_resize()
                                 .top_0()
                                 .left(neg_offset)
@@ -143,7 +143,7 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
                                 .w(HANDLE_SIZE)
                                 .px(HANDLE_PADDING)
                         })
-                        .when(axis.is_vertical(), |this| {
+                        .when(axis.dikey_mi(), |this| {
                             this.cursor_row_resize()
                                 .top(neg_offset)
                                 .left_0()
@@ -156,8 +156,8 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
                     div()
                         .bg(bg_color)
                         .group_hover("handle", |this| this.bg(bg_color))
-                        .when(axis.is_horizontal(), |this| this.h_full().w(HANDLE_SIZE))
-                        .when(axis.is_vertical(), |this| this.w_full().h(HANDLE_SIZE)),
+                        .when(axis.yatay_mi(), |this| this.h_full().w(HANDLE_SIZE))
+                        .when(axis.dikey_mi(), |this| this.w_full().h(HANDLE_SIZE)),
                 )
                 .into_any_element();
 
