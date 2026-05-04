@@ -174,6 +174,20 @@ impl AcilirKatman {
         self
     }
 
+    /// Dikey yön çevirme: `Top*` ile `Bottom*` çifti arasında takas eder.
+    /// Yatay (LeftCenter/RightCenter) anchor'lar olduğu gibi döner.
+    pub(crate) fn flip_vertical(anchor: Anchor) -> Anchor {
+        match anchor {
+            Anchor::TopLeft => Anchor::BottomLeft,
+            Anchor::TopCenter => Anchor::BottomCenter,
+            Anchor::TopRight => Anchor::BottomRight,
+            Anchor::BottomLeft => Anchor::TopLeft,
+            Anchor::BottomCenter => Anchor::TopCenter,
+            Anchor::BottomRight => Anchor::TopRight,
+            other => other,
+        }
+    }
+
     pub(crate) fn resolved_corner(anchor: Anchor, trigger_bounds: Bounds<Pixels>) -> Point<Pixels> {
         match anchor {
             Anchor::TopLeft => trigger_bounds.origin,
@@ -215,6 +229,10 @@ pub struct AcilirKatmanDurumu {
     previous_focus_handle: Option<FocusHandle>,
     trigger_bounds: Bounds<Pixels>,
     trigger_bounds_captured: bool,
+    /// Açılır içeriğin son render'da paint edildiği gerçek pencere sınırları.
+    /// Yön çevirme (flip) kararı için bir önceki frame'in değeri kullanılır.
+    pub(crate) popup_bounds: Bounds<Pixels>,
+    pub(crate) popup_bounds_captured: bool,
     open: bool,
     on_open_change: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
 
@@ -229,6 +247,8 @@ impl AcilirKatmanDurumu {
             previous_focus_handle: None,
             trigger_bounds: Bounds::default(),
             trigger_bounds_captured: false,
+            popup_bounds: Bounds::default(),
+            popup_bounds_captured: false,
             open: default_open,
             on_open_change: None,
             _dismiss_subscription: None,
@@ -387,6 +407,8 @@ impl RenderOnce for AcilirKatman {
         let focus_handle = state.read(cx).focus_handle.clone();
         let trigger_bounds = state.read(cx).trigger_bounds;
         let trigger_bounds_captured = state.read(cx).trigger_bounds_captured;
+        let popup_bounds = state.read(cx).popup_bounds;
+        let popup_bounds_captured = state.read(cx).popup_bounds_captured;
 
         let Some(trigger) = self.trigger else {
             return div().id("empty");
@@ -394,10 +416,32 @@ impl RenderOnce for AcilirKatman {
 
         let parent_view_id = window.current_view();
 
+        // Önceki frame'de yakalanmış popup_bounds + viewport ile yön çevirme kararı.
+        // İlk frame'de popup_bounds_captured = false olduğu için orijinal anchor kullanılır;
+        // bir sonraki render'da gerçek paint bounds'una göre yön düzeltilir.
+        let effective_anchor = if popup_bounds_captured {
+            let viewport = window.viewport_size();
+            let opens_down = matches!(
+                self.anchor,
+                Anchor::TopLeft | Anchor::TopCenter | Anchor::TopRight
+            );
+            let overflows_bottom =
+                popup_bounds.origin.y + popup_bounds.size.height > viewport.height;
+            let overflows_top = popup_bounds.origin.y < Pixels::ZERO;
+
+            if (opens_down && overflows_bottom) || (!opens_down && overflows_top) {
+                Self::flip_vertical(self.anchor)
+            } else {
+                self.anchor
+            }
+        } else {
+            self.anchor
+        };
+
         // Shared cell so the deferred Anchored element can read the real trigger bounds at
         // prepaint time (after trigger's on_prepaint has already fired with the correct bounds).
         let position = Rc::new(Cell::new(Self::resolved_corner(
-            self.anchor,
+            effective_anchor,
             trigger_bounds,
         )));
 
@@ -420,7 +464,7 @@ impl RenderOnce for AcilirKatman {
             .on_prepaint({
                 let state = state.clone();
                 let position = position.clone();
-                let anchor = self.anchor;
+                let anchor = effective_anchor;
                 move |bounds, window, cx| {
                     position.set(Self::resolved_corner(anchor, bounds));
                     let first_capture = state.update(cx, |state, _| {
@@ -442,7 +486,7 @@ impl RenderOnce for AcilirKatman {
         }
 
         let popover_content =
-            Self::render_popover_content(self.anchor, self.appearance, window, cx)
+            Self::render_popover_content(effective_anchor, self.appearance, window, cx)
                 .track_focus(&focus_handle)
                 .key_context(CONTEXT)
                 .on_action(window.listener_for(&state, AcilirKatmanDurumu::on_action_cancel))
@@ -463,13 +507,38 @@ impl RenderOnce for AcilirKatman {
                 })
                 .refine_style(&self.style);
 
-        el.child(Self::render_popover(
-            self.anchor,
-            position,
-            popover_content,
-            window,
-            cx,
-        ))
+        // Popup için inline `anchored` kullanıyoruz; render_popover ile aynı,
+        // tek farkı sarmalayıcı div'in `on_prepaint`'inde popup'ın gerçek
+        // paint bounds'unu state'e yazıp bir sonraki frame için flip kararı
+        // verilebilmesini sağlamamız.
+        let popup = deferred(
+            anchored()
+                .snap_to_window_with_margin(px(8.))
+                .anchor(effective_anchor)
+                .position(position.get())
+                .child(div().relative().child(popover_content).on_prepaint({
+                    let state = state.clone();
+                    move |bounds, window, cx| {
+                        let mut should_request_frame = false;
+                        state.update(cx, |s, cx| {
+                            let changed = s.popup_bounds != bounds;
+                            let first = !s.popup_bounds_captured;
+                            if changed || first {
+                                s.popup_bounds = bounds;
+                                s.popup_bounds_captured = true;
+                                cx.notify();
+                            }
+                            should_request_frame = first;
+                        });
+                        if should_request_frame {
+                            window.request_animation_frame();
+                        }
+                    }
+                })),
+        )
+        .with_priority(1);
+
+        el.child(popup)
     }
 }
 
