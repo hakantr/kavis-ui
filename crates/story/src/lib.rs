@@ -655,7 +655,6 @@ fn localized_story_title(title: &'static str) -> &'static str {
         "Tabs" => "Sekmeler",
         "Cip" => "Etiket",
         "Textarea" => "Metin Alanı",
-        "Tema Colors" => "Tema Renkleri",
         "ToggleButton" => "Geçiş Düğmesi",
         "AracIpucu" => "İpucu",
         "Agac" => "Ağaç",

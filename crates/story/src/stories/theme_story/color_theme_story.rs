@@ -92,13 +92,13 @@ pub struct ThemeColorsStory {
 
 impl crate::stories::Story for ThemeColorsStory {
     fn title() -> &'static str {
-        "Tema Colors"
+        "Tema Renkleri"
     }
 
     fn description() -> &'static str {
-        "A color theme viewer to explore colors organized by categories."
-        // Themes are loaded by applying user-defined color overrides to a default base theme,
-        // with inherited colors marked by an indicator dot.
+        "Kategoriye göre düzenlenmiş renkleri incelemek için tema rengi görüntüleyici."
+        // Temalar, varsayılan temel temaya kullanıcı tanımlı renk geçersiz kılmaları
+        // uygulanarak yüklenir; miras alınan renkler gösterge noktasıyla işaretlenir.
     }
 
     fn new_view(window: &mut Window, cx: &mut App) -> Entity<impl Render> {
@@ -416,12 +416,12 @@ impl ThemeColorsStory {
                                 let expand_all = expand_all.clone();
                                 let collapse_all = collapse_all.clone();
                                 move |menu, _, _| {
-                                    menu.item(PopupMenuItem::new("Expand All").on_click({
+                                    menu.item(PopupMenuItem::new("Tümünü Genişlet").on_click({
                                         let expand_all = expand_all.clone();
                                         move |ev, window, cx| (expand_all)(ev, window, cx)
                                     }))
                                     .item(
-                                        PopupMenuItem::new("Collapse All").on_click({
+                                        PopupMenuItem::new("Tümünü Daralt").on_click({
                                             let collapse_all = collapse_all.clone();
                                             move |ev, window, cx| (collapse_all)(ev, window, cx)
                                         }),

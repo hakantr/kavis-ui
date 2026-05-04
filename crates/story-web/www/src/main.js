@@ -10,21 +10,21 @@ async function init() {
     // Initialize the story gallery
     await wasm.run();
 
-    // Hide loading indicator
+    // GPUI kendi canvas öğesini body içine ekler; yükleme kabuğu artık gerekli değil.
     if (appEl) {
       appEl.remove();
     }
   } catch (error) {
-    console.error('Failed to initialize:', error);
+    console.error('Başlatılamadı:', error);
 
     // Show error message
     if (loadingEl) {
       loadingEl.innerHTML = `
         <div class="error">
-          <h2>Failed to load the application</h2>
+          <h2>Uygulama yüklenemedi</h2>
           <p>${error.message || error}</p>
           <p style="margin-top: 10px; font-size: 14px;">
-            Please check the console for more details.
+            Ayrıntılar için tarayıcı konsolunu kontrol edin.
           </p>
         </div>
       `;

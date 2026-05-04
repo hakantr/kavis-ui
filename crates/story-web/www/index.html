@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kavis UI Story Gallery</title>
+    <title>Kavis UI Galeri</title>
     <style>
       * {
         margin: 0;
@@ -59,6 +59,26 @@
         padding: 20px;
         text-align: center;
       }
+
+      .error pre {
+        color: #6b1f1f;
+        background: rgba(211, 47, 47, 0.08);
+        border-radius: 6px;
+        margin-top: 12px;
+        max-width: 720px;
+        overflow: auto;
+        padding: 12px;
+        text-align: left;
+        white-space: pre-wrap;
+      }
+
+      .startup-error {
+        align-items: center;
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        width: 100vw;
+      }
     </style>
   </head>
   <body>
@@ -66,7 +86,7 @@
       <canvas id="canvas"></canvas>
       <div id="loading">
         <div class="spinner"></div>
-        <p>Loading Kavis UI Story Gallery...</p>
+        <p>Kavis UI galerisi yükleniyor...</p>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

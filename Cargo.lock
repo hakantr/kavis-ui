@@ -4521,6 +4521,7 @@ dependencies = [
  "log",
  "tracing-wasm",
  "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

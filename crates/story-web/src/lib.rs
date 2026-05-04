@@ -6,6 +6,50 @@ use kavis_ui_assets::Varliklar;
 use kavis_ui_story::{Gallery, StoryRoot};
 use wasm_bindgen::prelude::*;
 
+#[cfg(target_family = "wasm")]
+fn escape_html(message: &str) -> String {
+    message
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;")
+}
+
+#[cfg(target_family = "wasm")]
+fn show_startup_error(message: &str) {
+    let escaped_message = escape_html(message);
+    let markup = format!(
+        r#"<div class="error">
+  <h2>Galeri başlatılamadı</h2>
+  <p>Tarayıcı GPU bağlamı başlatılamadı. Lütfen WebGPU desteği olan güncel bir tarayıcı kullanın ve donanım hızlandırmanın açık olduğundan emin olun.</p>
+  <pre>{escaped_message}</pre>
+</div>"#
+    );
+
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Some(document) = window.document() else {
+        return;
+    };
+
+    if let Some(loading) = document.get_element_by_id("loading") {
+        loading.set_inner_html(&markup);
+        return;
+    }
+
+    let Ok(error_container) = document.create_element("div") else {
+        return;
+    };
+    error_container.set_inner_html(&markup);
+    error_container.set_class_name("startup-error");
+
+    if let Some(body) = document.body() {
+        let _ = body.append_child(&error_container);
+    }
+}
+
 #[wasm_bindgen]
 pub fn run() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
@@ -50,12 +94,19 @@ pub fn run() -> Result<(), JsValue> {
         // Use Noto Sans SC as the default font family for unified CJK + Latin rendering.
         cx.global_mut::<Tema>().font_family = "Noto Sans SC".into();
 
-        cx.open_window(WindowOptions::default(), |window, cx| {
+        if let Err(error) = cx.open_window(WindowOptions::default(), |window, cx| {
             let view = Gallery::view(None, window, cx);
             let story_root = cx.new(|cx| StoryRoot::new("Kavis UI", view, window, cx));
             cx.new(|cx| KokGorunum::new(story_root, window, cx))
-        })
-        .expect("Pencere açılamadı");
+        }) {
+            let message = format!("Pencere açılamadı: {error:#}");
+            log::error!("{message}");
+
+            #[cfg(target_family = "wasm")]
+            show_startup_error(&message);
+
+            return;
+        }
         cx.activate(true);
     });
 
