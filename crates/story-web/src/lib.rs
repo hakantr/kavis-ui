@@ -54,12 +54,6 @@ fn show_startup_error(message: &str) {
 pub fn run() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
 
-    // Initialize logging to browser console
-    console_log::init_with_level(log::Level::Info).expect("Günlükleyici başlatılamadı");
-
-    // Also initialize tracing for WASM
-    tracing_wasm::set_as_global_default();
-
     #[cfg(target_family = "wasm")]
     gpui_platform::web_init();
     #[cfg(not(target_family = "wasm"))]
@@ -100,13 +94,18 @@ pub fn run() -> Result<(), JsValue> {
             cx.new(|cx| KokGorunum::new(story_root, window, cx))
         }) {
             let message = format!("Pencere açılamadı: {error:#}");
-            log::error!("{message}");
 
             #[cfg(target_family = "wasm")]
             show_startup_error(&message);
 
+            #[cfg(not(target_family = "wasm"))]
+            log::error!("{message}");
+
             return;
         }
+
+        let _ = console_log::init_with_level(log::Level::Info);
+        let _ = tracing_wasm::try_set_as_global_default();
         cx.activate(true);
     });
 
