@@ -1048,7 +1048,14 @@ mod tests {
         highlighter.injection_layers.len()
     }
 
-    #[cfg(feature = "tree-sitter-markdown")]
+    #[cfg(any(
+        feature = "tree-sitter-markdown",
+        all(
+            feature = "tree-sitter-html",
+            feature = "tree-sitter-javascript",
+            feature = "tree-sitter-css"
+        )
+    ))]
     fn has_highlight_covering(
         highlights: &[HighlightItem],
         source: &str,
@@ -1071,8 +1078,14 @@ mod tests {
             "appearance": "dark",
             "style": {
                 "syntax": {
+                    "emphasis": {
+                        "font_style": "italic"
+                    },
                     "strikethrough": {
                         "font_style": "strikethrough"
+                    },
+                    "text.literal": {
+                        "color": "#6F42C1"
                     }
                 }
             }
@@ -1139,6 +1152,53 @@ mod tests {
 
     #[test]
     #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_emphasis() {
+        let markdown = "This has _italic_ text.";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "italic", "emphasis"),
+            "italic text should be highlighted as emphasis"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_strikethrough() {
+        let markdown = "This has ~~deleted~~ text.";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "deleted", "strikethrough"),
+            "strikethrough text should be highlighted"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_emphasis_style_depends_on_theme() {
+        let markdown = "This has _italic_ text.";
+        let rope = Rope::from_str(markdown);
+        let mut highlighter = SozdizimiVurgulayici::new("markdown");
+        highlighter.update(None, &rope, None);
+        let theme = test_highlight_theme();
+
+        let styles = highlighter.styles(&(0..markdown.len()), &theme);
+        let start = markdown.find("italic").unwrap();
+        let end = start + "italic".len();
+
+        assert!(
+            styles.iter().any(|(range, style)| {
+                range.start <= start
+                    && range.end >= end
+                    && style.font_style == Some(crate::ham_gpui::FontStyle::Italic)
+            }),
+            "italic Markdown should use the theme's emphasis font style"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
     fn test_markdown_inline_strikethrough_style_depends_on_theme() {
         let markdown = "This has ~~deleted~~ text.";
         let rope = Rope::from_str(markdown);
@@ -1167,6 +1227,161 @@ mod tests {
             markdown_injection_layer_count(markdown),
             0,
             "plain Markdown text should not create a markdown_inline layer"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_markers_create_injection_layer() {
+        let markdown = "This has _italic_ text.";
+
+        assert_eq!(
+            markdown_injection_layer_count(markdown),
+            1,
+            "Markdown inline markers should create a markdown_inline layer"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_latex_marker_creates_injection_layer() {
+        let markdown = "This has $x^2$ text.";
+
+        assert_eq!(
+            markdown_injection_layer_count(markdown),
+            1,
+            "Markdown inline LaTeX markers should create a markdown_inline layer"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_nested_emphasis_uses_default_bold_italic_style() {
+        let markdown = "This has _**bold**_ text.";
+        let rope = Rope::from_str(markdown);
+        let mut highlighter = SozdizimiVurgulayici::new("markdown");
+        highlighter.update(None, &rope, None);
+        let theme = VurguTemasi::default_dark();
+
+        let styles = highlighter.styles(&(0..markdown.len()), &theme);
+        let start = markdown.find("bold").unwrap();
+        let end = start + "bold".len();
+
+        assert!(
+            styles.iter().any(|(range, style)| {
+                range.start <= start
+                    && range.end >= end
+                    && style.font_weight == Some(crate::ham_gpui::FontWeight::BOLD)
+                    && style.font_style == Some(crate::ham_gpui::FontStyle::Italic)
+            }),
+            "strong emphasis nested in emphasis should be bold and italic by default"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_link_text() {
+        let markdown = "This has a [link](https://example.com).";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "link", "link_text"),
+            "link text should be highlighted"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_code_span() {
+        let markdown = "This has `code` text.";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "`code`", "text.literal"),
+            "inline code spans should be highlighted as literal text"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_latex_span() {
+        let markdown = "This has $x^2 + y^2 = z^2$ text.";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            has_highlight_covering(&highlights, markdown, "$x^2 + y^2 = z^2$", "text.literal"),
+            "inline LaTeX spans should be highlighted as literal text"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "tree-sitter-markdown")]
+    fn test_markdown_inline_regions_do_not_combine_across_paragraphs() {
+        let markdown = "first **open\n\nclose** second";
+        let highlights = markdown_highlights(markdown);
+
+        assert!(
+            !has_highlight_covering(&highlights, markdown, "open", "emphasis.strong"),
+            "unclosed strong emphasis should not highlight text before the paragraph break"
+        );
+        assert!(
+            !has_highlight_covering(&highlights, markdown, "close", "emphasis.strong"),
+            "unclosed strong emphasis should not highlight text after the paragraph break"
+        );
+    }
+
+    #[test]
+    #[cfg(all(
+        feature = "tree-sitter-html",
+        feature = "tree-sitter-javascript",
+        feature = "tree-sitter-css"
+    ))]
+    fn test_html_script_and_style_injections() {
+        let html = r#"<style>
+.card { color: #336699; }
+</style>
+<script>
+const answer = 42;
+console.log(answer);
+</script>
+"#;
+
+        let rope = Rope::from_str(html);
+        let mut highlighter = SozdizimiVurgulayici::new("html");
+        highlighter.update(None, &rope, None);
+
+        assert!(
+            highlighter
+                .injection_layers
+                .iter()
+                .any(|layer| layer.language_name.as_ref() == "css"),
+            "style elements should create a CSS injection layer"
+        );
+        assert!(
+            highlighter
+                .injection_layers
+                .iter()
+                .any(|layer| layer.language_name.as_ref() == "javascript"),
+            "script elements should create a JavaScript injection layer"
+        );
+
+        let highlights = highlighter.match_styles(0..html.len());
+
+        assert!(
+            has_highlight_covering(&highlights, html, "color", "property"),
+            "CSS property names inside style elements should be highlighted"
+        );
+        assert!(
+            has_highlight_covering(&highlights, html, "#336699", "string.special"),
+            "CSS color values inside style elements should be highlighted"
+        );
+        assert!(
+            has_highlight_covering(&highlights, html, "const", "keyword"),
+            "JavaScript keywords inside script elements should be highlighted"
+        );
+        assert!(
+            has_highlight_covering(&highlights, html, "answer", "variable"),
+            "JavaScript identifiers inside script elements should be highlighted"
         );
     }
 

@@ -563,12 +563,36 @@ mod tests {
 
         assert!(layout.icon_collapsed);
         assert!(!layout.offcanvas_collapsed);
+        assert!(!layout.align_child_to_end);
         assert_eq!(
             layout.wrapper,
             SidebarWrapperLayout::Animated {
                 target_width: COLLAPSED_WIDTH,
             }
         );
+    }
+
+    #[test]
+    fn icon_modu_acikken_genisleyen_genisligi_kullanir() {
+        let layout = layout(YanCubukDaralma::Icon, false, Some(px(240.)), Side::Left);
+
+        assert!(!layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert_eq!(
+            layout.wrapper,
+            SidebarWrapperLayout::Animated {
+                target_width: px(240.),
+            }
+        );
+    }
+
+    #[test]
+    fn icon_modu_acikken_piksel_olmayan_genislikte_ozgun_yerlesimi_korur() {
+        let layout = layout(YanCubukDaralma::Icon, false, None, Side::Left);
+
+        assert!(!layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert_eq!(layout.wrapper, SidebarWrapperLayout::None);
     }
 
     #[test]
@@ -587,6 +611,60 @@ mod tests {
     }
 
     #[test]
+    fn offcanvas_acikken_piksel_genisligi_kullanir() {
+        let layout = layout(
+            YanCubukDaralma::Offcanvas,
+            false,
+            Some(px(240.)),
+            Side::Left,
+        );
+
+        assert!(!layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert_eq!(
+            layout.wrapper,
+            SidebarWrapperLayout::Animated {
+                target_width: px(240.),
+            }
+        );
+    }
+
+    #[test]
+    fn offcanvas_daralinca_piksel_olmayan_genislik_durumunda_yerlesimi_statik_birakir() {
+        let layout = layout(YanCubukDaralma::Offcanvas, true, None, Side::Left);
+
+        assert!(!layout.icon_collapsed);
+        assert!(layout.offcanvas_collapsed);
+        assert_eq!(
+            layout.wrapper,
+            SidebarWrapperLayout::Static { width: px(0.) }
+        );
+    }
+
+    #[test]
+    fn offcanvas_acikken_piksel_olmayan_genislikte_ozgun_yerlesimi_korur() {
+        let layout = layout(YanCubukDaralma::Offcanvas, false, None, Side::Left);
+
+        assert!(!layout.icon_collapsed);
+        assert!(!layout.offcanvas_collapsed);
+        assert_eq!(layout.wrapper, SidebarWrapperLayout::None);
+    }
+
+    #[test]
+    fn offcanvas_alt_ogeyi_icerik_kenarina_yaslamali() {
+        let left = layout(YanCubukDaralma::Offcanvas, true, Some(px(240.)), Side::Left);
+        let right = layout(
+            YanCubukDaralma::Offcanvas,
+            true,
+            Some(px(240.)),
+            Side::Right,
+        );
+
+        assert!(left.align_child_to_end);
+        assert!(!right.align_child_to_end);
+    }
+
+    #[test]
     fn none_modu_daralma_durumunu_yok_sayar() {
         let layout = layout(YanCubukDaralma::None, true, Some(px(240.)), Side::Right);
 
@@ -597,15 +675,78 @@ mod tests {
     }
 
     #[test]
+    fn animasyon_kimligi_yan_cubuk_kimligine_baglanmali() {
+        let from = px(240.);
+        let to = COLLAPSED_WIDTH;
+
+        assert_ne!(
+            sidebar_animation_id(&ElementId::Name("sidebar-a".into()), from, to),
+            sidebar_animation_id(&ElementId::Name("sidebar-b".into()), from, to)
+        );
+    }
+
+    #[test]
     fn animasyon_durumu_offcanvas_kapanisi_bitene_kadar_icerigi_tutar() {
         let mut state = SidebarAnimationState::new(px(240.), true);
 
         let request = state.update_target(px(0.), true);
 
         assert_eq!(request, Some(1));
+        assert_eq!(state.from_width, px(240.));
+        assert_eq!(state.target_width, px(0.));
         assert!(state.render_child);
+
         assert!(state.finish_hide(1));
+
         assert!(!state.render_child);
         assert!(!state.hide_scheduled);
+    }
+
+    #[test]
+    fn animasyon_durumu_bekleyen_offcanvas_gizlemesini_yeniden_planlamamali() {
+        let mut state = SidebarAnimationState::new(px(240.), true);
+
+        let request = state.update_target(px(0.), true);
+
+        assert_eq!(request, Some(1));
+        assert!(!state.needs_update(px(0.), true));
+        assert_eq!(state.update_target(px(0.), true), None);
+        assert_eq!(state.hide_request, 1);
+    }
+
+    #[test]
+    fn animasyon_durumu_yeniden_acilinca_bekleyen_gizlemeyi_iptal_etmeli() {
+        let mut state = SidebarAnimationState::new(px(240.), true);
+
+        let request = state.update_target(px(0.), true).unwrap();
+        state.update_target(px(240.), false);
+
+        assert!(!state.finish_hide(request));
+        assert!(state.render_child);
+        assert!(!state.hide_scheduled);
+        assert_eq!(state.from_width, px(0.));
+        assert_eq!(state.target_width, px(240.));
+    }
+
+    #[test]
+    fn animasyon_durumu_eski_gizleme_isteklerini_yok_saymali() {
+        let mut state = SidebarAnimationState::new(px(240.), true);
+
+        let request = state.update_target(px(0.), true).unwrap();
+        state.update_target(px(240.), false);
+        state.update_target(px(0.), true);
+
+        assert!(!state.finish_hide(request));
+        assert!(state.render_child);
+        assert!(state.hide_scheduled);
+    }
+
+    #[test]
+    fn animasyon_durumu_baslangicta_offcanvas_kapaliysa_gizli_baslamali() {
+        let state = SidebarAnimationState::new(px(0.), false);
+
+        assert!(!state.render_child);
+        assert_eq!(state.from_width, px(0.));
+        assert_eq!(state.target_width, px(0.));
     }
 }

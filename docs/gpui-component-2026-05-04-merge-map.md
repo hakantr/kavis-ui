@@ -93,6 +93,43 @@ cargo check -p kavis-ui-story-web
 git diff --check
 ```
 
+## Sonradan Kapatılan Test Boşlukları
+
+İlk uyarlamada upstream test grubunun bir kısmı taşınmamıştı. Şimdi eklendi:
+
+### Sidebar (`crates/ui/src/sidebar.rs` `tests` modülü)
+
+- `icon_modu_acikken_genisleyen_genisligi_kullanir`
+- `icon_modu_acikken_piksel_olmayan_genislikte_ozgun_yerlesimi_korur`
+- `offcanvas_acikken_piksel_genisligi_kullanir`
+- `offcanvas_daralinca_piksel_olmayan_genislik_durumunda_yerlesimi_statik_birakir`
+- `offcanvas_acikken_piksel_olmayan_genislikte_ozgun_yerlesimi_korur`
+- `offcanvas_alt_ogeyi_icerik_kenarina_yaslamali`
+- `animasyon_kimligi_yan_cubuk_kimligine_baglanmali`
+- `animasyon_durumu_bekleyen_offcanvas_gizlemesini_yeniden_planlamamali`
+- `animasyon_durumu_yeniden_acilinca_bekleyen_gizlemeyi_iptal_etmeli`
+- `animasyon_durumu_eski_gizleme_isteklerini_yok_saymali`
+- `animasyon_durumu_baslangicta_offcanvas_kapaliysa_gizli_baslamali`
+- `icon_modu_daralinca_simge_genisligi_kullanir` testine `align_child_to_end` doğrulaması eklendi.
+- `bool_collapsible_should_remain_backward_compatible` testi alınmadı; bool API'si bilinçli olarak desteklenmiyor.
+
+### Highlighter (`crates/ui/src/highlighter/highlighter.rs` `tests` modülü)
+
+- `test_markdown_inline_emphasis`
+- `test_markdown_inline_strikethrough`
+- `test_markdown_inline_emphasis_style_depends_on_theme`
+- `test_markdown_inline_markers_create_injection_layer`
+- `test_markdown_inline_latex_marker_creates_injection_layer`
+- `test_markdown_inline_nested_emphasis_uses_default_bold_italic_style`
+- `test_markdown_inline_link_text`
+- `test_markdown_inline_code_span`
+- `test_markdown_inline_latex_span`
+- `test_markdown_inline_regions_do_not_combine_across_paragraphs`
+- `test_html_script_and_style_injections` (HTML/JS/CSS feature kombinasyonuna feature-gated)
+- `test_highlight_theme` yardımcı fonksiyonu `emphasis` (italic) ve `text.literal` stillerini de döndürecek şekilde upstream ile eşitlendi.
+- `has_highlight_covering` yardımcı fonksiyonu HTML feature kombinasyonu için de derlenmesi adına feature gate genişletildi.
+- `test_markdown_plain_inline_skips_injection_layer` upstream'da Japonca CJK metniyle çağrılırken, kavis-ui tarafında Türkçe ASCII metin korundu (trigger byte tetiklemediği için fonksiyonel sonuç aynı).
+
 ## Gelecek Merge Kontrol Listesi
 
 1. Upstream tarih filtresini netleştir:
