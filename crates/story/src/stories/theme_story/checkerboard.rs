@@ -1,7 +1,7 @@
-use kavis_ui::ham_gpui::*;
 use kavis_ui::EtkinTema as _;
+use kavis_ui::ham_gpui::*;
 
-#[derive(IntoElement)]
+#[derive(kavis_ui::OgeyeDonus)]
 pub struct Checkerboard {
     children: Vec<AnyElement>,
     is_dark: bool,
@@ -51,7 +51,10 @@ impl RenderOnce for Checkerboard {
                             for col in 0..cols {
                                 if (row + col) % 2 == 0 {
                                     let origin = bounds.origin
-                                        + kavis_ui::ham_gpui::point(size * (col as f32), size * (row as f32));
+                                        + kavis_ui::ham_gpui::point(
+                                            size * (col as f32),
+                                            size * (row as f32),
+                                        );
 
                                     window.paint_quad(kavis_ui::ham_gpui::PaintQuad {
                                         bounds: kavis_ui::ham_gpui::Bounds {

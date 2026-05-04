@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 use std::time::Duration;
 
-use kavis_ui::ham_gpui::{actions, prelude::FluentBuilder as _, *};
 use kavis_ui::TemaModu;
+use kavis_ui::ham_gpui::{prelude::FluentBuilder as _, *};
 use kavis_ui::{
     BaslikCubugu, Boyutlandirilabilir, EtkinTema, KokGorunum, Simge, SimgeAdi, Tema,
     chart::AreaChart,
@@ -16,7 +16,7 @@ use smol::Timer;
 use sysinfo::{Disks, Pid, System};
 
 // Define the Quit action
-actions!(system_monitor, [Quit]);
+kavis_ui::aksiyonlar!(system_monitor, [Quit]);
 
 const INTERVAL: Duration = Duration::from_millis(500);
 const MAX_DATA_POINTS: usize = 120;

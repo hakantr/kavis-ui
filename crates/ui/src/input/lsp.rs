@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::ham_gpui::{App, Context, Hsla, MouseMoveEvent, Task, Window};
+use anyhow::Result;
 use ropey::Rope;
 use std::rc::Rc;
 

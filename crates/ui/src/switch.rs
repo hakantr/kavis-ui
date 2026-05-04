@@ -1,11 +1,11 @@
-use crate::{
-    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Side, StilUzantisi,
-    h_flex, text::Text, tooltip::BilesenAracIpucu,
-};
 use crate::ham_gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement, IntoElement,
     ParentElement as _, RenderOnce, SharedString, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder as _, px,
+};
+use crate::{
+    BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Side, StilUzantisi,
+    h_flex, text::Text, tooltip::BilesenAracIpucu,
 };
 use std::{rc::Rc, time::Duration};
 
@@ -210,11 +210,14 @@ impl RenderOnce for Anahtar {
                         .filter(|_| !self.disabled),
                     |this, on_click| {
                         let toggle_state = toggle_state.clone();
-                        this.on_mouse_down(crate::ham_gpui::MouseButton::Left, move |_, window, cx| {
-                            cx.stop_propagation();
-                            _ = toggle_state.update(cx, |this, _| *this = checked);
-                            on_click(&!checked, window, cx);
-                        })
+                        this.on_mouse_down(
+                            crate::ham_gpui::MouseButton::Left,
+                            move |_, window, cx| {
+                                cx.stop_propagation();
+                                _ = toggle_state.update(cx, |this, _| *this = checked);
+                                on_click(&!checked, window, cx);
+                            },
+                        )
                     },
                 ),
         )

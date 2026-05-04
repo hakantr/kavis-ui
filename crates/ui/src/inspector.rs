@@ -1,12 +1,12 @@
 use std::{cell::OnceCell, collections::HashMap, fmt::Write as _, rc::Rc, sync::OnceLock};
 
-use anyhow::Result;
 use crate::ham_gpui::{
     AnyElement, App, AppContext, Context, DivInspectorState, Entity, Inspector, InspectorElementId,
     InteractiveElement as _, IntoElement, KeyBinding, ParentElement as _, Refineable as _, Render,
     SharedString, StyleRefinement, Styled, Subscription, Task, Window, actions, div,
     inspector_reflection::FunctionReflection, prelude::FluentBuilder, px,
 };
+use anyhow::Result;
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionResponse, CompletionTextEdit, Diagnostic as Tani,
     DiagnosticSeverity as TaniOnemi, Position, TextEdit,

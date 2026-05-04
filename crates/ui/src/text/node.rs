@@ -723,7 +723,8 @@ impl Paragraph {
                     node_highlights.push((inner_range, highlight));
                 }
 
-                highlights = crate::ham_gpui::combine_highlights(highlights, node_highlights).collect();
+                highlights =
+                    crate::ham_gpui::combine_highlights(highlights, node_highlights).collect();
                 offset += text_len;
             }
             ix += 1;

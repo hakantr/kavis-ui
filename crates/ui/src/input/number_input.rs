@@ -1,11 +1,13 @@
-use crate::theme::EtkinTema;
 use crate::ham_gpui::Corners;
 use crate::ham_gpui::Window;
-use crate::ham_gpui::{AnyElement, App, Context, Edges, Entity, EventEmitter, FocusHandle, Focusable};
+use crate::ham_gpui::{
+    AnyElement, App, Context, Edges, Entity, EventEmitter, FocusHandle, Focusable,
+};
 use crate::ham_gpui::{
     InteractiveElement, IntoElement, KeyBinding, ParentElement, RenderOnce, SharedString,
     StyleRefinement, Styled, TextAlign, actions, prelude::FluentBuilder as _,
 };
+use crate::theme::EtkinTema;
 
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, SimgeAdi, StilUzantisi as _,

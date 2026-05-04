@@ -1,6 +1,6 @@
 use kavis_ui::ham_gpui::{
-    Action, Anchor, App, AppContext as _, Context, Entity, Focusable, IntoElement,
-    ParentElement as _, Render, Styled as _, Window, prelude::FluentBuilder as _,
+    Anchor, App, AppContext as _, Context, Entity, Focusable, IntoElement, ParentElement as _,
+    Render, Styled as _, Window, prelude::FluentBuilder as _,
 };
 use serde::Deserialize;
 
@@ -12,8 +12,8 @@ use kavis_ui::{
     h_flex, v_flex,
 };
 
-#[derive(Clone, Action, PartialEq, Eq, Deserialize)]
-#[action(namespace = dropdown_button_story, no_json)]
+#[derive(Clone, kavis_ui::Aksiyon, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = dropdown_button_story, no_json)]
 enum ButtonAction {
     Disabled,
     Loading,

@@ -1,6 +1,6 @@
 use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, InteractiveElement, KeyBinding, ParentElement,
-    Render, StatefulInteractiveElement as _, Styled, Window, actions, div,
+    Render, StatefulInteractiveElement as _, Styled, Window, div,
 };
 
 use kavis_ui::{
@@ -18,7 +18,7 @@ use kavis_ui::{
 
 use crate::{Story, section};
 
-actions!(tooltip_story, [Info]);
+kavis_ui::aksiyonlar!(tooltip_story, [Info]);
 
 pub fn init(cx: &mut App) {
     cx.bind_keys([KeyBinding::new(

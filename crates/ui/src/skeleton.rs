@@ -1,8 +1,8 @@
-use crate::{EtkinTema, StilUzantisi};
 use crate::ham_gpui::{
     Animation, AnimationExt, IntoElement, RenderOnce, StyleRefinement, Styled, bounce, div,
     ease_in_out,
 };
+use crate::{EtkinTema, StilUzantisi};
 use instant::Duration;
 
 /// Bir skeleton yükleme yer tutucu öğe.
@@ -35,7 +35,11 @@ impl Styled for Iskelet {
 }
 
 impl RenderOnce for Iskelet {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl IntoElement {
         div()
             .w_full()
             .h_4()

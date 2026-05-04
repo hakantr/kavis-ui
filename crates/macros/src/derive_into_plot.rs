@@ -8,7 +8,7 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
     let (impl_generics, type_generics, where_clause) = ast.generics.split_for_impl();
 
     let expanded = quote! {
-        impl #impl_generics gpui::IntoElement for #type_name #type_generics #where_clause {
+        impl #impl_generics kavis_ui::IntoElement for #type_name #type_generics #where_clause {
             type Element = Self;
 
             fn into_element(self) -> Self::Element {
@@ -16,11 +16,11 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
             }
         }
 
-        impl #impl_generics gpui::Element for #type_name #type_generics #where_clause {
+        impl #impl_generics kavis_ui::Element for #type_name #type_generics #where_clause {
             type RequestLayoutState = ();
             type PrepaintState = ();
 
-            fn id(&self) -> Option<gpui::ElementId> {
+            fn id(&self) -> Option<kavis_ui::ElementId> {
                 None
             }
 
@@ -30,13 +30,13 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
 
             fn request_layout(
                 &mut self,
-                _: Option<&gpui::GlobalElementId>,
-                _: Option<&gpui::InspectorElementId>,
-                window: &mut gpui::Window,
-                cx: &mut gpui::App,
-            ) -> (gpui::LayoutId, Self::RequestLayoutState) {
-                let style = gpui::Style {
-                    size: gpui::Size::full(),
+                _: Option<&kavis_ui::ham_gpui::GlobalElementId>,
+                _: Option<&kavis_ui::ham_gpui::InspectorElementId>,
+                window: &mut kavis_ui::Window,
+                cx: &mut kavis_ui::App,
+            ) -> (kavis_ui::ham_gpui::LayoutId, Self::RequestLayoutState) {
+                let style = kavis_ui::ham_gpui::Style {
+                    size: kavis_ui::ham_gpui::Size::full(),
                     ..Default::default()
                 };
 
@@ -45,24 +45,24 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
 
             fn prepaint(
                 &mut self,
-                _: Option<&gpui::GlobalElementId>,
-                _: Option<&gpui::InspectorElementId>,
-                _: gpui::Bounds<gpui::Pixels>,
+                _: Option<&kavis_ui::ham_gpui::GlobalElementId>,
+                _: Option<&kavis_ui::ham_gpui::InspectorElementId>,
+                _: kavis_ui::Bounds<kavis_ui::Pixels>,
                 _: &mut Self::RequestLayoutState,
-                _: &mut gpui::Window,
-                _: &mut gpui::App,
+                _: &mut kavis_ui::Window,
+                _: &mut kavis_ui::App,
             ) -> Self::PrepaintState {
             }
 
             fn paint(
                 &mut self,
-                _: Option<&gpui::GlobalElementId>,
-                _: Option<&gpui::InspectorElementId>,
-                bounds: gpui::Bounds<gpui::Pixels>,
+                _: Option<&kavis_ui::ham_gpui::GlobalElementId>,
+                _: Option<&kavis_ui::ham_gpui::InspectorElementId>,
+                bounds: kavis_ui::Bounds<kavis_ui::Pixels>,
                 _: &mut Self::RequestLayoutState,
                 _: &mut Self::PrepaintState,
-                window: &mut gpui::Window,
-                cx: &mut gpui::App,
+                window: &mut kavis_ui::Window,
+                cx: &mut kavis_ui::App,
             ) {
                 <Self as Plot>::paint(self, bounds, window, cx)
             }

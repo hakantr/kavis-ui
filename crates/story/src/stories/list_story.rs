@@ -4,7 +4,7 @@ use fake::Fake;
 use kavis_ui::ham_gpui::{
     App, AppContext, Context, ElementId, Entity, FocusHandle, Focusable, InteractiveElement,
     IntoElement, ParentElement, Render, RenderOnce, ScrollStrategy, SharedString, Styled,
-    Subscription, Task, Window, actions, div, px,
+    Subscription, Task, Window, div, px,
 };
 
 use kavis_ui::{
@@ -17,7 +17,7 @@ use kavis_ui::{
     v_flex,
 };
 
-actions!(list_story, [SelectedCompany]);
+kavis_ui::aksiyonlar!(list_story, [SelectedCompany]);
 
 #[derive(Clone, Default)]
 struct Company {
@@ -43,7 +43,7 @@ impl Company {
     }
 }
 
-#[derive(IntoElement)]
+#[derive(kavis_ui::OgeyeDonus)]
 struct CompanyListItem {
     base: ListeOgesi,
     company: Rc<Company>,

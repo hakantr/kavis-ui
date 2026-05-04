@@ -1,6 +1,6 @@
 use super::ListeOgesi;
-use crate::{skeleton::Iskelet, v_flex};
 use crate::ham_gpui::{IntoElement, ParentElement as _, RenderOnce, Styled};
+use crate::{skeleton::Iskelet, v_flex};
 
 #[derive(IntoElement)]
 pub struct Loading;
@@ -9,7 +9,11 @@ pub struct Loading;
 struct LoadingItem;
 
 impl RenderOnce for LoadingItem {
-    fn render(self, _window: &mut crate::ham_gpui::Window, _cx: &mut crate::ham_gpui::App) -> impl IntoElement {
+    fn render(
+        self,
+        _window: &mut crate::ham_gpui::Window,
+        _cx: &mut crate::ham_gpui::App,
+    ) -> impl IntoElement {
         ListeOgesi::new("skeleton").disabled(true).child(
             v_flex()
                 .gap_1p5()
@@ -21,7 +25,11 @@ impl RenderOnce for LoadingItem {
 }
 
 impl RenderOnce for Loading {
-    fn render(self, _window: &mut crate::ham_gpui::Window, _cx: &mut crate::ham_gpui::App) -> impl IntoElement {
+    fn render(
+        self,
+        _window: &mut crate::ham_gpui::Window,
+        _cx: &mut crate::ham_gpui::App,
+    ) -> impl IntoElement {
         v_flex()
             .py_2p5()
             .gap_3()

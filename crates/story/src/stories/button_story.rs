@@ -1,5 +1,5 @@
 use kavis_ui::ham_gpui::{
-    Action, App, AppContext as _, Axis, ClickEvent, Context, Entity, Focusable, InteractiveElement,
+    App, AppContext as _, Axis, ClickEvent, Context, Entity, Focusable, InteractiveElement,
     IntoElement, ParentElement as _, Render, Styled as _, Window, prelude::FluentBuilder, px,
 };
 
@@ -16,8 +16,8 @@ use serde::Deserialize;
 
 use crate::section;
 
-#[derive(Clone, Action, PartialEq, Eq, Deserialize)]
-#[action(namespace = button_story, no_json)]
+#[derive(Clone, kavis_ui::Aksiyon, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = button_story, no_json)]
 enum ButtonAction {
     Disabled,
     Loading,

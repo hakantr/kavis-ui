@@ -1,6 +1,6 @@
 use kavis_ui::ham_gpui::{
-    Action, Anchor, App, AppContext, Context, Entity, InteractiveElement, IntoElement, KeyBinding,
-    ParentElement as _, Render, SharedString, Styled as _, Window, actions, div, px,
+    Anchor, App, AppContext, Context, Entity, InteractiveElement, IntoElement, KeyBinding,
+    ParentElement as _, Render, SharedString, Styled as _, Window, div, px,
 };
 use kavis_ui::{
     EtkinTema as _, Side, SimgeAdi, StilUzantisi,
@@ -13,11 +13,11 @@ use serde::Deserialize;
 
 use crate::section;
 
-#[derive(Action, Clone, PartialEq, Deserialize)]
-#[action(namespace = menu_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Deserialize)]
+#[aksiyon(namespace = menu_story, no_json)]
 struct Info(usize);
 
-actions!(menu_story, [Copy, Paste, Cut, SearchAll, ToggleCheck]);
+kavis_ui::aksiyonlar!(menu_story, [Copy, Paste, Cut, SearchAll, ToggleCheck]);
 
 const CONTEXT: &str = "menu_story";
 pub fn init(cx: &mut App) {

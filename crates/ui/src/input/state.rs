@@ -2,7 +2,6 @@
 //!
 //! Based on the `Input` example from the `gpui` crate.
 //! https://github.com/zed-industries/zed/blob/main/crates/gpui/examples/input.rs
-use anyhow::Result;
 use crate::ham_gpui::{
     Action, App, AppContext, Bounds, ClipboardItem, Context, Entity, EntityInputHandler,
     EventEmitter, FocusHandle, Focusable, InteractiveElement as _, IntoElement, KeyBinding,
@@ -12,6 +11,7 @@ use crate::ham_gpui::{
     px,
 };
 use crate::ham_gpui::{Half, TextAlign};
+use anyhow::Result;
 use ropey::{Rope, RopeSlice};
 use serde::Deserialize;
 use std::ops::Range;
@@ -2617,8 +2617,8 @@ impl Render for InputState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theme::Tema;
     use crate::ham_gpui::{TestAppContext, VisualTestContext};
+    use crate::theme::Tema;
 
     struct InputView {
         input: Entity<InputState>,
@@ -2692,19 +2692,20 @@ ORDER BY id
         let comment_start = cx.update(|_, cx| {
             input.read_with(cx, |state, _| state.text.line_start_offset(comment_line))
         });
-        let styles_before: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> = cx.update(|_, cx| {
-            input.read_with(cx, |state, _| {
-                let mode = &state.mode;
-                if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {
-                    let h = highlighter.borrow();
-                    if let Some(h) = h.as_ref() {
-                        let line_end = state.text.line_end_offset(comment_line);
-                        return h.styles(&(comment_start..line_end), &theme);
+        let styles_before: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> =
+            cx.update(|_, cx| {
+                input.read_with(cx, |state, _| {
+                    let mode = &state.mode;
+                    if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {
+                        let h = highlighter.borrow();
+                        if let Some(h) = h.as_ref() {
+                            let line_end = state.text.line_end_offset(comment_line);
+                            return h.styles(&(comment_start..line_end), &theme);
+                        }
                     }
-                }
-                vec![]
-            })
-        });
+                    vec![]
+                })
+            });
 
         // Fold at line 0 with range 0..9 (hides lines 1-8)
         cx.update(|_, cx| {
@@ -2736,19 +2737,20 @@ ORDER BY id
         });
 
         // Get styles for the same comment line after folding
-        let styles_after: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> = cx.update(|_, cx| {
-            input.read_with(cx, |state, _| {
-                let mode = &state.mode;
-                if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {
-                    let h = highlighter.borrow();
-                    if let Some(h) = h.as_ref() {
-                        let line_end = state.text.line_end_offset(comment_line);
-                        return h.styles(&(comment_start..line_end), &theme);
+        let styles_after: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> =
+            cx.update(|_, cx| {
+                input.read_with(cx, |state, _| {
+                    let mode = &state.mode;
+                    if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {
+                        let h = highlighter.borrow();
+                        if let Some(h) = h.as_ref() {
+                            let line_end = state.text.line_end_offset(comment_line);
+                            return h.styles(&(comment_start..line_end), &theme);
+                        }
                     }
-                }
-                vec![]
-            })
-        });
+                    vec![]
+                })
+            });
 
         let colored_before: Vec<_> = styles_before
             .iter()

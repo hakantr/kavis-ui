@@ -1,3 +1,8 @@
+use crate::ham_gpui::{
+    Anchor, AnyView, App, AppContext, Context, DefiniteLength, ElementId, Entity, FocusHandle,
+    InteractiveElement, IntoElement, KeyBinding, ParentElement as _, Pixels, Render,
+    StyleRefinement, Styled, WeakFocusHandle, Window, actions, div, prelude::FluentBuilder as _,
+};
 use crate::{
     EtkinTema, OgeUzantisi, Placement, StilUzantisi,
     dialog::{ANIMATION_DURATION, IletisimKutusu},
@@ -7,11 +12,6 @@ use crate::{
     sheet::SayfaKatmani,
     tooltip::AracIpucuKatmani,
     window_border,
-};
-use crate::ham_gpui::{
-    Anchor, AnyView, App, AppContext, Context, DefiniteLength, ElementId, Entity, FocusHandle,
-    InteractiveElement, IntoElement, KeyBinding, ParentElement as _, Pixels, Render,
-    StyleRefinement, Styled, WeakFocusHandle, Window, actions, div, prelude::FluentBuilder as _,
 };
 use std::{any::TypeId, rc::Rc};
 

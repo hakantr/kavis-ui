@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use kavis_ui::ham_gpui::{
-    Action, App, AppContext, ClickEvent, Context, Entity, Focusable, IntoElement, ParentElement,
-    Render, SharedString, Styled, Window, div, prelude::FluentBuilder, px, relative,
+    App, AppContext, ClickEvent, Context, Entity, Focusable, IntoElement, ParentElement, Render,
+    SharedString, Styled, Window, div, prelude::FluentBuilder, px, relative,
 };
 
 use kavis_ui::{
@@ -21,8 +21,8 @@ use kavis_ui::{
 };
 use serde::Deserialize;
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = sidebar_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = sidebar_story, no_json)]
 pub struct SelectCompany(SharedString);
 
 pub struct SidebarStory {

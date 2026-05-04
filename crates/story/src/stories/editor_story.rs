@@ -1,4 +1,6 @@
-use kavis_ui::ham_gpui::{App, AppContext as _, Context, Entity, IntoElement, Render, Styled, Window};
+use kavis_ui::ham_gpui::{
+    App, AppContext as _, Context, Entity, IntoElement, Render, Styled, Window,
+};
 
 use kavis_ui::input::{Girdi, GirdiDurumu, SekmeBoyutu};
 

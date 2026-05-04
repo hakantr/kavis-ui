@@ -1,6 +1,8 @@
 use crate::ham_gpui::Corners;
 use crate::ham_gpui::Half;
-use crate::ham_gpui::{App, Bounds, Element, ElementId, ElementInputHandler, Entity, GlobalElementId};
+use crate::ham_gpui::{
+    App, Bounds, Element, ElementId, ElementInputHandler, Entity, GlobalElementId,
+};
 use crate::ham_gpui::{
     HighlightStyle, Hitbox, HitboxBehavior, Hsla, InteractiveElement, IntoElement, LayoutId,
     MouseButton, MouseMoveEvent, Path, Pixels, Point, ShapedLine, SharedString, Size, Style,
@@ -2263,7 +2265,10 @@ mod tests {
             },
         ];
 
-        let bg_segments = vec![(8..12, crate::ham_gpui::red()), (12..18, crate::ham_gpui::blue())];
+        let bg_segments = vec![
+            (8..12, crate::ham_gpui::red()),
+            (12..18, crate::ham_gpui::blue()),
+        ];
         let result = split_runs_by_bg_segments(5, &runs, &bg_segments);
         assert_eq!(
             result.iter().map(|run| run.len).collect::<Vec<_>>(),

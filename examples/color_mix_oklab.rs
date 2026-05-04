@@ -5,7 +5,7 @@ use kavis_ui::{
     v_flex, KokGorunum, Boyutlandirilabilir,
 };
 
-actions!(demo, [Quit]);
+kavis_ui::aksiyonlar!(demo, [Quit]);
 
 struct ColorMixDemo {
     focus_handle: FocusHandle,

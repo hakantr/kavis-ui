@@ -3003,7 +3003,7 @@ name = "gpui-wry"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
+ "kavis-ui",
  "lb-wry",
 ]
 
@@ -4376,6 +4376,7 @@ dependencies = [
  "gpui",
  "gpui_macros",
  "gpui_platform",
+ "gpui_web",
  "html5ever 0.38.0",
  "icu",
  "indoc",
@@ -4447,7 +4448,7 @@ name = "kavis-ui-assets"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
+ "kavis-ui",
  "log",
  "reqwest",
  "rust-embed",
@@ -4476,7 +4477,6 @@ dependencies = [
  "dirs",
  "fake",
  "getrandom 0.4.2",
- "gpui_web",
  "gtk",
  "itertools 0.14.0",
  "kavis-ui",

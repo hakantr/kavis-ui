@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::ham_gpui::{App, Context, Entity, SharedString, Task, Window};
+use anyhow::Result;
 use lsp_types::CodeAction;
 use std::ops::Range;
 

@@ -12,7 +12,9 @@ pub struct Link {
     style: StyleRefinement,
     href: Option<SharedString>,
     disabled: bool,
-    on_click: Option<Box<dyn Fn(&ClickEvent, &mut crate::ham_gpui::Window, &mut crate::ham_gpui::App) + 'static>>,
+    on_click: Option<
+        Box<dyn Fn(&ClickEvent, &mut crate::ham_gpui::Window, &mut crate::ham_gpui::App) + 'static>,
+    >,
     children: Vec<AnyElement>,
 }
 
@@ -67,7 +69,11 @@ impl ParentElement for Link {
 }
 
 impl RenderOnce for Link {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl IntoElement {
         let href = self.href.clone();
         let on_click = self.on_click;
 

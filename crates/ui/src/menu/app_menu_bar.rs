@@ -1,3 +1,9 @@
+use crate::ham_gpui::{
+    App, AppContext, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
+    InteractiveElement as _, IntoElement, KeyBinding, MouseButton, OwnedMenu, ParentElement,
+    Render, SharedString, StatefulInteractiveElement, Styled, Subscription, Window, anchored,
+    deferred, div, prelude::FluentBuilder, px,
+};
 use crate::{
     Boyutlandirilabilir, Secilebilir,
     actions::{Cancel, SelectLeft, SelectRight},
@@ -5,12 +11,6 @@ use crate::{
     global_state::KureselDurum,
     h_flex,
     menu::AcilirMenu,
-};
-use crate::ham_gpui::{
-    App, AppContext, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
-    InteractiveElement as _, IntoElement, KeyBinding, MouseButton, OwnedMenu, ParentElement,
-    Render, SharedString, StatefulInteractiveElement, Styled, Subscription, Window, anchored,
-    deferred, div, prelude::FluentBuilder, px,
 };
 
 const CONTEXT: &str = "AppMenuBar";

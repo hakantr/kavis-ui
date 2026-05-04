@@ -5,10 +5,10 @@
 /// ## Kullanım
 ///
 /// ```rust,no_run
-/// use gpui::*;
+/// use kavis_ui::*;
 /// use kavis_ui_assets::Varliklar;
 ///
-/// let app = gpui_platform::application().with_assets(Varliklar);
+/// let app = kavis_ui::platform::application().with_assets(Varliklar);
 /// ```
 ///
 /// ## Platform Farkları

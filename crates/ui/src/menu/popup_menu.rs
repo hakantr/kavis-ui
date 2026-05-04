@@ -1,9 +1,5 @@
 use crate::actions::{Cancel, Confirm, SelectDown, SelectUp};
 use crate::actions::{SelectLeft, SelectRight};
-use crate::menu::menu_item::MenuItemElement;
-use crate::scroll::KaydirilabilirOge;
-use crate::{BilesenBoyutu, Side, StilUzantisi, kbd::KlavyeTusu};
-use crate::{Boyutlandirilabilir as _, EtkinTema, OgeUzantisi, Simge, SimgeAdi, h_flex, v_flex};
 use crate::ham_gpui::{
     Action, Anchor, AnyElement, App, AppContext, Bounds, Context, DismissEvent, Edges, Entity,
     EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, KeyBinding,
@@ -11,6 +7,10 @@ use crate::ham_gpui::{
     WeakEntity, Window, anchored, div, prelude::FluentBuilder, px, rems,
 };
 use crate::ham_gpui::{ClickEvent, Half, MouseDownEvent, OwnedMenuItem, Point, Subscription};
+use crate::menu::menu_item::MenuItemElement;
+use crate::scroll::KaydirilabilirOge;
+use crate::{BilesenBoyutu, Side, StilUzantisi, kbd::KlavyeTusu};
+use crate::{Boyutlandirilabilir as _, EtkinTema, OgeUzantisi, Simge, SimgeAdi, h_flex, v_flex};
 
 use std::rc::Rc;
 
@@ -1062,7 +1062,10 @@ impl AcilirMenu {
 
         let is_bottom_pos = bounds.origin.y + bounds.size.height > window.bounds().size.height;
         self.submenu_anchor = if is_bottom_pos {
-            (anchor.other_side_along(crate::ham_gpui::Axis::Vertical), left)
+            (
+                anchor.other_side_along(crate::ham_gpui::Axis::Vertical),
+                left,
+            )
         } else {
             (anchor, left)
         };

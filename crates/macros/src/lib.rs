@@ -2,7 +2,9 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 
+mod derive_aksiyon;
 mod derive_into_plot;
+mod derive_ogeye_donus;
 
 /// icon_name! makrosu için girdi: EnumName, "yol", [isteğe bağlı derive listesi]
 struct SimgeAdiGirdisi {
@@ -44,6 +46,16 @@ impl Parse for SimgeAdiGirdisi {
 #[proc_macro_derive(IntoPlot)]
 pub fn derive_into_plot(input: TokenStream) -> TokenStream {
     derive_into_plot::derive_into_plot(input)
+}
+
+#[proc_macro_derive(Aksiyon, attributes(action, aksiyon))]
+pub fn derive_aksiyon(input: TokenStream) -> TokenStream {
+    derive_aksiyon::derive_aksiyon(input)
+}
+
+#[proc_macro_derive(OgeyeDonus)]
+pub fn derive_ogeye_donus(input: TokenStream) -> TokenStream {
+    derive_ogeye_donus::derive_ogeye_donus(input)
 }
 
 /// Bir SVG dosya adını PascalCase tanımlayıcıya dönüştürür.

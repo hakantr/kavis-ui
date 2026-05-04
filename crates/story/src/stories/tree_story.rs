@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use autocorrect::ignorer::Ignorer;
 use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, InteractiveElement, KeyBinding, ParentElement, Render,
-    Styled, Window, actions, prelude::FluentBuilder as _, px,
+    Styled, Window, prelude::FluentBuilder as _, px,
 };
 
 use kavis_ui::{
@@ -20,7 +20,7 @@ use rand::prelude::IndexedRandom as _;
 
 use crate::{Story, section};
 
-actions!(story, [Rename, OpenFile, Delete]);
+kavis_ui::aksiyonlar!(story, [Rename, OpenFile, Delete]);
 
 const CONTEXT: &str = "TreeStory";
 pub(crate) fn init(cx: &mut App) {
@@ -97,21 +97,36 @@ impl TreeStory {
         }
     }
 
-    fn on_action_rename(&mut self, _: &Rename, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
+    fn on_action_rename(
+        &mut self,
+        _: &Rename,
+        _: &mut Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe yeniden adlandırılıyor: {} ({})", item.label, item.id);
         }
     }
 
-    fn on_action_open(&mut self, _: &OpenFile, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
+    fn on_action_open(
+        &mut self,
+        _: &OpenFile,
+        _: &mut Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe açılıyor: {} ({})", item.label, item.id);
         }
     }
 
-    fn on_action_delete(&mut self, _: &Delete, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
+    fn on_action_delete(
+        &mut self,
+        _: &Delete,
+        _: &mut Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe siliniyor: {} ({})", item.label, item.id);

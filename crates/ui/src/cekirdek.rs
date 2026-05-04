@@ -56,7 +56,10 @@ pub struct KavisMotoru;
 impl KavisMotoru {
     /// Varsayilan platformla varlik kaynagi olmadan uygulamayi baslatir.
     pub fn baslat(baslangic_fonksiyonu: impl FnOnce(&mut Uygulama) + 'static) {
-        Self::platform_ile_baslat(gpui_platform::current_platform(false), baslangic_fonksiyonu);
+        Self::platform_ile_baslat(
+            crate::platform::current_platform(false),
+            baslangic_fonksiyonu,
+        );
     }
 
     /// Varsayilan platformla ve verilen varlik kaynagiyla uygulamayi baslatir.
@@ -64,7 +67,7 @@ impl KavisMotoru {
         varlik_kaynagi: impl VarlikKaynagi,
         baslangic_fonksiyonu: impl FnOnce(&mut Uygulama) + 'static,
     ) {
-        Self::platform_ile_kur(gpui_platform::current_platform(false))
+        Self::platform_ile_kur(crate::platform::current_platform(false))
             .with_assets(varlik_kaynagi)
             .run(move |cx| {
                 crate::init(cx);

@@ -19,5 +19,5 @@ doctest = false
 
 [dependencies]
 anyhow.workspace = true
-gpui.workspace = true
+kavis-ui.workspace = true
 wry = { version = "0.53.3", package = "lb-wry" }

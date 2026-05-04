@@ -21,15 +21,15 @@ use rand::RngExt as _;
 use serde::Deserialize;
 use std::{sync::Arc, time::Duration};
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct AddPanel(YerlesimKonumu);
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct TogglePanelVisible(SharedString);
 
-actions!(story, [ToggleDockToggleButton]);
+kavis_ui::aksiyonlar!(story, [ToggleDockToggleButton]);
 
 const MAIN_DOCK_AREA: DockAreaTab = DockAreaTab {
     id: "main-dock",

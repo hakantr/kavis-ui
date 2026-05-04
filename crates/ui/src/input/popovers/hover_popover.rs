@@ -41,7 +41,11 @@ impl HoverPopover {
 }
 
 impl Render for HoverPopover {
-    fn render(&mut self, _: &mut Window, _: &mut crate::ham_gpui::Context<Self>) -> impl IntoElement {
+    fn render(
+        &mut self,
+        _: &mut Window,
+        _: &mut crate::ham_gpui::Context<Self>,
+    ) -> impl IntoElement {
         let contents = match self.hover.contents.clone() {
             lsp_types::HoverContents::Scalar(scalar) => match scalar {
                 lsp_types::MarkedString::String(s) => s,

@@ -1,7 +1,7 @@
+use crate::ham_gpui::{App, Global, SharedString};
 use crate::{Tema, TemaKumesi, TemaModu, TemaRengi, TemaYapilandirmasi, highlighter::VurguTemasi};
 #[allow(unused)]
 use anyhow::Result;
-use crate::ham_gpui::{App, Global, SharedString};
 use std::{
     collections::HashMap,
     path::PathBuf,

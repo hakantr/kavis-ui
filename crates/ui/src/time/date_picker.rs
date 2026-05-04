@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
-use chrono::NaiveDate;
 use crate::ham_gpui::{
     App, AppContext, ClickEvent, Context, ElementId, Empty, Entity, EventEmitter, FocusHandle,
     Focusable, InteractiveElement as _, IntoElement, KeyBinding, MouseButton, ParentElement as _,
     Render, RenderOnce, SharedString, StatefulInteractiveElement as _, StyleRefinement, Styled,
     Subscription, Window, anchored, deferred, div, prelude::FluentBuilder as _, px,
 };
+use chrono::NaiveDate;
 use rust_i18n::t;
 
 use crate::{
@@ -234,7 +234,12 @@ impl TarihSeciciDurumu {
         }
     }
 
-    fn clean(&mut self, _: &crate::ham_gpui::ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
+    fn clean(
+        &mut self,
+        _: &crate::ham_gpui::ClickEvent,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         cx.stop_propagation();
         match self.date {
             Date::Single(_) => {
@@ -246,7 +251,12 @@ impl TarihSeciciDurumu {
         }
     }
 
-    fn toggle_calendar(&mut self, _: &crate::ham_gpui::ClickEvent, _: &mut Window, cx: &mut Context<Self>) {
+    fn toggle_calendar(
+        &mut self,
+        _: &crate::ham_gpui::ClickEvent,
+        _: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         self.open = !self.open;
         cx.notify();
     }
@@ -309,7 +319,11 @@ impl DevreDisiBirakilabilir for TarihSecici {
 }
 
 impl Render for TarihSeciciDurumu {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        &mut self,
+        _: &mut Window,
+        _: &mut Context<Self>,
+    ) -> impl crate::ham_gpui::IntoElement {
         Empty
     }
 }

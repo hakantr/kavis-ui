@@ -1,9 +1,9 @@
-use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi};
 use crate::ham_gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement as _, IntoElement,
     ParentElement, RenderOnce, StyleRefinement, Styled, Window, div, ease_in_out,
     prelude::FluentBuilder, px, relative,
 };
+use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi};
 use instant::Duration;
 
 use super::IlerlemeDurumu;

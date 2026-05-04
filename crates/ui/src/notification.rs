@@ -586,8 +586,8 @@ impl Render for BildirimListesi {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theme::Tema;
     use crate::ham_gpui::{TestAppContext, VisualTestContext};
+    use crate::theme::Tema;
 
     struct FooKind;
     struct BarKind;

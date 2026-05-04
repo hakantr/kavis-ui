@@ -1,7 +1,7 @@
-use anyhow::Result;
 use crate::ham_gpui::{
     App, Context, HighlightStyle, Hitbox, MouseDownEvent, Task, UnderlineStyle, Window, px,
 };
+use anyhow::Result;
 use ropey::Rope;
 use std::{ops::Range, rc::Rc};
 

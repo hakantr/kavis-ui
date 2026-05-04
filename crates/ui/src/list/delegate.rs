@@ -1,4 +1,6 @@
-use crate::ham_gpui::{AnyElement, App, Context, IntoElement, ParentElement as _, Styled as _, Task, Window};
+use crate::ham_gpui::{
+    AnyElement, App, Context, IntoElement, ParentElement as _, Styled as _, Task, Window,
+};
 
 use crate::{
     EtkinTema as _, IndexPath, Secilebilir, Simge, SimgeAdi, h_flex,

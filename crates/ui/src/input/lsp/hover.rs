@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::ham_gpui::{App, Context, Task, Window};
+use anyhow::Result;
 use instant::Duration;
 use ropey::Rope;
 

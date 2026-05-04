@@ -14,7 +14,7 @@ use kavis_ui_story::{ButtonStory, IconStory, StoryContainer};
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
 
-actions!(tiles_story, [Quit]);
+kavis_ui::aksiyonlar!(tiles_story, [Quit]);
 
 const TILES_DOCK_AREA: DockAreaTab = DockAreaTab {
     id: "story-tiles",
@@ -134,7 +134,7 @@ impl Render for ContainerPanel {
     }
 }
 
-actions!(workspace, [Open, CloseWindow]);
+kavis_ui::aksiyonlar!(workspace, [Open, CloseWindow]);
 
 pub fn init(cx: &mut App) {
     cx.on_action(|_action: &Open, _cx: &mut App| {});

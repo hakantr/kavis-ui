@@ -147,6 +147,9 @@ lsp-types.workspace = true
 # Cross-platform time APIs (zero-cost on native, uses web APIs on WASM)
 instant = { version = "0.1", features = ["wasm-bindgen"] }
 
+[target.'cfg(target_family = "wasm")'.dependencies]
+gpui_web.workspace = true
+
 # Native-only dependencies (not available on WASM)
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 smol.workspace = true

@@ -1,4 +1,4 @@
-use kavis_ui::ham_gpui::{Action, App, SharedString};
+use kavis_ui::ham_gpui::{App, SharedString};
 use kavis_ui::{Tema, TemaKaydi, TemaModu, scroll::KaydirmaCubuguGosterimi};
 use serde::{Deserialize, Serialize};
 
@@ -90,10 +90,10 @@ pub fn init(cx: &mut App) {
     });
 }
 
-#[derive(Action, Clone, PartialEq)]
-#[action(namespace = themes, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq)]
+#[aksiyon(namespace = themes, no_json)]
 pub(crate) struct SwitchTheme(pub(crate) SharedString);
 
-#[derive(Action, Clone, PartialEq)]
-#[action(namespace = themes, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq)]
+#[aksiyon(namespace = themes, no_json)]
 pub(crate) struct SwitchThemeMode(pub(crate) TemaModu);

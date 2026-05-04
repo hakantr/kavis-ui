@@ -1,5 +1,12 @@
 use std::{ops::Range, rc::Rc, time::Duration};
 
+use crate::ham_gpui::{
+    AppContext, Axis, Bounds, ClickEvent, Context, Div, DragMoveEvent, EventEmitter, FocusHandle,
+    Focusable, InteractiveElement, IntoElement, ListSizingBehavior, MouseButton, MouseDownEvent,
+    ParentElement, Pixels, Point, Render, ScrollStrategy, SharedString, Stateful,
+    StatefulInteractiveElement as _, Styled, Task, UniformListScrollHandle, Window, div,
+    prelude::FluentBuilder, px, uniform_list,
+};
 use crate::{
     EtkinTema, OgeUzantisi, SanalListeKaydirmaTutamaci, Simge, SimgeAdi, StilBoyutlandirma as _,
     StilUzantisi,
@@ -11,13 +18,6 @@ use crate::{
     menu::{AcilirMenu, BaglamMenusuUzantisi},
     scroll::{KaydirilabilirMaske, KaydirmaCubugu},
     v_flex,
-};
-use crate::ham_gpui::{
-    AppContext, Axis, Bounds, ClickEvent, Context, Div, DragMoveEvent, EventEmitter, FocusHandle,
-    Focusable, InteractiveElement, IntoElement, ListSizingBehavior, MouseButton, MouseDownEvent,
-    ParentElement, Pixels, Point, Render, ScrollStrategy, SharedString, Stateful,
-    StatefulInteractiveElement as _, Styled, Task, UniformListScrollHandle, Window, div,
-    prelude::FluentBuilder, px, uniform_list,
 };
 
 use super::*;
@@ -1926,17 +1926,18 @@ where
                     this.when(is_selected && self.selection_mode.is_row(), |this| {
                         this.map(|this| {
                             if cx.theme().list.active_highlight {
-                                this.border_color(crate::ham_gpui::transparent_white()).child(
-                                    div()
-                                        .top(if row_ix == 0 { px(0.) } else { px(-1.) })
-                                        .left(px(0.))
-                                        .right(px(0.))
-                                        .bottom(px(-1.))
-                                        .absolute()
-                                        .bg(cx.theme().table_active)
-                                        .border_1()
-                                        .border_color(cx.theme().table_active_border),
-                                )
+                                this.border_color(crate::ham_gpui::transparent_white())
+                                    .child(
+                                        div()
+                                            .top(if row_ix == 0 { px(0.) } else { px(-1.) })
+                                            .left(px(0.))
+                                            .right(px(0.))
+                                            .bottom(px(-1.))
+                                            .absolute()
+                                            .bg(cx.theme().table_active)
+                                            .border_1()
+                                            .border_color(cx.theme().table_active_border),
+                                    )
                             } else {
                                 this.bg(cx.theme().accent)
                             }
@@ -1945,16 +1946,17 @@ where
                 })
                 // Row right click row style
                 .when(self.right_clicked_row == Some(row_ix), |this| {
-                    this.border_color(crate::ham_gpui::transparent_white()).child(
-                        div()
-                            .top(if row_ix == 0 { px(0.) } else { px(-1.) })
-                            .left(px(0.))
-                            .right(px(0.))
-                            .bottom(px(-1.))
-                            .absolute()
-                            .border_1()
-                            .border_color(cx.theme().selection),
-                    )
+                    this.border_color(crate::ham_gpui::transparent_white())
+                        .child(
+                            div()
+                                .top(if row_ix == 0 { px(0.) } else { px(-1.) })
+                                .left(px(0.))
+                                .right(px(0.))
+                                .bottom(px(-1.))
+                                .absolute()
+                                .border_1()
+                                .border_color(cx.theme().selection),
+                        )
                 })
                 .on_mouse_down(
                     MouseButton::Right,
@@ -2185,17 +2187,18 @@ where
                                         // Use `col.width` (always up-to-date) rather than
                                         // `col.bounds.size.width`, which is only set after
                                         // prepaint and is therefore zero on the first frame.
-                                        let col_sizes: Rc<Vec<crate::ham_gpui::Size<Pixels>>> = Rc::new(
-                                            table
-                                                .col_groups
-                                                .iter()
-                                                .skip(left_columns_count)
-                                                .map(|col| crate::ham_gpui::Size {
-                                                    width: col.width,
-                                                    height: px(0.),
-                                                })
-                                                .collect(),
-                                        );
+                                        let col_sizes: Rc<Vec<crate::ham_gpui::Size<Pixels>>> =
+                                            Rc::new(
+                                                table
+                                                    .col_groups
+                                                    .iter()
+                                                    .skip(left_columns_count)
+                                                    .map(|col| crate::ham_gpui::Size {
+                                                        width: col.width,
+                                                        height: px(0.),
+                                                    })
+                                                    .collect(),
+                                            );
 
                                         table.load_more_if_need(
                                             rows_count,

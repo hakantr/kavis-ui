@@ -1,9 +1,8 @@
 use kavis_ui::ham_gpui::{
-    Action, AnyElement, AnyView, App, AppContext, Bounds, Context, Div, Entity, EventEmitter,
-    FocusHandle, Focusable, Global, Hsla, InteractiveElement, IntoElement, KeyBinding,
-    ParentElement, Pixels, Render, RenderOnce, SharedString, Size, StyleRefinement, Styled, Window,
-    WindowBounds, WindowKind, WindowOptions, actions, div, prelude::FluentBuilder as _, px, rems,
-    size,
+    AnyElement, AnyView, App, AppContext, Bounds, Context, Div, Entity, EventEmitter, FocusHandle,
+    Focusable, Global, Hsla, InteractiveElement, IntoElement, KeyBinding, ParentElement, Pixels,
+    Render, RenderOnce, SharedString, Size, StyleRefinement, Styled, Window, WindowBounds,
+    WindowKind, WindowOptions, div, prelude::FluentBuilder as _, px, rems, size,
 };
 use kavis_ui::{
     BaslikCubugu, EtkinTema, KokGorunum, PencereUzantisi, SimgeAdi,
@@ -29,23 +28,23 @@ pub use crate::title_bar::AppTitleBar;
 pub use gallery::Gallery;
 pub use stories::*;
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct SelectScrollbarShow(KaydirmaCubuguGosterimi);
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct SelectLocale(SharedString);
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct SelectFont(usize);
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = story, no_json)]
 pub struct SelectRadius(usize);
 
-actions!(
+kavis_ui::aksiyonlar!(
     story,
     [
         About,
@@ -196,7 +195,7 @@ pub fn init(cx: &mut App) {
         // Safety: the web examples run single-threaded; the client is
         // created and used exclusively on the main thread.
         let http_client = unsafe {
-            gpui_web::FetchHttpClient::with_user_agent("kavis-ui/story")
+            kavis_ui::web::FetchHttpClient::with_user_agent("kavis-ui/story")
                 .expect("FetchHttpClient oluşturulamadı")
         };
         cx.set_http_client(std::sync::Arc::new(http_client));
@@ -275,7 +274,7 @@ pub fn init(cx: &mut App) {
     cx.activate(true);
 }
 
-#[derive(IntoElement)]
+#[derive(kavis_ui::OgeyeDonus)]
 struct StorySection {
     base: Div,
     title: SharedString,

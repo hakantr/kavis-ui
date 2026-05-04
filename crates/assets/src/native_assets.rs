@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use gpui::{AssetSource, Result, SharedString};
+use kavis_ui::{AssetSource, Result, SharedString};
 use std::borrow::Cow;
 
 /// RustEmbed kullanan yerel uygulama

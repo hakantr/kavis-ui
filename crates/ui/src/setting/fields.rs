@@ -13,7 +13,9 @@ pub(crate) use string::*;
 pub use element::AyarAlaniOgesi;
 pub use number::NumberFieldOptions;
 
-use crate::ham_gpui::{AnyElement, App, IntoElement, SharedString, StyleRefinement, Styled, Window};
+use crate::ham_gpui::{
+    AnyElement, App, IntoElement, SharedString, StyleRefinement, Styled, Window,
+};
 use std::{any::Any, rc::Rc};
 
 use crate::setting::RenderOptions;

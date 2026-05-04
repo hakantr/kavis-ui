@@ -67,7 +67,11 @@ impl InteractiveElement for YanCubukAltligi {
 impl AcilirMenuTetikleyici for YanCubukAltligi {}
 
 impl RenderOnce for YanCubukAltligi {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl crate::ham_gpui::IntoElement {
         h_flex()
             .id("sidebar-footer")
             .gap_2()

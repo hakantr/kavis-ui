@@ -1,7 +1,7 @@
 use kavis_ui::ham_gpui::*;
 use kavis_ui::ham_gpui::{
-    Action, App, AppContext, Axis, Context, Entity, FocusHandle, Focusable, IntoElement,
-    ParentElement, Render, Styled, Window,
+    App, AppContext, Axis, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement,
+    Render, Styled, Window,
 };
 use kavis_ui::{
     BilesenBoyutu, Boyutlandirilabilir as _,
@@ -15,8 +15,8 @@ use kavis_ui::{
 use kavis_ui::{EksenUzantisi, h_flex, menu::AcilirMenuTetikleyici as _};
 use serde::Deserialize;
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = description_list_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = description_list_story, no_json)]
 struct ChangeSize(BilesenBoyutu);
 
 pub struct DescriptionListStory {

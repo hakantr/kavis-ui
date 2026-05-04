@@ -1191,7 +1191,11 @@ impl Focusable for SekmePaneli {
 impl EventEmitter<DismissEvent> for SekmePaneli {}
 impl EventEmitter<PanelEvent> for SekmePaneli {}
 impl Render for SekmePaneli {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl crate::ham_gpui::IntoElement {
         let focus_handle = self.focus_handle(cx);
         let active_panel = self.active_panel(cx);
         let state = TabState {

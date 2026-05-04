@@ -5,7 +5,7 @@ use kavis_ui::{
 };
 use kavis_ui_assets::Varliklar;
 
-actions!(class_menu, [Open, Delete, Export, Info]);
+kavis_ui::aksiyonlar!(class_menu, [Open, Delete, Export, Info]);
 
 pub struct HelloWorld;
 

@@ -335,11 +335,11 @@ impl Element for MetinGorunumu {
 #[cfg(test)]
 mod tests {
     use super::MetinGorunumu;
-    use crate::text::MetinGorunumuDurumu;
     use crate::ham_gpui::{
         AppContext as _, Context, Entity, IntoElement, Modifiers, MouseButton, ParentElement as _,
         Render, Styled as _, TestAppContext, VisualTestContext, Window, div, point, px,
     };
+    use crate::text::MetinGorunumuDurumu;
 
     struct TextViewTestRoot {
         text_view: Entity<MetinGorunumuDurumu>,

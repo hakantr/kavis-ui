@@ -215,7 +215,11 @@ impl Styled for KlavyeTusu {
 }
 
 impl RenderOnce for KlavyeTusu {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl crate::ham_gpui::IntoElement {
         if !self.appearance {
             return Self::format(&self.stroke).into_any_element();
         }

@@ -79,7 +79,11 @@ impl InteractiveElement for YanCubukBasligi {
 impl AcilirMenuTetikleyici for YanCubukBasligi {}
 
 impl RenderOnce for YanCubukBasligi {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl crate::ham_gpui::IntoElement {
         self.base
             .id("sidebar-header")
             .h_flex()

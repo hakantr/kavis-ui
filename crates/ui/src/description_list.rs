@@ -250,7 +250,11 @@ impl Boyutlandirilabilir for AciklamaListesi {
 }
 
 impl RenderOnce for AciklamaListesi {
-    fn render(self, _: &mut Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        self,
+        _: &mut Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl crate::ham_gpui::IntoElement {
         let base_gap = match self.size {
             BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(2.),
             BilesenBoyutu::Orta => px(4.),

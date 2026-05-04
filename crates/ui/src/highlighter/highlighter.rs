@@ -1,7 +1,7 @@
 use crate::highlighter::{DilKaydi, VurguTemasi};
 
-use anyhow::{Context, Result, anyhow};
 use crate::ham_gpui::{HighlightStyle, SharedString};
+use anyhow::{Context, Result, anyhow};
 
 use ropey::{ChunkCursor, Rope};
 use std::sync::Arc;

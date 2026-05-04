@@ -74,7 +74,11 @@ impl InteractiveElement for AvatarGroup {
 }
 
 impl RenderOnce for AvatarGroup {
-    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::App,
+    ) -> impl IntoElement {
         let item_ml = -super::avatar_size(self.size) * 0.3;
         let avatars_len = self.avatars.len();
 

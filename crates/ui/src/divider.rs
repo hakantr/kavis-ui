@@ -1,8 +1,8 @@
-use crate::{EtkinTema, StilUzantisi};
 use crate::ham_gpui::{
     App, Axis, Div, Hsla, IntoElement, ParentElement, PathBuilder, RenderOnce, SharedString,
     StyleRefinement, Styled, Window, canvas, div, point, prelude::FluentBuilder as _, px,
 };
+use crate::{EtkinTema, StilUzantisi};
 
 /// stil divider satır.
 #[derive(Clone, Copy, PartialEq, Default)]

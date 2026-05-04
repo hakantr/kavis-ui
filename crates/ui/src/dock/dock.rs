@@ -372,7 +372,11 @@ impl Yerlesim {
 }
 
 impl Render for Yerlesim {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl crate::ham_gpui::IntoElement {
         if !self.open && !self.placement.is_bottom() {
             return div();
         }

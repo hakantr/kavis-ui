@@ -1,5 +1,8 @@
 use std::rc::Rc;
 
+use crate::ham_gpui::{
+    AnyElement, App, IntoElement, ParentElement as _, StyleRefinement, Window, div,
+};
 use crate::{
     Boyutlandirilabilir, StilUzantisi,
     checkbox::OnayKutusu,
@@ -9,7 +12,6 @@ use crate::{
     },
     switch::Anahtar,
 };
-use crate::ham_gpui::{AnyElement, App, IntoElement, ParentElement as _, StyleRefinement, Window, div};
 
 pub(crate) struct BoolField {
     use_switch: bool,

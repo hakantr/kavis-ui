@@ -276,10 +276,12 @@ impl UygulamaMenuOgesi {
         match self {
             Self::Ayirici => OwnedMenuItem::Separator,
             Self::AltMenu(menu) => OwnedMenuItem::Submenu(menu.sahipli_menu()),
-            Self::SistemMenusu { baslik, tur } => OwnedMenuItem::SystemMenu(crate::ham_gpui::OwnedOsMenu {
-                name: baslik.clone(),
-                menu_type: (*tur).into(),
-            }),
+            Self::SistemMenusu { baslik, tur } => {
+                OwnedMenuItem::SystemMenu(crate::ham_gpui::OwnedOsMenu {
+                    name: baslik.clone(),
+                    menu_type: (*tur).into(),
+                })
+            }
             Self::Aksiyon {
                 baslik,
                 aksiyon,

@@ -6,10 +6,9 @@ use std::{
 
 use fake::Fake;
 use kavis_ui::ham_gpui::{
-    Action, AnyElement, App, AppContext, ClickEvent, Context, Div, Entity, Focusable,
-    InteractiveElement, IntoElement, ParentElement, Render, SharedString, Stateful,
-    StatefulInteractiveElement, Styled, Subscription, Task, TextAlign, Window, div,
-    prelude::FluentBuilder as _,
+    AnyElement, App, AppContext, ClickEvent, Context, Div, Entity, Focusable, InteractiveElement,
+    IntoElement, ParentElement, Render, SharedString, Stateful, StatefulInteractiveElement, Styled,
+    Subscription, Task, TextAlign, Window, div, prelude::FluentBuilder as _,
 };
 use kavis_ui::{
     BilesenBoyutu, Boyutlandirilabilir as _, EtkinTema as _, Secilebilir, StilBoyutlandirma as _,
@@ -30,12 +29,12 @@ use kavis_ui::{
 use rand::RngExt as _;
 use serde::{Deserialize, Serialize};
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = data_table_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = data_table_story, no_json)]
 struct ChangeSize(BilesenBoyutu);
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = data_table_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = data_table_story, no_json)]
 struct OpenDetail(usize);
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -1070,7 +1069,11 @@ impl DataTableStory {
 }
 
 impl Render for DataTableStory {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl kavis_ui::ham_gpui::IntoElement {
+    fn render(
+        &mut self,
+        _: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         let table = &self.table.read(cx);
         let delegate = table.delegate();
         let rows_count = delegate.rows_count(cx);

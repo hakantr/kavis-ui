@@ -1,7 +1,7 @@
 use kavis_ui::ham_gpui::{
-    Action, Anchor, App, AppContext, Context, DismissEvent, Entity, EventEmitter, FocusHandle,
-    Focusable, Half, InteractiveElement, IntoElement, KeyBinding, MouseButton, ParentElement as _,
-    Render, Styled as _, Window, actions, div, px,
+    Anchor, App, AppContext, Context, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable,
+    Half, InteractiveElement, IntoElement, KeyBinding, MouseButton, ParentElement as _, Render,
+    Styled as _, Window, div, px,
 };
 use kavis_ui::{
     EtkinTema, PencereUzantisi, StilUzantisi,
@@ -17,11 +17,11 @@ use serde::Deserialize;
 
 use crate::section;
 
-#[derive(Action, Clone, PartialEq, Eq, Deserialize)]
-#[action(namespace = popover_story, no_json)]
+#[derive(kavis_ui::Aksiyon, Clone, PartialEq, Eq, Deserialize)]
+#[aksiyon(namespace = popover_story, no_json)]
 struct Info(usize);
 
-actions!(popover_story, [Copy, Paste, Cut, SearchAll, ToggleCheck]);
+kavis_ui::aksiyonlar!(popover_story, [Copy, Paste, Cut, SearchAll, ToggleCheck]);
 const CONTEXT: &str = "popover-story";
 pub fn init(cx: &mut App) {
     cx.bind_keys([

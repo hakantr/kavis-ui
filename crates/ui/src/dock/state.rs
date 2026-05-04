@@ -1,4 +1,6 @@
-use crate::ham_gpui::{App, AppContext, Axis, Bounds, Entity, Pixels, WeakEntity, Window, point, px, size};
+use crate::ham_gpui::{
+    App, AppContext, Axis, Bounds, Entity, Pixels, WeakEntity, Window, point, px, size,
+};
 use itertools::Itertools as _;
 use serde::{Deserialize, Serialize};
 

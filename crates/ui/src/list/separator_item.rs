@@ -34,7 +34,11 @@ impl Secilebilir for ListeAyiriciOgesi {
 }
 
 impl RenderOnce for ListeAyiriciOgesi {
-    fn render(self, _: &mut crate::ham_gpui::Window, _: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
+    fn render(
+        self,
+        _: &mut crate::ham_gpui::Window,
+        _: &mut crate::ham_gpui::App,
+    ) -> impl crate::ham_gpui::IntoElement {
         ListeOgesi::new("separator")
             .refine_style(&self.style)
             .children(self.children)

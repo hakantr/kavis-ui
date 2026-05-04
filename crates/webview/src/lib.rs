@@ -5,10 +5,13 @@ use wry::{
     dpi::{self, LogicalSize},
 };
 
-use gpui::{
-    App, Bounds, ContentMask, DismissEvent, Element, ElementId, Entity, EventEmitter, FocusHandle,
-    Focusable, GlobalElementId, Hitbox, InteractiveElement, IntoElement, LayoutId, MouseDownEvent,
-    ParentElement as _, Pixels, Render, Size, Style, Styled as _, Window, canvas, div,
+use kavis_ui::{
+    App, Bounds, Element, ElementId, Entity, EventEmitter, FocusHandle, Focusable,
+    InteractiveElement, IntoElement, ParentElement as _, Pixels, Render, Styled as _, Window, div,
+    ham_gpui::{
+        ContentMask, DismissEvent, GlobalElementId, Hitbox, HitboxBehavior, InspectorElementId,
+        LayoutId, MouseDownEvent, Size, Style, canvas,
+    },
 };
 
 /// wry WebGorunumu tabanlı bir web görünümü.
@@ -88,7 +91,7 @@ impl Deref for WebGorunumu {
 }
 
 impl Focusable for WebGorunumu {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &kavis_ui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -98,8 +101,8 @@ impl EventEmitter<DismissEvent> for WebGorunumu {}
 impl Render for WebGorunumu {
     fn render(
         &mut self,
-        window: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
+        window: &mut kavis_ui::Window,
+        cx: &mut kavis_ui::Context<Self>,
     ) -> impl IntoElement {
         let view = cx.entity().clone();
 
@@ -165,7 +168,7 @@ impl Element for WebGorunumuOgesi {
     fn request_layout(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
@@ -183,7 +186,7 @@ impl Element for WebGorunumuOgesi {
     fn prepaint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&InspectorElementId>,
         bounds: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -205,13 +208,13 @@ impl Element for WebGorunumuOgesi {
         });
 
         // Create a hitbox to handle mouse event
-        Some(window.insert_hitbox(bounds, gpui::HitboxBehavior::Normal))
+        Some(window.insert_hitbox(bounds, HitboxBehavior::Normal))
     }
 
     fn paint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&InspectorElementId>,
         bounds: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         hitbox: &mut Self::PrepaintState,

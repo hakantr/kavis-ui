@@ -1,6 +1,5 @@
 use std::ops::Range;
 
-use chrono::{Datelike, NaiveDate};
 use crate::ham_gpui::{
     AnyElement, App, AppContext, AvailableSpace, Bounds, ClickEvent, Context, Element, ElementId,
     Entity, EventEmitter, FocusHandle, Focusable, GlobalElementId, InteractiveElement, IntoElement,
@@ -8,6 +7,7 @@ use crate::ham_gpui::{
     RenderOnce, SharedString, StatefulInteractiveElement as _, StyleRefinement, Styled,
     Subscription, Window, anchored, deferred, div, point, prelude::FluentBuilder as _, px,
 };
+use chrono::{Datelike, NaiveDate};
 
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema as _, SimgeAdi,
