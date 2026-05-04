@@ -66,4 +66,7 @@ Markdown içerik Türkçedir. Ana dokümantasyon ağacı `docs/docs` altında tu
 
 ## Upstream Birleştirme Notları
 
-`../gpui-component` karşılaştırmalarına devam etmeden önce ilgili merge haritasını oku. 2026-05-04 uyarlaması için yol haritası `docs/gpui-component-2026-05-04-merge-map.md` dosyasındadır.
+`../gpui-component` karşılaştırmalarına devam etmeden önce ilgili merge haritasını oku.
+
+- İlk `gpui-component 0.5.1` fork/uyarlama haritası: `docs/gpui-component-0.5.1-initial-fork-map.md`
+- 2026-05-04 uyarlama haritası: `docs/gpui-component-2026-05-04-merge-map.md`
