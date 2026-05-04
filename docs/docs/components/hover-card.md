@@ -10,7 +10,7 @@ description: İmleç öğenin üzerindeyken bağlamsal içerik gösterir.
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

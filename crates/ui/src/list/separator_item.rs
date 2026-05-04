@@ -1,4 +1,4 @@
-use gpui::{AnyElement, ParentElement, RenderOnce, StyleRefinement};
+use crate::ham_gpui::{AnyElement, ParentElement, RenderOnce, StyleRefinement};
 use smallvec::SmallVec;
 
 use crate::{Secilebilir, StilUzantisi, list::ListeOgesi};
@@ -34,7 +34,7 @@ impl Secilebilir for ListeAyiriciOgesi {
 }
 
 impl RenderOnce for ListeAyiriciOgesi {
-    fn render(self, _: &mut gpui::Window, _: &mut gpui::App) -> impl gpui::IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, _: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
         ListeOgesi::new("separator")
             .refine_style(&self.style)
             .children(self.children)

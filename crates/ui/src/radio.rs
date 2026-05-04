@@ -5,7 +5,7 @@ use crate::{
     StilUzantisi, checkbox::checkbox_check_icon, h_flex, text::Text, tooltip::BilesenAracIpucu,
     v_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Axis, Div, ElementId, InteractiveElement, IntoElement, ParentElement,
     RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder, px, relative, rems,
@@ -114,13 +114,13 @@ impl Boyutlandirilabilir for Radyo {
 }
 
 impl Styled for Radyo {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl InteractiveElement for Radyo {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.base.interactivity()
     }
 }
@@ -223,7 +223,7 @@ impl RenderOnce for Radyo {
                             .children(self.children),
                     )
                 })
-                .on_mouse_down(gpui::MouseButton::Left, |_, window, _| {
+                .on_mouse_down(crate::ham_gpui::MouseButton::Left, |_, window, _| {
                     // Avoid focus on mouse down.
                     window.prevent_default();
                 })

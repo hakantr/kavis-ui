@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     App, Background, Bounds, Corners, PaintQuad, Pixels, Point, Size, Window, fill, point, px,
 };
 
@@ -68,7 +68,7 @@ impl<T> Default for Bar<T> {
             band_width: 0.,
             base: Box::new(|_| 0.),
             value: Box::new(|_| None),
-            fill: Box::new(|_, _, _| gpui::black().into()),
+            fill: Box::new(|_, _, _| crate::ham_gpui::black().into()),
             label: None,
             corner_radii: Corners::all(px(0.)),
         }
@@ -142,7 +142,7 @@ impl<T> Bar<T> {
     /// koordinatlar üretmek isteyen çağıranlar bunu bu çerçeveden kendileri hesaplamalıdır.
     ///
     /// [`Background`] değerine dönüştürülebilen her tipi kabul eder; düz renkler ve
-    /// tam belirtilmiş [`gpui::linear_gradient`] değerleri buna dahildir. Arka plan
+    /// tam belirtilmiş [`crate::ham_gpui::linear_gradient`] değerleri buna dahildir. Arka plan
     /// olduğu gibi kullanılır; gradyan açısı çubuk yönüne göre ayarlanmaz.
     pub fn fill<F, B>(mut self, fill: F) -> Self
     where
@@ -240,7 +240,7 @@ impl<T> Bar<T> {
 
 /// Çubuk etiketinin başlangıç noktasıdır; çubuğun dışında, değer bitişinde konumlandırılır.
 ///
-/// çağıran chooses [`gpui::TextAlign`] (typically `Center` için dikey
+/// çağıran chooses [`crate::ham_gpui::TextAlign`] (typically `Center` için dikey
 /// çubuklar, `Left` için `BarAlignment::Left`, `Right` için `BarAlignment::Right`).
 fn label_origin(
     alignment: BarAlignment,

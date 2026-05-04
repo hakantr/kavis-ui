@@ -1,5 +1,5 @@
 use anyhow::Result;
-use gpui::{App, Context, Hsla, Task, Window};
+use crate::ham_gpui::{App, Context, Hsla, Task, Window};
 use instant::Duration;
 use lsp_types::ColorInformation;
 use ropey::Rope;
@@ -77,7 +77,7 @@ impl Lsp {
                         let mut document_colors: Vec<(lsp_types::Range, Hsla)> = colors
                             .iter()
                             .map(|info| {
-                                let color = gpui::Rgba {
+                                let color = crate::ham_gpui::Rgba {
                                     r: info.color.red,
                                     g: info.color.green,
                                     b: info.color.blue,

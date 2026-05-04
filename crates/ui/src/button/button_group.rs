@@ -1,8 +1,8 @@
-use gpui::Corners;
-use gpui::InteractiveElement;
-use gpui::ParentElement;
-use gpui::{App, Axis, Edges, ElementId, IntoElement, Window};
-use gpui::{
+use crate::ham_gpui::Corners;
+use crate::ham_gpui::InteractiveElement;
+use crate::ham_gpui::ParentElement;
+use crate::ham_gpui::{App, Axis, Edges, ElementId, IntoElement, Window};
+use crate::ham_gpui::{
     RenderOnce, StatefulInteractiveElement as _, StyleRefinement, Styled, div,
     prelude::FluentBuilder as _,
 };
@@ -137,7 +137,7 @@ impl Boyutlandirilabilir for DugmeGrubu {
 }
 
 impl Styled for DugmeGrubu {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -264,10 +264,10 @@ impl RenderOnce for DugmeGrubu {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui::Axis;
+    use crate::ham_gpui::Axis;
 
-    #[gpui::test]
-    fn test_button_group_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_group_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let group = DugmeGrubu::new("complex-group")
             .child(Dugme::new("btn1").label("One"))
             .child(Dugme::new("btn2").label("Two"))

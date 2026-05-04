@@ -1,5 +1,5 @@
 use anyhow::Result;
-use gpui::{
+use crate::ham_gpui::{
     App, Context, HighlightStyle, Hitbox, MouseDownEvent, Task, UnderlineStyle, Window, px,
 };
 use ropey::Rope;
@@ -228,6 +228,6 @@ impl TextElement {
             return None;
         };
 
-        Some(window.insert_hitbox(bounds, gpui::HitboxBehavior::Normal))
+        Some(window.insert_hitbox(bounds, crate::ham_gpui::HitboxBehavior::Normal))
     }
 }

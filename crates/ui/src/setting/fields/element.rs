@@ -1,4 +1,4 @@
-use gpui::{AnyElement, App, IntoElement, StyleRefinement, Window};
+use crate::ham_gpui::{AnyElement, App, IntoElement, StyleRefinement, Window};
 use std::rc::Rc;
 
 use crate::setting::{HerhangiBirAyarAlani, RenderOptions, fields::AyarAlaniCizimi};

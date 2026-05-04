@@ -10,7 +10,7 @@ Açık/kapalı ayarları için anahtar bileşeni. Güncel örnekler Kavis UI'nin
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

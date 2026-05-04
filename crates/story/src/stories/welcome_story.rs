@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, Render, Styled as _, Window, px,
 };
 
@@ -39,13 +39,13 @@ impl Story for WelcomeStory {
         None
     }
 
-    fn paddings() -> gpui::Pixels {
+    fn paddings() -> kavis_ui::ham_gpui::Pixels {
         px(0.)
     }
 }
 
 impl Focusable for WelcomeStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -53,9 +53,9 @@ impl Focusable for WelcomeStory {
 impl Render for WelcomeStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        _: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        _: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         markdown(include_str!("../../../../README.md"))
             .px_4()
             .scrollable(true)

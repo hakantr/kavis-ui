@@ -4,13 +4,13 @@ use crate::menu::menu_item::MenuItemElement;
 use crate::scroll::KaydirilabilirOge;
 use crate::{BilesenBoyutu, Side, StilUzantisi, kbd::KlavyeTusu};
 use crate::{Boyutlandirilabilir as _, EtkinTema, OgeUzantisi, Simge, SimgeAdi, h_flex, v_flex};
-use gpui::{
+use crate::ham_gpui::{
     Action, Anchor, AnyElement, App, AppContext, Bounds, Context, DismissEvent, Edges, Entity,
     EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, KeyBinding,
     ParentElement, Pixels, Render, ScrollHandle, SharedString, StatefulInteractiveElement, Styled,
     WeakEntity, Window, anchored, div, prelude::FluentBuilder, px, rems,
 };
-use gpui::{ClickEvent, Half, MouseDownEvent, OwnedMenuItem, Point, Subscription};
+use crate::ham_gpui::{ClickEvent, Half, MouseDownEvent, OwnedMenuItem, Point, Subscription};
 
 use std::rc::Rc;
 
@@ -1019,7 +1019,7 @@ impl AcilirMenu {
             this.p_0()
                 .flex_nowrap()
                 .border_0()
-                .bg(gpui::transparent_white())
+                .bg(crate::ham_gpui::transparent_white())
         })
     }
 
@@ -1062,7 +1062,7 @@ impl AcilirMenu {
 
         let is_bottom_pos = bounds.origin.y + bounds.size.height > window.bounds().size.height;
         self.submenu_anchor = if is_bottom_pos {
-            (anchor.other_side_along(gpui::Axis::Vertical), left)
+            (anchor.other_side_along(crate::ham_gpui::Axis::Vertical), left)
         } else {
             (anchor, left)
         };

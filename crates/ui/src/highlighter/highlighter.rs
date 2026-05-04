@@ -1,7 +1,7 @@
 use crate::highlighter::{DilKaydi, VurguTemasi};
 
 use anyhow::{Context, Result, anyhow};
-use gpui::{HighlightStyle, SharedString};
+use crate::ham_gpui::{HighlightStyle, SharedString};
 
 use ropey::{ChunkCursor, Rope};
 use std::sync::Arc;
@@ -912,7 +912,7 @@ fn merge_highlight_style(style: &mut HighlightStyle, other: &HighlightStyle) {
 
 #[cfg(test)]
 mod tests {
-    use gpui::Hsla;
+    use crate::ham_gpui::Hsla;
 
     use super::*;
     use crate::Renklendir as _;
@@ -932,11 +932,11 @@ mod tests {
         fn color_name(c: Option<Hsla>) -> String {
             match c {
                 Some(c) => {
-                    if c == gpui::red() {
+                    if c == crate::ham_gpui::red() {
                         "red".to_string()
-                    } else if c == gpui::green() {
+                    } else if c == crate::ham_gpui::green() {
                         "green".to_string()
-                    } else if c == gpui::blue() {
+                    } else if c == crate::ham_gpui::blue() {
                         "blue".to_string()
                     } else {
                         c.to_hex()
@@ -1019,9 +1019,9 @@ $x = 1;
 
     #[test]
     fn test_unique_styles() {
-        let red = color_style(gpui::red());
-        let green = color_style(gpui::green());
-        let blue = color_style(gpui::blue());
+        let red = color_style(crate::ham_gpui::red());
+        let green = color_style(crate::ham_gpui::green());
+        let blue = color_style(crate::ham_gpui::blue());
         let clean = HighlightStyle::default();
 
         assert_unique_styles(

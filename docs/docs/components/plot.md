@@ -10,7 +10,7 @@ Düşük seviye çizim, eksen, grid, şekil ve araç ipucu altyapısıdır. Gün
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

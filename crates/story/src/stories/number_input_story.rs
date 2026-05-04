@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext as _, Context, Entity, Focusable, InteractiveElement, IntoElement,
     ParentElement as _, Render, Styled, Subscription, Window, px,
 };
@@ -204,7 +204,7 @@ impl NumberInputStory {
 }
 
 impl Focusable for NumberInputStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.number_input1.focus_handle(cx)
     }
 }

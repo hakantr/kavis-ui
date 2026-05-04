@@ -1,5 +1,5 @@
 use crate::{DevreDisiBirakilabilir, EtkinTema, StilUzantisi, h_flex};
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, ClickEvent, ElementId, InteractiveElement, IntoElement, MouseButton,
     ParentElement, RenderOnce, SharedString, StatefulInteractiveElement as _, StyleRefinement,
     Styled, Window, prelude::FluentBuilder as _,
@@ -71,13 +71,13 @@ impl DevreDisiBirakilabilir for MenuItemElement {
 }
 
 impl Styled for MenuItemElement {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl ParentElement for MenuItemElement {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.children.extend(elements);
     }
 }

@@ -2,7 +2,7 @@ use crate::{
     Boyutlandirilabilir as _, DevreDisiBirakilabilir, EtkinTema, Secilebilir, Simge, StilUzantisi,
     h_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, ClickEvent, Div, ElementId, InteractiveElement, IntoElement, MouseButton,
     MouseDownEvent, MouseMoveEvent, ParentElement, RenderOnce, Stateful,
     StatefulInteractiveElement as _, StyleRefinement, Styled, Window, div,
@@ -154,13 +154,13 @@ impl Secilebilir for ListeOgesi {
 }
 
 impl Styled for ListeOgesi {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl ParentElement for ListeOgesi {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.children.extend(elements);
     }
 }

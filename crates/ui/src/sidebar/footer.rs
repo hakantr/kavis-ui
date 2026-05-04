@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     Div, InteractiveElement, IntoElement, ParentElement, RenderOnce, Styled,
     prelude::FluentBuilder as _,
 };
@@ -47,19 +47,19 @@ impl Daraltilabilir for YanCubukAltligi {
 }
 
 impl ParentElement for YanCubukAltligi {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.base.extend(elements);
     }
 }
 
 impl Styled for YanCubukAltligi {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         self.base.style()
     }
 }
 
 impl InteractiveElement for YanCubukAltligi {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.base.interactivity()
     }
 }
@@ -67,7 +67,7 @@ impl InteractiveElement for YanCubukAltligi {
 impl AcilirMenuTetikleyici for YanCubukAltligi {}
 
 impl RenderOnce for YanCubukAltligi {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl gpui::IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
         h_flex()
             .id("sidebar-footer")
             .gap_2()

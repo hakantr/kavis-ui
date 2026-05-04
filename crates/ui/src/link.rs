@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, ClickEvent, ElementId, InteractiveElement, IntoElement, MouseButton, ParentElement,
     RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, div,
 };
@@ -12,7 +12,7 @@ pub struct Link {
     style: StyleRefinement,
     href: Option<SharedString>,
     disabled: bool,
-    on_click: Option<Box<dyn Fn(&ClickEvent, &mut gpui::Window, &mut gpui::App) + 'static>>,
+    on_click: Option<Box<dyn Fn(&ClickEvent, &mut crate::ham_gpui::Window, &mut crate::ham_gpui::App) + 'static>>,
     children: Vec<AnyElement>,
 }
 
@@ -41,7 +41,7 @@ impl Link {
     /// Aksi halde bağlantı yalnızca href ayarlıysa açılır.
     pub fn on_click(
         mut self,
-        handler: impl Fn(&ClickEvent, &mut gpui::Window, &mut gpui::App) + 'static,
+        handler: impl Fn(&ClickEvent, &mut crate::ham_gpui::Window, &mut crate::ham_gpui::App) + 'static,
     ) -> Self {
         self.on_click = Some(Box::new(handler));
         self
@@ -55,19 +55,19 @@ impl Link {
 }
 
 impl Styled for Link {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl ParentElement for Link {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.children.extend(elements)
     }
 }
 
 impl RenderOnce for Link {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         let href = self.href.clone();
         let on_click = self.on_click;
 

@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use gpui::ElementId;
+use crate::ham_gpui::ElementId;
 
 /// Bir listede bölüm indeksi, satır indeksi ve sütun indeksinden oluşan indeks yolunu temsil eder.
 ///

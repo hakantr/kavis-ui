@@ -5,7 +5,7 @@ use std::{
 };
 
 use fake::Fake;
-use gpui::{
+use kavis_ui::ham_gpui::{
     Action, AnyElement, App, AppContext, ClickEvent, Context, Div, Entity, Focusable,
     InteractiveElement, IntoElement, ParentElement, Render, SharedString, Stateful,
     StatefulInteractiveElement, Styled, Subscription, Task, TextAlign, Window, div,
@@ -776,7 +776,7 @@ impl super::Story for DataTableStory {
 }
 
 impl Focusable for DataTableStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.table.focus_handle(cx)
     }
 }
@@ -1070,7 +1070,7 @@ impl DataTableStory {
 }
 
 impl Render for DataTableStory {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl gpui::IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl kavis_ui::ham_gpui::IntoElement {
         let table = &self.table.read(cx);
         let delegate = table.delegate();
         let rows_count = delegate.rows_count(cx);

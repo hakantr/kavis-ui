@@ -1,6 +1,6 @@
 // From:
 // https://github.com/zed-industries/zed/blob/56daba28d40301ee4c05546fadb691d070b7b2b6/crates/gpui/examples/window_shadow.rs
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Bounds, CursorStyle, Decorations, Edges, HitboxBehavior, Hsla,
     InteractiveElement as _, IntoElement, MouseButton, ParentElement, Pixels, Point, RenderOnce,
     ResizeEdge, Size, Styled as _, Window, canvas, div, point, prelude::FluentBuilder as _, px,
@@ -95,11 +95,11 @@ impl RenderOnce for PencereKenarligi {
 
         div()
             .id("window-backdrop")
-            .bg(gpui::transparent_black())
+            .bg(crate::ham_gpui::transparent_black())
             .map(|div| match decorations {
                 Decorations::Server => div,
                 Decorations::Client { tiling, .. } => div
-                    .bg(gpui::transparent_black())
+                    .bg(crate::ham_gpui::transparent_black())
                     .child(
                         canvas(
                             |_bounds, window, _| {
@@ -191,7 +191,7 @@ impl RenderOnce for PencereKenarligi {
                             .when(!tiling.left, |div| div.border_l(BORDER_SIZE))
                             .when(!tiling.right, |div| div.border_r(BORDER_SIZE))
                             .when(!tiling.is_tiled(), |div| {
-                                div.shadow(vec![gpui::BoxShadow {
+                                div.shadow(vec![crate::ham_gpui::BoxShadow {
                                     color: Hsla {
                                         h: 0.,
                                         s: 0.,
@@ -207,7 +207,7 @@ impl RenderOnce for PencereKenarligi {
                     .on_mouse_move(|_e, _, cx| {
                         cx.stop_propagation();
                     })
-                    .bg(gpui::transparent_black())
+                    .bg(crate::ham_gpui::transparent_black())
                     .size_full()
                     .children(self.children),
             )

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use autocorrect::ignorer::Ignorer;
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, InteractiveElement, KeyBinding, ParentElement, Render,
     Styled, Window, actions, prelude::FluentBuilder as _, px,
 };
@@ -97,21 +97,21 @@ impl TreeStory {
         }
     }
 
-    fn on_action_rename(&mut self, _: &Rename, _: &mut Window, cx: &mut gpui::Context<Self>) {
+    fn on_action_rename(&mut self, _: &Rename, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe yeniden adlandırılıyor: {} ({})", item.label, item.id);
         }
     }
 
-    fn on_action_open(&mut self, _: &OpenFile, _: &mut Window, cx: &mut gpui::Context<Self>) {
+    fn on_action_open(&mut self, _: &OpenFile, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe açılıyor: {} ({})", item.label, item.id);
         }
     }
 
-    fn on_action_delete(&mut self, _: &Delete, _: &mut Window, cx: &mut gpui::Context<Self>) {
+    fn on_action_delete(&mut self, _: &Delete, _: &mut Window, cx: &mut kavis_ui::ham_gpui::Context<Self>) {
         if let Some(entry) = self.tree_state.read(cx).selected_entry() {
             let item = entry.item();
             println!("Öğe siliniyor: {} ({})", item.label, item.id);
@@ -136,9 +136,9 @@ impl Story for TreeStory {
 impl Render for TreeStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         let view = cx.entity();
         v_flex()
             .w_full()

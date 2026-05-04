@@ -1,4 +1,4 @@
-use gpui::{App, Entity, Menu, MenuItem, SharedString};
+use kavis_ui::ham_gpui::{App, Entity, Menu, MenuItem, SharedString};
 use kavis_ui::{EtkinTema as _, KureselDurum, Tema, TemaKaydi, TemaModu, menu::UygulamaMenuCubugu};
 
 use crate::{

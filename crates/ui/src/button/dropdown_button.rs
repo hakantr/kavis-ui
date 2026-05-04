@@ -1,5 +1,5 @@
-use gpui::Corners;
-use gpui::{
+use crate::ham_gpui::Corners;
+use crate::ham_gpui::{
     Anchor, App, Context, Div, Edges, ElementId, Entity, InteractiveElement, Interactivity,
     IntoElement, ParentElement, Pixels, RenderOnce, SharedString, Stateful, StyleRefinement,
     Styled, Window, div, prelude::FluentBuilder,
@@ -223,7 +223,7 @@ impl DevreDisiBirakilabilir for AcilirDugme {
 }
 
 impl Styled for AcilirDugme {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -349,8 +349,8 @@ impl RenderOnce for AcilirDugme {
 mod tests {
     use super::*;
 
-    #[gpui::test]
-    fn test_dropdown_button_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_dropdown_button_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let button = Dugme::new("inner").label("Action");
         let dropdown = AcilirDugme::new("complex-dropdown")
             .button(button)

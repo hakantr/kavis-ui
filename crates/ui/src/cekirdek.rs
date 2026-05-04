@@ -6,7 +6,7 @@
 
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext as _, Application, AssetSource, Bounds, Context, Entity, Pixels, Platform,
     Render, SharedString, Size, TitlebarOptions, Window, WindowBackgroundAppearance, WindowBounds,
     WindowHandle, WindowOptions, px, size,
@@ -43,7 +43,7 @@ pub type PaylasimliMetin = SharedString;
 pub type PencereTutamaci<T> = WindowHandle<T>;
 
 /// Kavis UI sonuc tipi.
-pub type KavisSonucu<T> = gpui::Result<T>;
+pub type KavisSonucu<T> = crate::ham_gpui::Result<T>;
 
 /// Varlik kaynaklarini yukleyen soyutlama.
 pub trait VarlikKaynagi: AssetSource {}

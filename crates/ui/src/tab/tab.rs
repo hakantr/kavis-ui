@@ -4,8 +4,8 @@ use crate::{
     BilesenBoyutu, Boyutlandirilabilir, EtkinTema, Secilebilir, Simge, SimgeAdi, StilUzantisi,
     h_flex,
 };
-use gpui::prelude::FluentBuilder as _;
-use gpui::{
+use crate::ham_gpui::prelude::FluentBuilder as _;
+use crate::ham_gpui::{
     AnyElement, App, ClickEvent, Div, Edges, Hsla, InteractiveElement, IntoElement, MouseButton,
     ParentElement, Pixels, RenderOnce, SharedString, StatefulInteractiveElement, Styled, Window,
     div, px, relative,
@@ -382,11 +382,11 @@ impl Default for TabStyle {
     fn default() -> Self {
         TabStyle {
             borders: Edges::all(px(0.)),
-            border_color: gpui::transparent_white(),
-            bg: gpui::transparent_white(),
-            fg: gpui::transparent_white(),
+            border_color: crate::ham_gpui::transparent_white(),
+            bg: crate::ham_gpui::transparent_white(),
+            fg: crate::ham_gpui::transparent_white(),
             shadow: false,
-            inner_bg: gpui::transparent_white(),
+            inner_bg: crate::ham_gpui::transparent_white(),
         }
     }
 }
@@ -567,7 +567,7 @@ impl Secilebilir for Sekme {
 }
 
 impl InteractiveElement for Sekme {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.base.interactivity()
     }
 }
@@ -575,7 +575,7 @@ impl InteractiveElement for Sekme {
 impl StatefulInteractiveElement for Sekme {}
 
 impl Styled for Sekme {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         self.base.style()
     }
 }

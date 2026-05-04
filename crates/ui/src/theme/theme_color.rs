@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{TemaModu, theme::DEFAULT_THEME_COLORS};
 
-use gpui::Hsla;
+use crate::ham_gpui::Hsla;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

@@ -1,6 +1,6 @@
 // @reference: https://d3js.org/d3-shape/line
 
-use gpui::{
+use crate::ham_gpui::{
     Background, BorderStyle, Bounds, Hsla, PaintQuad, Path, PathBuilder, Pixels, Point, Window, px,
     quad, size,
 };
@@ -32,7 +32,7 @@ impl<T> Default for Line<T> {
             stroke_style: Default::default(),
             dot: false,
             dot_size: px(4.),
-            dot_fill_color: gpui::transparent_black(),
+            dot_fill_color: crate::ham_gpui::transparent_black(),
             dot_stroke_color: None,
         }
     }
@@ -115,7 +115,7 @@ impl<T> Line<T> {
     /// dots üzerinde Satır. çizer.
     fn paint_dot(&self, dot: Point<Pixels>) -> PaintQuad {
         quad(
-            gpui::bounds(dot, size(self.dot_size, self.dot_size)),
+            crate::ham_gpui::bounds(dot, size(self.dot_size, self.dot_size)),
             self.dot_size / 2.,
             self.dot_fill_color,
             px(1.),
@@ -210,7 +210,7 @@ impl<T> Line<T> {
 mod tests {
     use super::*;
 
-    use gpui::{Bounds, point, px};
+    use crate::ham_gpui::{Bounds, point, px};
 
     #[test]
     fn test_line_path() {

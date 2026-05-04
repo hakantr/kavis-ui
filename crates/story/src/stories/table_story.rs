@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext as _, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement,
     Render, Styled, Window, prelude::FluentBuilder as _, px,
 };

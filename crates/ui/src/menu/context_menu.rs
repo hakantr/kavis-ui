@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use gpui::{
+use crate::ham_gpui::{
     Anchor, AnyElement, App, Context, DismissEvent, Element, ElementId, Entity, Focusable,
     GlobalElementId, Hitbox, HitboxBehavior, InspectorElementId, InteractiveElement, IntoElement,
     MouseButton, MouseDownEvent, ParentElement, Pixels, Point, StyleRefinement, Styled,
@@ -152,11 +152,11 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
 
     fn request_layout(
         &mut self,
-        id: Option<&gpui::GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        id: Option<&crate::ham_gpui::GlobalElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
-    ) -> (gpui::LayoutId, Self::RequestLayoutState) {
+    ) -> (crate::ham_gpui::LayoutId, Self::RequestLayoutState) {
         let anchor = self.anchor;
 
         self.with_element_state(
@@ -233,9 +233,9 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
 
     fn prepaint(
         &mut self,
-        _: Option<&gpui::GlobalElementId>,
+        _: Option<&crate::ham_gpui::GlobalElementId>,
         _: Option<&InspectorElementId>,
-        bounds: gpui::Bounds<gpui::Pixels>,
+        bounds: crate::ham_gpui::Bounds<crate::ham_gpui::Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
         cx: &mut App,
@@ -248,9 +248,9 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
 
     fn paint(
         &mut self,
-        id: Option<&gpui::GlobalElementId>,
+        id: Option<&crate::ham_gpui::GlobalElementId>,
         _: Option<&InspectorElementId>,
-        _: gpui::Bounds<gpui::Pixels>,
+        _: crate::ham_gpui::Bounds<crate::ham_gpui::Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         hitbox: &mut Self::PrepaintState,
         window: &mut Window,

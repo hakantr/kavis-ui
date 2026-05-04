@@ -1,4 +1,4 @@
-use gpui::{App, FontWeight, HighlightStyle, Hsla, SharedString};
+use crate::ham_gpui::{App, FontWeight, HighlightStyle, Hsla, SharedString};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -157,12 +157,12 @@ pub enum YaziTipiStili {
     Underline,
 }
 
-impl From<YaziTipiStili> for gpui::FontStyle {
+impl From<YaziTipiStili> for crate::ham_gpui::FontStyle {
     fn from(style: YaziTipiStili) -> Self {
         match style {
-            YaziTipiStili::Normal => gpui::FontStyle::Normal,
-            YaziTipiStili::Italic => gpui::FontStyle::Italic,
-            YaziTipiStili::Underline => gpui::FontStyle::Normal,
+            YaziTipiStili::Normal => crate::ham_gpui::FontStyle::Normal,
+            YaziTipiStili::Italic => crate::ham_gpui::FontStyle::Italic,
+            YaziTipiStili::Underline => crate::ham_gpui::FontStyle::Normal,
         }
     }
 }

@@ -15,7 +15,7 @@ use super::{
     Panel, PanelEvent, PanelInfo, PanelState, PanelView, SekmePaneli, StackPanel, TileMeta,
     YerlesimAlani,
 };
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, AppContext, Bounds, Context, DismissEvent, Div, DragMoveEvent, Empty,
     EntityId, EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, MouseButton,
     MouseDownEvent, MouseUpEvent, ParentElement, Pixels, Point, Render, ScrollHandle, Size,

@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext as _, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement as _,
     Render, Styled as _, Window,
 };
@@ -46,7 +46,7 @@ impl super::Story for ToggleStory {
 }
 
 impl Focusable for ToggleStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

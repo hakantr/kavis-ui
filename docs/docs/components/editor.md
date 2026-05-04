@@ -10,7 +10,7 @@ Rope tabanlı metin düzenleme, LSP ve sözdizimi vurgulama altyapısını kulla
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

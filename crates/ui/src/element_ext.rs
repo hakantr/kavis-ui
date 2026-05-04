@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Bounds, IntoElement, ParentElement, Pixels, Styled as _, Window, canvas,
 };
 
@@ -33,7 +33,7 @@ impl AnyChildElement {
     }
 }
 
-/// Bir özellik için extend [`gpui::öğe`] ile ek işlev.
+/// Bir özellik için extend [`crate::ham_gpui::öğe`] ile ek işlev.
 pub trait OgeUzantisi: ParentElement + Sized {
     /// Bir prepaint geri çağrı için öğe ekler.
     ///
@@ -41,7 +41,7 @@ pub trait OgeUzantisi: ParentElement + Sized {
     ///
     /// İlk argüman öğenin piksel cinsinden sınırlarıdır.
     ///
-    /// Bakınız ayrıca [`gpui::canvas`].
+    /// Bakınız ayrıca [`crate::ham_gpui::canvas`].
     fn on_prepaint<F>(self, f: F) -> Self
     where
         F: FnOnce(Bounds<Pixels>, &mut Window, &mut App) + 'static,

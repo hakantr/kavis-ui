@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     Action, AnyElement, App, AppContext, Context, DismissEvent, Empty, Entity, EventEmitter,
     Half as _, HighlightStyle, InteractiveElement as _, IntoElement, ParentElement, Pixels, Point,
     Render, RenderOnce, SharedString, Styled, StyledText, Subscription, Window, deferred, div,
@@ -132,7 +132,7 @@ impl EventEmitter<DismissEvent> for BaglamMenusuTemsilcisi {}
 impl ListeTemsilcisi for BaglamMenusuTemsilcisi {
     type Item = CompletionMenuItem;
 
-    fn items_count(&self, _: usize, _: &gpui::App) -> usize {
+    fn items_count(&self, _: usize, _: &crate::ham_gpui::App) -> usize {
         self.items.len()
     }
 

@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::EtkinTema as _;
 
 #[derive(IntoElement)]
@@ -40,7 +40,7 @@ impl RenderOnce for Checkerboard {
             .overflow_hidden()
             .size_full()
             .child(
-                gpui::canvas(
+                kavis_ui::ham_gpui::canvas(
                     move |_, _, _| (),
                     move |bounds, _, window, _| {
                         let size = square_size;
@@ -51,18 +51,18 @@ impl RenderOnce for Checkerboard {
                             for col in 0..cols {
                                 if (row + col) % 2 == 0 {
                                     let origin = bounds.origin
-                                        + gpui::point(size * (col as f32), size * (row as f32));
+                                        + kavis_ui::ham_gpui::point(size * (col as f32), size * (row as f32));
 
-                                    window.paint_quad(gpui::PaintQuad {
-                                        bounds: gpui::Bounds {
+                                    window.paint_quad(kavis_ui::ham_gpui::PaintQuad {
+                                        bounds: kavis_ui::ham_gpui::Bounds {
                                             origin,
-                                            size: gpui::size(size, size),
+                                            size: kavis_ui::ham_gpui::size(size, size),
                                         },
-                                        corner_radii: gpui::Corners::default(),
+                                        corner_radii: kavis_ui::ham_gpui::Corners::default(),
                                         background: c2.into(),
-                                        border_widths: gpui::Edges::default(),
-                                        border_color: gpui::transparent_black(),
-                                        border_style: gpui::BorderStyle::default(),
+                                        border_widths: kavis_ui::ham_gpui::Edges::default(),
+                                        border_color: kavis_ui::ham_gpui::transparent_black(),
+                                        border_style: kavis_ui::ham_gpui::BorderStyle::default(),
                                     });
                                 }
                             }

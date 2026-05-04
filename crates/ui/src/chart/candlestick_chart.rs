@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{App, Bounds, Hsla, PathBuilder, Pixels, SharedString, Window, fill, px};
+use crate::ham_gpui::{App, Bounds, Hsla, PathBuilder, Pixels, SharedString, Window, fill, px};
 use kavis_ui_macros::IntoPlot;
 use num_traits::{Num, ToPrimitive};
 

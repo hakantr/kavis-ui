@@ -10,7 +10,7 @@ Tek satır veya çok satırlı metin girişi için state tabanlı bileşen. Gün
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

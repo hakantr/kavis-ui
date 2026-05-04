@@ -1,7 +1,7 @@
 use crate::{
     BilesenBoyutu, Boyutlandirilabilir, Simge, progress::DaireselIlerleme, spinner::DonerGosterge,
 };
-use gpui::{App, IntoElement, RenderOnce, Window, prelude::FluentBuilder};
+use crate::ham_gpui::{App, IntoElement, RenderOnce, Window, prelude::FluentBuilder};
 
 /// Dugme simge olan olabilir bir Simge, DonerGosterge, veya Ilerleme kullanmak için `simge` yöntem Dugme.
 #[doc(hidden)]
@@ -137,8 +137,8 @@ mod tests {
     use super::*;
     use crate::SimgeAdi;
 
-    #[gpui::test]
-    fn test_button_icon_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_icon_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let custom_icon = Simge::new(SimgeAdi::Loader);
         let icon = DugmeSimgesi::new(SimgeAdi::Plus)
             .loading(true)
@@ -150,8 +150,8 @@ mod tests {
         assert_eq!(icon.size, BilesenBoyutu::Buyuk);
     }
 
-    #[gpui::test]
-    fn test_button_icon_variant_types(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_icon_variant_types(_cx: &mut crate::ham_gpui::TestAppContext) {
         // Test Simge variant
         let icon_variant = DugmeSimgesiVaryanti::Simge(Simge::new(SimgeAdi::Plus));
         assert!(!icon_variant.is_spinner());

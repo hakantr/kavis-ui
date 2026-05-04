@@ -1,5 +1,5 @@
 use anyhow::{Context as _, Result};
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     BaslikCubugu, Boyutlandirilabilir, EtkinTema, KokGorunum,
     dock::{
@@ -368,15 +368,15 @@ impl StoryTiles {
                     appears_transparent: true,
                     traffic_light_position: Some(point(px(9.0), px(9.0))),
                 }),
-                window_min_size: Some(gpui::Size {
+                window_min_size: Some(kavis_ui::ham_gpui::Size {
                     width: px(640.),
                     height: px(480.),
                 }),
                 kind: WindowKind::Normal,
                 #[cfg(target_os = "linux")]
-                window_background: gpui::WindowBackgroundAppearance::Transparent,
+                window_background: kavis_ui::ham_gpui::WindowBackgroundAppearance::Transparent,
                 #[cfg(target_os = "linux")]
-                window_decorations: Some(gpui::WindowDecorations::Client),
+                window_decorations: Some(kavis_ui::ham_gpui::WindowDecorations::Client),
                 ..Default::default()
             };
 
@@ -434,7 +434,7 @@ impl Render for StoryTiles {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         kavis_ui::init(cx);

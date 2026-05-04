@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use itertools::Itertools as _;
 use kavis_ui::{
     Boyutlandirilabilir as _, EtkinTema as _, IndexPath, SimgeAdi,
@@ -35,7 +35,7 @@ impl SecimOgesi for Country {
         self.name.clone()
     }
 
-    fn display_title(&self) -> Option<gpui::AnyElement> {
+    fn display_title(&self) -> Option<kavis_ui::ham_gpui::AnyElement> {
         Some(format!("{} ({})", self.name, self.code).into_any_element())
     }
 
@@ -72,7 +72,7 @@ impl super::Story for SelectStory {
 }
 
 impl Focusable for SelectStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.fruit_select.focus_handle(cx)
     }
 }

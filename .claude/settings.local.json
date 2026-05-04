@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo check *)",
+      "Bash(grep -v \"gpui_macos\\\\|unnecessary \\\\`unsafe\\\\`\\\\|unused_unsafe\\\\|generated 1 warning\")",
+      "Bash(cargo test *)"
+    ]
+  }
+}

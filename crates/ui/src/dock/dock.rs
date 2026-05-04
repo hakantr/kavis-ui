@@ -2,7 +2,7 @@
 
 use std::{ops::Deref, sync::Arc};
 
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext, Axis, Context, Element, Empty, Entity, IntoElement, MouseMoveEvent,
     MouseUpEvent, ParentElement as _, Pixels, Point, Render, Style, StyleRefinement, Styled as _,
     WeakEntity, Window, div, prelude::FluentBuilder as _, px,
@@ -372,7 +372,7 @@ impl Yerlesim {
 }
 
 impl Render for Yerlesim {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl gpui::IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
         if !self.open && !self.placement.is_bottom() {
             return div();
         }
@@ -423,7 +423,7 @@ impl Element for DockElement {
     type RequestLayoutState = ();
     type PrepaintState = ();
 
-    fn id(&self) -> Option<gpui::ElementId> {
+    fn id(&self) -> Option<crate::ham_gpui::ElementId> {
         None
     }
 
@@ -433,21 +433,21 @@ impl Element for DockElement {
 
     fn request_layout(
         &mut self,
-        _: Option<&gpui::GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
-        window: &mut gpui::Window,
+        _: Option<&crate::ham_gpui::GlobalElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
+        window: &mut crate::ham_gpui::Window,
         cx: &mut App,
-    ) -> (gpui::LayoutId, Self::RequestLayoutState) {
+    ) -> (crate::ham_gpui::LayoutId, Self::RequestLayoutState) {
         (window.request_layout(Style::default(), None, cx), ())
     }
 
     fn prepaint(
         &mut self,
-        _: Option<&gpui::GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
-        _: gpui::Bounds<Pixels>,
+        _: Option<&crate::ham_gpui::GlobalElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
+        _: crate::ham_gpui::Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
-        _window: &mut gpui::Window,
+        _window: &mut crate::ham_gpui::Window,
         _cx: &mut App,
     ) -> Self::PrepaintState {
         ()
@@ -455,12 +455,12 @@ impl Element for DockElement {
 
     fn paint(
         &mut self,
-        _: Option<&gpui::GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
-        _: gpui::Bounds<Pixels>,
+        _: Option<&crate::ham_gpui::GlobalElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
+        _: crate::ham_gpui::Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         _: &mut Self::PrepaintState,
-        window: &mut gpui::Window,
+        window: &mut crate::ham_gpui::Window,
         cx: &mut App,
     ) {
         window.on_mouse_event({

@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     Action, AsKeystroke, FocusHandle, Half, IntoElement, KeyContext, Keystroke, ParentElement as _,
     RenderOnce, StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _, relative,
 };
@@ -215,7 +215,7 @@ impl Styled for KlavyeTusu {
 }
 
 impl RenderOnce for KlavyeTusu {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl gpui::IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
         if !self.appearance {
             return Self::format(&self.stroke).into_any_element();
         }
@@ -248,7 +248,7 @@ mod tests {
     #[test]
     fn test_format() {
         use super::KlavyeTusu;
-        use gpui::Keystroke;
+        use crate::ham_gpui::Keystroke;
 
         if cfg!(target_os = "macos") {
             assert_eq!(

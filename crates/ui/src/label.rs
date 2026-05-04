@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use gpui::{
+use crate::ham_gpui::{
     App, HighlightStyle, IntoElement, ParentElement, RenderOnce, SharedString, StyleRefinement,
     Styled, StyledText, Window, div, prelude::FluentBuilder, rems,
 };
@@ -181,12 +181,12 @@ impl Etiket {
             ));
         }
 
-        Some(gpui::combine_highlights(vec![], highlights).collect())
+        Some(crate::ham_gpui::combine_highlights(vec![], highlights).collect())
     }
 }
 
 impl Styled for Etiket {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }

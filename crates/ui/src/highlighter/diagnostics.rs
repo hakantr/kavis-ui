@@ -4,7 +4,7 @@ use std::{
     usize,
 };
 
-use gpui::{App, HighlightStyle, Hsla, SharedString, UnderlineStyle, px};
+use crate::ham_gpui::{App, HighlightStyle, Hsla, SharedString, UnderlineStyle, px};
 use ropey::Rope;
 use sum_tree::{Bias, SeekTarget, SumTree};
 

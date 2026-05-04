@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use chrono::NaiveDate;
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext, ClickEvent, Context, ElementId, Empty, Entity, EventEmitter, FocusHandle,
     Focusable, InteractiveElement as _, IntoElement, KeyBinding, MouseButton, ParentElement as _,
     Render, RenderOnce, SharedString, StatefulInteractiveElement as _, StyleRefinement, Styled,
@@ -234,7 +234,7 @@ impl TarihSeciciDurumu {
         }
     }
 
-    fn clean(&mut self, _: &gpui::ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
+    fn clean(&mut self, _: &crate::ham_gpui::ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
         cx.stop_propagation();
         match self.date {
             Date::Single(_) => {
@@ -246,7 +246,7 @@ impl TarihSeciciDurumu {
         }
     }
 
-    fn toggle_calendar(&mut self, _: &gpui::ClickEvent, _: &mut Window, cx: &mut Context<Self>) {
+    fn toggle_calendar(&mut self, _: &crate::ham_gpui::ClickEvent, _: &mut Window, cx: &mut Context<Self>) {
         self.open = !self.open;
         cx.notify();
     }
@@ -309,7 +309,7 @@ impl DevreDisiBirakilabilir for TarihSecici {
 }
 
 impl Render for TarihSeciciDurumu {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl gpui::IntoElement {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
         Empty
     }
 }

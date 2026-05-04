@@ -1,5 +1,5 @@
 use crate::{BilesenBoyutu, EtkinTema, h_flex, skeleton::Iskelet, v_flex};
-use gpui::{IntoElement, ParentElement as _, RenderOnce, Styled, prelude::FluentBuilder as _};
+use crate::ham_gpui::{IntoElement, ParentElement as _, RenderOnce, Styled, prelude::FluentBuilder as _};
 
 #[derive(IntoElement)]
 pub(super) struct Loading {
@@ -47,7 +47,7 @@ impl LoadingRow {
 }
 
 impl RenderOnce for LoadingRow {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         let paddings = self.size.table_cell_padding();
         let height = self.size.table_row_height() * 0.5;
 
@@ -99,7 +99,7 @@ impl RenderOnce for LoadingRow {
 }
 
 impl RenderOnce for Loading {
-    fn render(self, _window: &mut gpui::Window, _cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, _window: &mut crate::ham_gpui::Window, _cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         v_flex()
             .gap_0()
             .child(LoadingRow::header().size(self.size))

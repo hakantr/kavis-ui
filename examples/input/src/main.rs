@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     input::{Girdi, GirdiDurumu, GirdiOlayi},
     *,
@@ -54,7 +54,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         // This must be called before using any Kavis UI features.

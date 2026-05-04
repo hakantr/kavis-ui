@@ -1,4 +1,4 @@
-use gpui::{Context, Pixels, Task, px};
+use crate::ham_gpui::{Context, Pixels, Task, px};
 use instant::Duration;
 
 static INTERVAL: Duration = Duration::from_millis(500);

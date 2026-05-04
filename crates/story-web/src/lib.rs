@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use gpui::{prelude::*, *};
+use kavis_ui::ham_gpui::{prelude::*, *};
 use kavis_ui::{KokGorunum, theme::Tema};
 use kavis_ui_assets::Varliklar;
 use kavis_ui_story::{Gallery, StoryRoot};
@@ -55,12 +55,12 @@ pub fn run() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
 
     #[cfg(target_family = "wasm")]
-    gpui_platform::web_init();
+    kavis_ui::platform::web_init();
     #[cfg(not(target_family = "wasm"))]
-    let app = gpui_platform::application();
+    let app = kavis_ui::platform::application();
     #[cfg(target_family = "wasm")]
     let app = {
-        let app = gpui_platform::single_threaded_web();
+        let app = kavis_ui::platform::single_threaded_web();
 
         // Temporary fix: intentionally leak the `Rc<AppCell>` to keep the application alive
         struct WasmApplication(std::rc::Rc<AppCell>);

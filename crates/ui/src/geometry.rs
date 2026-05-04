@@ -1,7 +1,7 @@
 // crates/ui/src/geometry.rs
 use std::fmt::{self, Debug, Display, Formatter};
 
-use gpui::{AbsoluteLength, Axis, Length, Pixels};
+use crate::ham_gpui::{AbsoluteLength, Axis, Length, Pixels};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -57,7 +57,7 @@ impl Placement {
     }
 }
 
-// The local Anchor enum has been removed. Use gpui::Anchor instead.
+// The local Anchor enum has been removed. Use crate::ham_gpui::Anchor instead.
 
 /// Bir enum için defining taraf öğe.
 ///
@@ -121,7 +121,7 @@ impl UzunlukUzantisi for Length {
 
 /// Bir struct için defining edges bir öğe.
 ///
-/// Bir extend version [`gpui::Edges`] için serialize/deserialize.
+/// Bir extend version [`crate::ham_gpui::Edges`] için serialize/deserialize.
 #[allow(dead_code)]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, Eq, PartialEq)]
 #[repr(C)]

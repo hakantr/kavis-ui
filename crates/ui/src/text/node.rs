@@ -4,7 +4,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, DefiniteLength, Div, ElementId, FontStyle as YaziTipiStili, FontWeight, Half,
     HighlightStyle, InteractiveElement as _, IntoElement, Length, ObjectFit, ParentElement,
     SharedString, SharedUri, StatefulInteractiveElement, Styled, StyledImage as _, Window, div,
@@ -694,8 +694,8 @@ impl Paragraph {
                         highlight.font_style = Some(YaziTipiStili::Italic);
                     }
                     if style.strikethrough {
-                        highlight.strikethrough = Some(gpui::StrikethroughStyle {
-                            thickness: gpui::px(1.),
+                        highlight.strikethrough = Some(crate::ham_gpui::StrikethroughStyle {
+                            thickness: crate::ham_gpui::px(1.),
                             ..Default::default()
                         });
                     }
@@ -705,8 +705,8 @@ impl Paragraph {
 
                     if let Some(mut link_mark) = style.link.clone() {
                         highlight.color = Some(cx.theme().link);
-                        highlight.underline = Some(gpui::UnderlineStyle {
-                            thickness: gpui::px(1.),
+                        highlight.underline = Some(crate::ham_gpui::UnderlineStyle {
+                            thickness: crate::ham_gpui::px(1.),
                             ..Default::default()
                         });
 
@@ -723,7 +723,7 @@ impl Paragraph {
                     node_highlights.push((inner_range, highlight));
                 }
 
-                highlights = gpui::combine_highlights(highlights, node_highlights).collect();
+                highlights = crate::ham_gpui::combine_highlights(highlights, node_highlights).collect();
                 offset += text_len;
             }
             ix += 1;

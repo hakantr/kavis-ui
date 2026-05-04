@@ -10,7 +10,7 @@ Ayar sayfaları, gruplar ve alan tipleri için hazır düzen. Güncel örnekler 
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

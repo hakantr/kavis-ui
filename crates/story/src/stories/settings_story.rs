@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Axis, Context, Element, Entity, FocusHandle, Focusable, Global, IntoElement,
     ParentElement as _, Render, SharedString, Styled, Window, px,
 };
@@ -124,7 +124,7 @@ impl super::Story for SettingsStory {
         Self::view(window, cx)
     }
 
-    fn paddings() -> gpui::Pixels {
+    fn paddings() -> kavis_ui::ham_gpui::Pixels {
         px(0.)
     }
 }
@@ -603,7 +603,7 @@ impl SettingsStory {
 }
 
 impl Focusable for SettingsStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

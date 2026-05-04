@@ -5,7 +5,7 @@ use crate::{
     Secilebilir, SimgeAdi, StilUzantisi as _, icon::AdliSimge, text::Text,
     tooltip::BilesenAracIpucu, v_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt, AnyElement, App, Div, ElementId, InteractiveElement, IntoElement,
     ParentElement, RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled,
     Window, div, prelude::FluentBuilder as _, px, relative, rems, svg,
@@ -99,14 +99,14 @@ impl OnayKutusu {
 }
 
 impl InteractiveElement for OnayKutusu {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.base.interactivity()
     }
 }
 impl StatefulInteractiveElement for OnayKutusu {}
 
 impl Styled for OnayKutusu {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -302,7 +302,7 @@ impl RenderOnce for OnayKutusu {
                             .children(self.children),
                     )
                 })
-                .on_mouse_down(gpui::MouseButton::Left, |_, window, _| {
+                .on_mouse_down(crate::ham_gpui::MouseButton::Left, |_, window, _| {
                     // Avoid focus on mouse down.
                     window.prevent_default();
                 })

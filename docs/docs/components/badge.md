@@ -10,7 +10,7 @@ Bir öğenin üzerinde sayı, nokta veya simge rozeti gösterir. Güncel örnekl
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

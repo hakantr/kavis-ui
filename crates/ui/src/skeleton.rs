@@ -1,5 +1,5 @@
 use crate::{EtkinTema, StilUzantisi};
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt, IntoElement, RenderOnce, StyleRefinement, Styled, bounce, div,
     ease_in_out,
 };
@@ -29,13 +29,13 @@ impl Iskelet {
 }
 
 impl Styled for Iskelet {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl RenderOnce for Iskelet {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         div()
             .w_full()
             .h_4()

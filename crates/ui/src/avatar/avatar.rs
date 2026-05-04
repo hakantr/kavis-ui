@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     App, Div, Hsla, ImageSource, InteractiveElement, Interactivity, IntoElement,
     ParentElement as _, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, img,
     prelude::FluentBuilder,
@@ -110,7 +110,7 @@ impl RenderOnce for Avatar {
             })
             .map(|this| match self.src {
                 None => this.when(self.name.is_some(), |this| {
-                    let color_ix = gpui::hash(&self.short_name) % COLOR_COUNT;
+                    let color_ix = crate::ham_gpui::hash(&self.short_name) % COLOR_COUNT;
                     let color = default_color(color_ix, cx);
 
                     this.bg(color.opacity(BG_OPACITY))
@@ -154,8 +154,8 @@ mod tests {
         assert_eq!(extract_text_initials(&"huacnlee"), "HU".to_string());
     }
 
-    #[gpui::test]
-    fn test_avatar_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_avatar_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let avatar = Avatar::new()
             .name("Jason Lee")
             .placeholder(Simge::new(SimgeAdi::User))

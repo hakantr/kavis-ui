@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, InteractiveElement, KeyBinding, ParentElement,
     Render, StatefulInteractiveElement as _, Styled, Window, actions, div,
 };
@@ -29,7 +29,7 @@ pub fn init(cx: &mut App) {
 }
 
 pub struct TooltipStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
 }
 
 impl TooltipStory {
@@ -63,7 +63,7 @@ impl Story for TooltipStory {
 }
 
 impl Focusable for TooltipStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -71,9 +71,9 @@ impl Focusable for TooltipStory {
 impl Render for TooltipStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        _cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        _cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         v_flex()
             .w_full()
             .gap_3()

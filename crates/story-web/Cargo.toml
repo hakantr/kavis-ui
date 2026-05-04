@@ -8,8 +8,6 @@ edition.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-gpui.workspace = true
-gpui_platform.workspace = true
 kavis-ui = { path = "../ui", default-features = false }
 kavis-ui-assets.workspace = true
 kavis-ui-story = { path = "../story", default-features = false }

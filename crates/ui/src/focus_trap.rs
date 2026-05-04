@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Bounds, Element, ElementId, FocusHandle, Global, GlobalElementId,
     InteractiveElement, Interactivity, IntoElement, LayoutId, ParentElement, Pixels,
     StatefulInteractiveElement, StyleRefinement, Styled, WeakFocusHandle, Window,
@@ -175,8 +175,8 @@ impl<E: InteractiveElement + ParentElement + Styled + Element + 'static> Element
 
     fn request_layout(
         &mut self,
-        global_id: Option<&gpui::GlobalElementId>,
-        _inspector_id: Option<&gpui::InspectorElementId>,
+        global_id: Option<&crate::ham_gpui::GlobalElementId>,
+        _inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
@@ -188,8 +188,8 @@ impl<E: InteractiveElement + ParentElement + Styled + Element + 'static> Element
 
     fn prepaint(
         &mut self,
-        global_id: Option<&gpui::GlobalElementId>,
-        inspector_id: Option<&gpui::InspectorElementId>,
+        global_id: Option<&crate::ham_gpui::GlobalElementId>,
+        inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -201,8 +201,8 @@ impl<E: InteractiveElement + ParentElement + Styled + Element + 'static> Element
 
     fn paint(
         &mut self,
-        global_id: Option<&gpui::GlobalElementId>,
-        inspector_id: Option<&gpui::InspectorElementId>,
+        global_id: Option<&crate::ham_gpui::GlobalElementId>,
+        inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         prepaint: &mut Self::PrepaintState,

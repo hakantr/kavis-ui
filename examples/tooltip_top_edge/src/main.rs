@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     EtkinTema as _, KokGorunum,
     button::{Dugme, DugmeVaryantlari as _},
@@ -36,7 +36,7 @@ impl Render for TooltipTopEdgeExample {
 }
 
 fn main() {
-    let app = gpui_platform::application();
+    let app = kavis_ui::platform::application();
 
     app.run(move |cx| {
         kavis_ui::init(cx);

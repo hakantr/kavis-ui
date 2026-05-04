@@ -11,8 +11,6 @@ default = ["tree-sitter"]
 
 [dependencies]
 anyhow.workspace = true
-gpui.workspace = true
-gpui_platform.workspace = true
 kavis-ui = { workspace = true }
 kavis-ui-assets.workspace = true
 

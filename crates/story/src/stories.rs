@@ -1,4 +1,4 @@
-use gpui::{AnyView, App, AppContext as _, Entity, Hsla, Pixels, Render, Window, px};
+use kavis_ui::ham_gpui::{AnyView, App, AppContext as _, Entity, Hsla, Pixels, Render, Window, px};
 use kavis_ui::dock::PanelDenetimi;
 
 mod accordion_story;

@@ -10,7 +10,7 @@ pub(crate) use context_menu::*;
 pub(crate) use diagnostic_popover::*;
 pub(crate) use hover_popover::*;
 
-use gpui::{
+use crate::ham_gpui::{
     App, Div, ElementId, Entity, InteractiveElement as _, IntoElement, SharedString, Stateful,
     StyleRefinement, Styled as _, Window, div, px, rems,
 };

@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     Anchor, AnyElement, App, Bounds, Context, Deferred, DismissEvent, Div, ElementId, EventEmitter,
     FocusHandle, Focusable, InteractiveElement as _, IntoElement, KeyBinding, MouseButton,
     ParentElement, Pixels, Point, Render, RenderOnce, Stateful, StyleRefinement, Styled,
@@ -631,7 +631,7 @@ impl RenderOnce for AcilirKatman {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui::MouseButton;
+    use crate::ham_gpui::MouseButton;
 
     #[test]
     fn test_popover_builder_chaining() {
@@ -651,14 +651,14 @@ mod tests {
 
     #[test]
     fn test_resolved_corner_top_positions() {
-        use gpui::px;
+        use crate::ham_gpui::px;
 
         let bounds = Bounds {
             origin: Point {
                 x: px(100.),
                 y: px(100.),
             },
-            size: gpui::Size {
+            size: crate::ham_gpui::Size {
                 width: px(200.),
                 height: px(50.),
             },

@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext as _, ClickEvent, Context, Entity, Focusable, IntoElement, ParentElement as _,
     Render, Styled, Window, px,
 };
@@ -139,7 +139,7 @@ impl TextareaStory {
 }
 
 impl Focusable for TextareaStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.textarea.focus_handle(cx)
     }
 }

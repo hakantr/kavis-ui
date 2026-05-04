@@ -9,7 +9,7 @@ pub use kavis_ui_macros::IntoPlot;
 
 use std::{fmt::Debug, ops::Add};
 
-use gpui::{App, Bounds, IntoElement, Path, PathBuilder, Pixels, Point, Window, point, px};
+use crate::ham_gpui::{App, Bounds, IntoElement, Path, PathBuilder, Pixels, Point, Window, point, px};
 
 pub use axis::{AXIS_GAP, AxisLabelSide, AxisText, PlotAxis};
 pub use grid::Grid;

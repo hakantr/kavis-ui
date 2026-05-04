@@ -2,7 +2,7 @@ use kavis_ui_assets::Varliklar;
 use kavis_ui_story::{Gallery, create_new_window, init};
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     // Parse `cargo run -- <story_name>`
     let name = std::env::args().nth(1);

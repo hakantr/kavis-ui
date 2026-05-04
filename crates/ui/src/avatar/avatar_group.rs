@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     Div, InteractiveElement, Interactivity, IntoElement, ParentElement as _, RenderOnce,
     StyleRefinement, Styled, div, prelude::FluentBuilder as _,
 };
@@ -74,7 +74,7 @@ impl InteractiveElement for AvatarGroup {
 }
 
 impl RenderOnce for AvatarGroup {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         let item_ml = -super::avatar_size(self.size) * 0.3;
         let avatars_len = self.avatars.len();
 
@@ -112,8 +112,8 @@ impl RenderOnce for AvatarGroup {
 mod tests {
     use super::*;
 
-    #[gpui::test]
-    fn test_avatar_group_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_avatar_group_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let group = AvatarGroup::new()
             .child(Avatar::new().name("Alice"))
             .child(Avatar::new().name("Bob"))

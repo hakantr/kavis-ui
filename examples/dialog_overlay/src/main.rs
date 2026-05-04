@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     BaslikCubugu, KokGorunum, PencereUzantisi as _, StilUzantisi as _, button::Dugme, h_flex,
     menu::BaglamMenusuUzantisi,
@@ -26,7 +26,7 @@ impl HelloWorld {
 impl Render for HelloWorld {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
-            .bg(gpui::white())
+            .bg(kavis_ui::ham_gpui::white())
             .size_full()
             .child(BaslikCubugu::new().child("dialog & Drawer"))
             .child(
@@ -58,10 +58,10 @@ impl Render for HelloWorld {
                             .h_40()
                             .border_1()
                             .border_dashed()
-                            .border_color(gpui::black())
+                            .border_color(kavis_ui::ham_gpui::black())
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(gpui::yellow().opacity(0.2)))
+                            .hover(|this| this.bg(kavis_ui::ham_gpui::yellow().opacity(0.2)))
                             .child("Hover test here.")
                             .child("Right click to show Context Menu")
                             .baglam_menusu({
@@ -82,7 +82,7 @@ impl Render for HelloWorld {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         kavis_ui::init(cx);

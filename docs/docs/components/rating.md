@@ -10,7 +10,7 @@ Yıldız benzeri puan seçimi gösterir. Güncel örnekler Kavis UI'nin Türkçe
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

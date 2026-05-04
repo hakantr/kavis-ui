@@ -10,7 +10,7 @@ Varlık kaynağından SVG simgeleri çizer. Güncel örnekler Kavis UI'nin Türk
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     AnyElement, App, AppContext, Context, Entity, FocusHandle, Focusable, IntoElement,
     ParentElement as _, Pixels, Render, SharedString, Styled, Window, div, px,
 };
@@ -32,7 +32,7 @@ impl super::Story for ResizableStory {
 }
 
 impl Focusable for ResizableStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

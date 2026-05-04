@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     BaslikCubugu, KokGorunum,
     button::{Dugme, DugmeVaryantlari},
@@ -40,7 +40,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(kavis_ui_assets::Varliklar);
+    let app = kavis_ui::platform::application().with_assets(kavis_ui_assets::Varliklar);
 
     app.run(move |cx| {
         kavis_ui::init(cx);

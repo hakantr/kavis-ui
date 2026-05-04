@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled, Window,
 };
 use kavis_ui::{
@@ -12,7 +12,7 @@ use kavis_ui::{
 use crate::section;
 
 pub struct RatingStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     size: BilesenBoyutu,
     value: usize,
 }
@@ -46,7 +46,7 @@ impl RatingStory {
 }
 
 impl Focusable for RatingStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

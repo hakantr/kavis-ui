@@ -6,7 +6,7 @@ use crate::{
     h_flex,
     menu::AcilirMenu,
 };
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext, ClickEvent, Context, DismissEvent, Entity, FocusHandle, Focusable,
     InteractiveElement as _, IntoElement, KeyBinding, MouseButton, OwnedMenu, ParentElement,
     Render, SharedString, StatefulInteractiveElement, Styled, Subscription, Window, anchored,
@@ -313,7 +313,7 @@ impl Render for AppMenu {
             .when(is_selected, |this| {
                 this.child(deferred(
                     anchored()
-                        .anchor(gpui::Anchor::TopLeft)
+                        .anchor(crate::ham_gpui::Anchor::TopLeft)
                         .snap_to_window_with_margin(px(8.))
                         .child(
                             div()
@@ -331,7 +331,7 @@ impl Render for AppMenu {
 mod tests {
     use super::*;
 
-    use gpui::TestAppContext;
+    use crate::ham_gpui::TestAppContext;
 
     struct TestRoot {
         menu_bar: Entity<AppMenuBar>,
@@ -348,7 +348,7 @@ mod tests {
         }
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn preserves_action_context_while_switching_menus(cx: &mut TestAppContext) {
         let (root, cx) = cx.add_window_view(|window, cx| {
             let first_focus = cx.focus_handle();

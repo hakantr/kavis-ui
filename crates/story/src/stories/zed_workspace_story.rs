@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, InteractiveElement, IntoElement,
     ParentElement, Render, Styled, Window, div, px,
 };
@@ -381,13 +381,13 @@ impl Story for ZedWorkspaceStory {
         Self::view(window, cx)
     }
 
-    fn paddings() -> gpui::Pixels {
+    fn paddings() -> kavis_ui::ham_gpui::Pixels {
         px(0.)
     }
 }
 
 impl Focusable for ZedWorkspaceStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -395,9 +395,9 @@ impl Focusable for ZedWorkspaceStory {
 impl Render for ZedWorkspaceStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         div()
             .size_full()
             .overflow_y_scrollbar()

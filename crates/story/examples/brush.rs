@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{StyleRefinement, prelude::FluentBuilder, *};
+use kavis_ui::ham_gpui::{StyleRefinement, prelude::FluentBuilder, *};
 use kavis_ui::{
     Boyutlandirilabilir, EtkinTema, OgeUzantisi, Renklendir as _, SimgeAdi,
     button::Dugme,
@@ -13,7 +13,7 @@ use kavis_ui::{
 use kavis_ui_assets::Varliklar;
 
 pub struct BrushStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     brush_size: Entity<KaydiriciDurumu>,
     brush_opacity: Entity<KaydiriciDurumu>,
     brush_color: Hsla,
@@ -448,7 +448,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         kavis_ui_story::init(cx);

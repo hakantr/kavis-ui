@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, InteractiveElement as _, IntoElement,
     ParentElement, Render, Styled, Window, div, px,
 };
@@ -46,7 +46,7 @@ impl AlertDialogStory {
 }
 
 impl Focusable for AlertDialogStory {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &kavis_ui::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }

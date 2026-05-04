@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled,
     Window, div, px,
 };
@@ -11,7 +11,7 @@ use kavis_ui::{
 use crate::section;
 
 pub struct CheckboxStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     check1: bool,
     check2: bool,
     check3: bool,
@@ -53,7 +53,7 @@ impl CheckboxStory {
 }
 
 impl Focusable for CheckboxStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

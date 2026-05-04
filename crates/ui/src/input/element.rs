@@ -1,7 +1,7 @@
-use gpui::Corners;
-use gpui::Half;
-use gpui::{App, Bounds, Element, ElementId, ElementInputHandler, Entity, GlobalElementId};
-use gpui::{
+use crate::ham_gpui::Corners;
+use crate::ham_gpui::Half;
+use crate::ham_gpui::{App, Bounds, Element, ElementId, ElementInputHandler, Entity, GlobalElementId};
+use crate::ham_gpui::{
     HighlightStyle, Hitbox, HitboxBehavior, Hsla, InteractiveElement, IntoElement, LayoutId,
     MouseButton, MouseMoveEvent, Path, Pixels, Point, ShapedLine, SharedString, Size, Style,
     Styled as _, TextAlign, TextRun, TextStyle, UnderlineStyle, Window, fill, point, px, relative,
@@ -42,7 +42,7 @@ struct FoldIconLayout {
     /// Hitbox için satır sayı alan (için kullanılır üzerine gelme detection)
     line_number_hitbox: Hitbox,
     /// Her katlama adayı için (gösterim_satırı, is_folded, icon_element) çiftlerinin listesi.
-    icons: Vec<(usize, bool, gpui::AnyElement)>,
+    icons: Vec<(usize, bool, crate::ham_gpui::AnyElement)>,
 }
 
 pub(super) struct TextElement {
@@ -439,7 +439,7 @@ impl TextElement {
 
         let path_origin = bounds.origin + point(line_number_width, px(0.));
         let first_p = *points.get(0).unwrap();
-        let mut builder = gpui::PathBuilder::fill();
+        let mut builder = crate::ham_gpui::PathBuilder::fill();
         builder.move_to(path_origin + first_p);
         for p in points.iter().skip(1) {
             builder.line_to(path_origin + *p);
@@ -635,7 +635,7 @@ impl TextElement {
                 &[TextRun {
                     len: line_number_len,
                     font: style.font(),
-                    color: gpui::black(),
+                    color: crate::ham_gpui::black(),
                     background_color: None,
                     underline: None,
                     strikethrough: None,
@@ -1088,7 +1088,7 @@ impl TextElement {
                 highlighter.styles(&(byte_start..byte_end), &cx.theme().highlight_theme)
             };
 
-            *styles = gpui::combine_highlights(styles.clone(), range_styles).collect();
+            *styles = crate::ham_gpui::combine_highlights(styles.clone(), range_styles).collect();
         };
 
         // Group contiguous visible lines into ranges and call styles() once per range
@@ -1132,7 +1132,7 @@ impl TextElement {
         }
 
         // Combine marker styles
-        styles = gpui::combine_highlights(diagnostic_styles, styles).collect();
+        styles = crate::ham_gpui::combine_highlights(diagnostic_styles, styles).collect();
 
         Some(styles)
     }
@@ -1189,7 +1189,7 @@ impl IntoElement for TextElement {
 /// Bir debug fonksiyon için print points olarak SVG yol.
 #[allow(unused)]
 fn print_points_as_svg_path(
-    line_corners: &Vec<gpui::Corners<Pixels>>,
+    line_corners: &Vec<crate::ham_gpui::Corners<Pixels>>,
     points: &Vec<Point<Pixels>>,
 ) {
     for corners in line_corners {
@@ -1232,7 +1232,7 @@ impl Element for TextElement {
     fn request_layout(
         &mut self,
         _id: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
@@ -1262,7 +1262,7 @@ impl Element for TextElement {
     fn prepaint(
         &mut self,
         _id: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         _request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -1497,7 +1497,7 @@ impl Element for TextElement {
                     &[TextRun {
                         len: longest_line.len(),
                         font: style.font(),
-                        color: gpui::black(),
+                        color: crate::ham_gpui::black(),
                         background_color: None,
                         underline: None,
                         strikethrough: None,
@@ -1672,7 +1672,7 @@ impl Element for TextElement {
     fn paint(
         &mut self,
         _id: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         input_bounds: Bounds<Pixels>,
         _request_layout: &mut Self::RequestLayoutState,
         prepaint: &mut Self::PrepaintState,
@@ -1941,7 +1941,7 @@ impl Element for TextElement {
         });
 
         if let Some(hitbox) = prepaint.hover_definition_hitbox.as_ref() {
-            window.set_cursor_style(gpui::CursorStyle::PointingHand, &hitbox);
+            window.set_cursor_style(crate::ham_gpui::CursorStyle::PointingHand, &hitbox);
         }
 
         // Paint inline completion first line suffix (after cursor on same line)
@@ -2058,9 +2058,9 @@ fn split_runs_by_bg_segments(
             let overlap_start = run_start.max(bg_range.start);
             let overlap_end = run_end.min(bg_range.end);
             let text_color = if bg_color.l >= 0.5 {
-                gpui::black()
+                crate::ham_gpui::black()
             } else {
-                gpui::white()
+                crate::ham_gpui::white()
             };
 
             let run_len = overlap_end.saturating_sub(overlap_start);
@@ -2145,8 +2145,8 @@ mod tests {
     fn test_runs_for_range() {
         let run = TextRun {
             len: 0,
-            font: gpui::font(".SystemUIFont"),
-            color: gpui::black(),
+            font: crate::ham_gpui::font(".SystemUIFont"),
+            color: crate::ham_gpui::black(),
             background_color: None,
             underline: None,
             strikethrough: None,
@@ -2203,8 +2203,8 @@ mod tests {
     fn test_placeholder_line_runs() {
         let run = TextRun {
             len: 0,
-            font: gpui::font(".SystemUIFont"),
-            color: gpui::black(),
+            font: crate::ham_gpui::font(".SystemUIFont"),
+            color: crate::ham_gpui::black(),
             background_color: None,
             underline: None,
             strikethrough: None,
@@ -2241,8 +2241,8 @@ mod tests {
     fn test_split_runs_by_bg_segments() {
         let run = TextRun {
             len: 0,
-            font: gpui::font(".SystemUIFont"),
-            color: gpui::blue(),
+            font: crate::ham_gpui::font(".SystemUIFont"),
+            color: crate::ham_gpui::blue(),
             background_color: None,
             underline: None,
             strikethrough: None,
@@ -2263,17 +2263,17 @@ mod tests {
             },
         ];
 
-        let bg_segments = vec![(8..12, gpui::red()), (12..18, gpui::blue())];
+        let bg_segments = vec![(8..12, crate::ham_gpui::red()), (12..18, crate::ham_gpui::blue())];
         let result = split_runs_by_bg_segments(5, &runs, &bg_segments);
         assert_eq!(
             result.iter().map(|run| run.len).collect::<Vec<_>>(),
             vec![3, 2, 2, 5, 1, 23]
         );
-        assert_eq!(result[0].color, gpui::blue());
-        assert_eq!(result[1].color, gpui::black());
-        assert_eq!(result[2].color, gpui::black());
-        assert_eq!(result[3].color, gpui::black());
-        assert_eq!(result[4].color, gpui::black());
-        assert_eq!(result[5].color, gpui::blue());
+        assert_eq!(result[0].color, crate::ham_gpui::blue());
+        assert_eq!(result[1].color, crate::ham_gpui::black());
+        assert_eq!(result[2].color, crate::ham_gpui::black());
+        assert_eq!(result[3].color, crate::ham_gpui::black());
+        assert_eq!(result[4].color, crate::ham_gpui::black());
+        assert_eq!(result[5].color, crate::ham_gpui::blue());
     }
 }

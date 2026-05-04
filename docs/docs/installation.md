@@ -18,7 +18,7 @@ anyhow = "1"
 Uygulama başlangıcında Kavis UI başlatılmalıdır:
 
 ```rust
-gpui_platform::application().run(move |cx| {
+kavis_ui::platform::application().run(move |cx| {
     kavis_ui::init(cx);
 });
 ```

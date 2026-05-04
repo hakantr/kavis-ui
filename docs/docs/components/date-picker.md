@@ -10,7 +10,7 @@ Tek tarih veya tarih aralığı seçimi için durumlu bileşen. Güncel örnekle
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, Hsla, IntoElement, ParentElement, Render,
     SharedString, Styled, Subscription, Window, hsla, px,
 };
@@ -14,7 +14,7 @@ use kavis_ui::{
 use crate::section;
 
 pub struct SliderStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     slider1: Entity<KaydiriciDurumu>,
     slider1_value: f32,
     slider2: Entity<KaydiriciDurumu>,
@@ -172,7 +172,7 @@ impl SliderStory {
             slider3,
             slider4,
             slider_hsl,
-            slider_hsl_value: gpui::red(),
+            slider_hsl_value: kavis_ui::ham_gpui::red(),
             slider_logarithmic,
             disabled: false,
             _subscritions,
@@ -181,7 +181,7 @@ impl SliderStory {
 }
 
 impl Focusable for SliderStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

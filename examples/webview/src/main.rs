@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use gpui_wry::WebGorunumu;
 use kavis_ui::{
     EtkinTema as _, KokGorunum, h_flex,
@@ -98,7 +98,7 @@ impl Example {
 }
 
 impl Focusable for Example {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &kavis_ui::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -121,7 +121,7 @@ impl Render for Example {
                 div()
                     .flex_1()
                     .border_1()
-                    .h(gpui::px(400.))
+                    .h(kavis_ui::ham_gpui::px(400.))
                     .border_color(cx.theme().border)
                     .child(webview.clone()),
             )
@@ -135,7 +135,7 @@ fn main() {
         std::env::set_var("GPUI_DISABLE_DIRECT_COMPOSITION", "true");
     }
 
-    gpui_platform::application().run(move |cx| {
+    kavis_ui::platform::application().run(move |cx| {
         // This must be called before using any Kavis UI features.
         kavis_ui::init(cx);
 

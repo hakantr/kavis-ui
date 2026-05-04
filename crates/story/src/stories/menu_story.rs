@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     Action, Anchor, App, AppContext, Context, Entity, InteractiveElement, IntoElement, KeyBinding,
     ParentElement as _, Render, SharedString, Styled as _, Window, actions, div, px,
 };

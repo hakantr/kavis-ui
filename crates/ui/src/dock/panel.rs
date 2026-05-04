@@ -1,5 +1,5 @@
 use crate::{button::Dugme, dock::SekmePaneli, menu::AcilirMenu};
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, AnyView, App, AppContext as _, Context, Entity, EntityId, EventEmitter,
     FocusHandle, Focusable, Global, Hsla, IntoElement, Render, SharedString, WeakEntity, Window,
 };
@@ -83,7 +83,7 @@ pub trait Panel: EventEmitter<PanelEvent> + Render + Focusable {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Option<impl IntoElement> {
-        None::<gpui::Div>
+        None::<crate::ham_gpui::Div>
     }
 
     /// Panelin kapatılabilir olup olmadığını döndürür. Varsayılan `true`.

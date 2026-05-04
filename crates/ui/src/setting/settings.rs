@@ -6,7 +6,7 @@ use crate::{
     setting::{AyarGrubu, AyarSayfasi},
     sidebar::{YanCubuk, YanCubukMenuOgesi, YanCubukMenusu},
 };
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext as _, Axis, ElementId, Entity, IntoElement, ParentElement as _, Pixels,
     RenderOnce, StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _, px, relative,
 };

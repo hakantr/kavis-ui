@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     App, Axis, ElementId, InteractiveElement as _, IntoElement, ParentElement, RenderOnce,
     StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _,
 };

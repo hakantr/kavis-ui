@@ -25,7 +25,7 @@ Paragraflar normal metin, **kalın metin**, *italik metin*, `satır içi kod` ve
 ## Kod Bloğu
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::button::{Dugme, DugmeVaryantlari as _};
 
 Dugme::new("kaydet")

@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use chrono::{Datelike, NaiveDate};
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, AppContext, AvailableSpace, Bounds, ClickEvent, Context, Element, ElementId,
     Entity, EventEmitter, FocusHandle, Focusable, GlobalElementId, InteractiveElement, IntoElement,
     KeyDownEvent, LayoutId, MouseButton, MouseUpEvent, ParentElement as _, Pixels, Render,
@@ -1048,7 +1048,7 @@ impl Element for MonthSuggestionsPopover {
     fn request_layout(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
@@ -1093,7 +1093,7 @@ impl Element for MonthSuggestionsPopover {
     fn prepaint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         _: Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -1111,7 +1111,7 @@ impl Element for MonthSuggestionsPopover {
     fn paint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         _: Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         _: &mut Self::PrepaintState,

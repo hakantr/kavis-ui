@@ -12,7 +12,7 @@ use crate::{
     scroll::{KaydirilabilirMaske, KaydirmaCubugu},
     v_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     AppContext, Axis, Bounds, ClickEvent, Context, Div, DragMoveEvent, EventEmitter, FocusHandle,
     Focusable, InteractiveElement, IntoElement, ListSizingBehavior, MouseButton, MouseDownEvent,
     ParentElement, Pixels, Point, Render, ScrollStrategy, SharedString, Stateful,
@@ -1674,7 +1674,7 @@ where
         row_ix: usize,
         rows_count: usize,
         left_columns_count: usize,
-        col_sizes: Rc<Vec<gpui::Size<Pixels>>>,
+        col_sizes: Rc<Vec<crate::ham_gpui::Size<Pixels>>>,
         columns_count: usize,
         is_filled: bool,
         window: &mut Window,
@@ -1926,7 +1926,7 @@ where
                     this.when(is_selected && self.selection_mode.is_row(), |this| {
                         this.map(|this| {
                             if cx.theme().list.active_highlight {
-                                this.border_color(gpui::transparent_white()).child(
+                                this.border_color(crate::ham_gpui::transparent_white()).child(
                                     div()
                                         .top(if row_ix == 0 { px(0.) } else { px(-1.) })
                                         .left(px(0.))
@@ -1945,7 +1945,7 @@ where
                 })
                 // Row right click row style
                 .when(self.right_clicked_row == Some(row_ix), |this| {
-                    this.border_color(gpui::transparent_white()).child(
+                    this.border_color(crate::ham_gpui::transparent_white()).child(
                         div()
                             .top(if row_ix == 0 { px(0.) } else { px(-1.) })
                             .left(px(0.))
@@ -2091,7 +2091,7 @@ impl<D> Focusable for TabloDurumu<D>
 where
     D: TabloTemsilcisi,
 {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &crate::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -2185,12 +2185,12 @@ where
                                         // Use `col.width` (always up-to-date) rather than
                                         // `col.bounds.size.width`, which is only set after
                                         // prepaint and is therefore zero on the first frame.
-                                        let col_sizes: Rc<Vec<gpui::Size<Pixels>>> = Rc::new(
+                                        let col_sizes: Rc<Vec<crate::ham_gpui::Size<Pixels>>> = Rc::new(
                                             table
                                                 .col_groups
                                                 .iter()
                                                 .skip(left_columns_count)
-                                                .map(|col| gpui::Size {
+                                                .map(|col| crate::ham_gpui::Size {
                                                     width: col.width,
                                                     height: px(0.),
                                                 })

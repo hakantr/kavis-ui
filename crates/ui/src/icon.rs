@@ -1,5 +1,5 @@
 use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema};
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, AppContext, Context, Entity, Hsla, IntoElement, Radians, Render, RenderOnce,
     SharedString, StyleRefinement, Styled, Svg, Transformation, Window,
     prelude::FluentBuilder as _, svg,
@@ -98,7 +98,7 @@ impl Simge {
         cx.new(|_| self)
     }
 
-    pub fn transform(mut self, transformation: gpui::Transformation) -> Self {
+    pub fn transform(mut self, transformation: crate::ham_gpui::Transformation) -> Self {
         self.base = self.base.with_transformation(transformation);
         self
     }

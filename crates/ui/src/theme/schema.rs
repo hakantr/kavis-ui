@@ -1,6 +1,6 @@
 use std::{rc::Rc, sync::Arc};
 
-use gpui::{SharedString, px};
+use crate::ham_gpui::{SharedString, px};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

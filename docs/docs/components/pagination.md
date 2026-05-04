@@ -10,7 +10,7 @@ Sayfa numaraları ve gezinme eylemleri sağlar. Güncel örnekler Kavis UI'nin T
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

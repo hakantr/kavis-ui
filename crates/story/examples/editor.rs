@@ -8,7 +8,7 @@ use std::{
 };
 
 use autocorrect::ignorer::Ignorer;
-use gpui::{prelude::FluentBuilder, *};
+use kavis_ui::ham_gpui::{prelude::FluentBuilder, *};
 use kavis_ui::{
     Boyutlandirilabilir, EtkinTema, PencereUzantisi, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
@@ -625,7 +625,7 @@ impl DocumentColorProvider for ExampleLspStore {
         text: &Halat,
         _window: &mut Window,
         _cx: &mut App,
-    ) -> Task<gpui::Result<Vec<lsp_types::ColorInformation>>> {
+    ) -> Task<kavis_ui::ham_gpui::Result<Vec<lsp_types::ColorInformation>>> {
         let nodes = color_lsp::parse(&text.to_string());
         let colors = nodes
             .into_iter()
@@ -1135,7 +1135,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         kavis_ui_story::init(cx);

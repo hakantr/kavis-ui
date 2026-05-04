@@ -5,7 +5,7 @@ pub use avatar::*;
 pub use avatar_group::*;
 
 use crate::{BilesenBoyutu, Simge, StilUzantisi as _};
-use gpui::{Div, Img, IntoElement, Pixels, Styled, px, rems};
+use crate::ham_gpui::{Div, Img, IntoElement, Pixels, Styled, px, rems};
 
 /// boyut avatar temelli üzerinde verilen [`BilesenBoyutu`] döndürür.
 pub(super) fn avatar_size(size: BilesenBoyutu) -> Pixels {

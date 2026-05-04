@@ -10,7 +10,7 @@ pub use candlestick_chart::CandlestickChart;
 pub use line_chart::LineChart;
 pub use pie_chart::PieChart;
 
-use gpui::{Hsla, SharedString, TextAlign};
+use crate::ham_gpui::{Hsla, SharedString, TextAlign};
 
 use crate::plot::{
     AxisText,

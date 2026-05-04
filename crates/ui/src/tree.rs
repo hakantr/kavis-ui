@@ -1,6 +1,6 @@
 use std::{cell::RefCell, ops::Range, rc::Rc};
 
-use gpui::{
+use crate::ham_gpui::{
     App, Context, ElementId, Entity, FocusHandle, InteractiveElement as _, IntoElement, KeyBinding,
     ListSizingBehavior, MouseButton, ParentElement, Render, RenderOnce, SharedString,
     StyleRefinement, Styled, UniformListScrollHandle, Window, div, prelude::FluentBuilder as _,
@@ -287,7 +287,7 @@ impl AgacDurumu {
             .and_then(|ix| self.entries.get(ix).map(|entry| &entry.item))
     }
 
-    pub fn scroll_to_item(&mut self, ix: usize, strategy: gpui::ScrollStrategy) {
+    pub fn scroll_to_item(&mut self, ix: usize, strategy: crate::ham_gpui::ScrollStrategy) {
         self.scroll_handle.scroll_to_item(ix, strategy);
     }
 
@@ -403,7 +403,7 @@ impl AgacDurumu {
 
         self.selected_ix = Some(selected_ix);
         self.scroll_handle
-            .scroll_to_item(selected_ix, gpui::ScrollStrategy::Top);
+            .scroll_to_item(selected_ix, crate::ham_gpui::ScrollStrategy::Top);
         cx.notify();
     }
 
@@ -417,7 +417,7 @@ impl AgacDurumu {
 
         self.selected_ix = Some(selected_ix);
         self.scroll_handle
-            .scroll_to_item(selected_ix, gpui::ScrollStrategy::Bottom);
+            .scroll_to_item(selected_ix, crate::ham_gpui::ScrollStrategy::Bottom);
         cx.notify();
     }
 
@@ -604,7 +604,7 @@ mod tests {
     use indoc::indoc;
 
     use super::AgacDurumu;
-    use gpui::AppContext as _;
+    use crate::ham_gpui::AppContext as _;
 
     fn assert_entries(entries: &Vec<super::AgacGirdisi>, expected: &str) {
         let actual: Vec<String> = entries
@@ -620,8 +620,8 @@ mod tests {
         assert_eq!(actual.trim(), expected.trim());
     }
 
-    #[gpui::test]
-    fn test_tree_entry(cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_tree_entry(cx: &mut crate::ham_gpui::TestAppContext) {
         use super::AgacOgesi;
 
         let items = vec![

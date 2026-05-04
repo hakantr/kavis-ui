@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Div, Half as _, Hsla, IntoElement, ParentElement, Pixels, Point, RenderOnce,
     StyleRefinement, Styled, Window, div, prelude::FluentBuilder, px,
 };
@@ -119,8 +119,8 @@ impl Dot {
         Self {
             point,
             size: px(6.),
-            stroke: gpui::transparent_black(),
-            fill: gpui::transparent_black(),
+            stroke: crate::ham_gpui::transparent_black(),
+            fill: crate::ham_gpui::transparent_black(),
         }
     }
 

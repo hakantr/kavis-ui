@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, Hsla, IntoElement, ParentElement as _, Render,
     Styled as _, Subscription, Window, div, prelude::FluentBuilder as _,
 };
@@ -54,7 +54,7 @@ impl ColorPickerStory {
 }
 
 impl Focusable for ColorPickerStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.color.read(cx).focus_handle(cx)
     }
 }

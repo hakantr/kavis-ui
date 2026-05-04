@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled,
     Window, px,
 };
@@ -7,7 +7,7 @@ use kavis_ui::{Boyutlandirilabilir, EtkinTema as _, SimgeAdi, spinner::DonerGost
 use crate::section;
 
 pub struct SpinnerStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     value: f32,
 }
 
@@ -43,7 +43,7 @@ impl SpinnerStory {
 }
 
 impl Focusable for SpinnerStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

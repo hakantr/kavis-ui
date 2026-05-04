@@ -8,14 +8,14 @@ description: Kavis UI simge varlıklarını uygulamaya bağlama.
 `Simge` bileşeni SVG dosyalarını GPUI varlık kaynağından okur. Hazır paket için `kavis-ui-assets`, özel paket için kendi `AssetSource` uygulamanızı kullanın.
 
 ```rust
-let app = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
+let app = kavis_ui::platform::application().with_assets(kavis_ui_assets::Assets);
 ```
 
 Özel kaynak örneği:
 
 ```rust
 use anyhow::anyhow;
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use rust_embed::RustEmbed;
 use std::borrow::Cow;
 

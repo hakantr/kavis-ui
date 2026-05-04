@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     App, InteractiveElement as _, IntoElement, ListState as ListeDurumu, ParentElement as _,
     SharedString, Styled as _, Window, div,
 };
@@ -88,7 +88,7 @@ impl ParsedDocument {
         }
 
         div().id("document").size_full().child(
-            gpui::list(list_state, {
+            crate::ham_gpui::list(list_state, {
                 let node_cx = node_cx.clone();
                 let blocks = blocks.clone();
                 move |ix, window, cx| {

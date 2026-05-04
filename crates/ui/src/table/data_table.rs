@@ -6,7 +6,7 @@ use crate::{
     },
     table::{TabloDurumu, TabloTemsilcisi},
 };
-use gpui::{
+use crate::ham_gpui::{
     App, Edges, Entity, Focusable, InteractiveElement, IntoElement, KeyBinding, ParentElement,
     RenderOnce, Styled, Window, div, prelude::FluentBuilder,
 };

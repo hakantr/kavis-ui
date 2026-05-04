@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use gpui::{Pixels, Rems, StyleRefinement, px, rems};
+use crate::ham_gpui::{Pixels, Rems, StyleRefinement, px, rems};
 
 use crate::highlighter::VurguTemasi;
 

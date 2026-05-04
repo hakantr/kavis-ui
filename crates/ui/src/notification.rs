@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use gpui::{
+use crate::ham_gpui::{
     Anchor, Animation, AnimationExt, AnyElement, App, AppContext, ClickEvent, Context,
     DismissEvent, ElementId, Entity, EventEmitter, InteractiveElement as _, IntoElement,
     ParentElement as _, Pixels, Render, SharedString, StatefulInteractiveElement, StyleRefinement,
@@ -541,8 +541,8 @@ impl BildirimListesi {
 impl Render for BildirimListesi {
     fn render(
         &mut self,
-        window: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
+        window: &mut crate::ham_gpui::Window,
+        cx: &mut crate::ham_gpui::Context<Self>,
     ) -> impl IntoElement {
         let size = window.viewport_size();
         let items = self.notifications.iter().rev().take(10).rev().cloned();
@@ -587,7 +587,7 @@ impl Render for BildirimListesi {
 mod tests {
     use super::*;
     use crate::theme::Tema;
-    use gpui::{TestAppContext, VisualTestContext};
+    use crate::ham_gpui::{TestAppContext, VisualTestContext};
 
     struct FooKind;
     struct BarKind;
@@ -619,7 +619,7 @@ mod tests {
         cx.run_until_parked();
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn close_by_type_removes_id_and_all_id1_of_same_type(cx: &mut TestAppContext) {
         cx.update(|cx| cx.set_global(Tema::default()));
         let (root, cx) = cx.add_window_view(|window, cx| TestRoot {
@@ -665,7 +665,7 @@ mod tests {
         );
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn close_with_id_and_element_id_removes_only_matching_key(cx: &mut TestAppContext) {
         cx.update(|cx| cx.set_global(Tema::default()));
         let (root, cx) = cx.add_window_view(|window, cx| TestRoot {
@@ -709,7 +709,7 @@ mod tests {
         assert!(remaining.contains(&BildirimKimligi::Id(TypeId::of::<FooKind>())));
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn close_with_only_type_id_does_not_match_id1_entries(cx: &mut TestAppContext) {
         // The plain `close(TypeId)` form (used by the legacy code path) must keep
         // its narrow semantics: it only matches `BildirimKimligi::Id`, not
@@ -736,7 +736,7 @@ mod tests {
         assert_eq!(ids(&list, cx).len(), 1, "id1 entry should remain untouched");
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn close_by_type_with_no_match_is_noop(cx: &mut TestAppContext) {
         cx.update(|cx| cx.set_global(Tema::default()));
         let (root, cx) = cx.add_window_view(|window, cx| TestRoot {

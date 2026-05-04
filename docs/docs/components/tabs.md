@@ -10,7 +10,7 @@ Aynı alanda birden çok görünüm arasında geçiş sağlar. Güncel örnekler
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

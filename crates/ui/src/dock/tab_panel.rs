@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use gpui::{
+use crate::ham_gpui::{
     Anchor, App, AppContext, Context, DismissEvent, Div, DragMoveEvent, Empty, Entity,
     EventEmitter, FocusHandle, Focusable, InteractiveElement as _, IntoElement, ParentElement,
     Pixels, Render, ScrollHandle, SharedString, StatefulInteractiveElement, StyleRefinement,
@@ -1180,7 +1180,7 @@ impl SekmePaneli {
 }
 
 impl Focusable for SekmePaneli {
-    fn focus_handle(&self, cx: &App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &App) -> crate::ham_gpui::FocusHandle {
         if let Some(active_panel) = self.active_panel(cx) {
             active_panel.focus_handle(cx)
         } else {
@@ -1191,7 +1191,7 @@ impl Focusable for SekmePaneli {
 impl EventEmitter<DismissEvent> for SekmePaneli {}
 impl EventEmitter<PanelEvent> for SekmePaneli {}
 impl Render for SekmePaneli {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl gpui::IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl crate::ham_gpui::IntoElement {
         let focus_handle = self.focus_handle(cx);
         let active_panel = self.active_panel(cx);
         let state = TabState {

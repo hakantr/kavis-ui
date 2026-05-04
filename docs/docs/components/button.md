@@ -10,7 +10,7 @@ Tıklanabilir eylemler için varyant, boyut, simge ve yüklenme durumu destekley
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

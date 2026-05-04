@@ -1,7 +1,7 @@
 use std::{rc::Rc, time::Duration};
 
 use fake::Fake;
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, ElementId, Entity, FocusHandle, Focusable, InteractiveElement,
     IntoElement, ParentElement, Render, RenderOnce, ScrollStrategy, SharedString, Styled,
     Subscription, Task, Window, actions, div, px,
@@ -473,7 +473,7 @@ fn random_company() -> Company {
 }
 
 impl Focusable for ListStory {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &kavis_ui::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }

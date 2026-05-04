@@ -1,4 +1,4 @@
-use gpui::{prelude::*, *};
+use kavis_ui::ham_gpui::{prelude::*, *};
 use kavis_ui::{
     EtkinTema as _, Simge, SimgeAdi, h_flex,
     input::{Girdi, GirdiDurumu, GirdiOlayi},

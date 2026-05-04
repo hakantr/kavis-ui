@@ -10,7 +10,7 @@ description: Özel kaydırma çubuğu ve maske yardımcılarını sağlar.
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

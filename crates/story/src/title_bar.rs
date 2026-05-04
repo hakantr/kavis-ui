@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use kavis_ui::ham_gpui::{
     Anchor, AnyElement, App, AppContext, Context, Entity, FocusHandle, InteractiveElement as _,
     IntoElement, MouseButton, ParentElement as _, Render, SharedString, Styled as _, Subscription,
     Window, div, px,

@@ -1,4 +1,4 @@
-use gpui::{prelude::FluentBuilder, *};
+use kavis_ui::ham_gpui::{prelude::FluentBuilder, *};
 use kavis_ui::{
     EtkinTema as _, IndexPath, Simge, SimgeAdi, StilUzantisi as _, TemaRengi,
     button::{Dugme, DugmeVaryantlari as _},

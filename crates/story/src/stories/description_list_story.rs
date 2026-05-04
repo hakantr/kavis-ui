@@ -1,5 +1,5 @@
-use gpui::*;
-use gpui::{
+use kavis_ui::ham_gpui::*;
+use kavis_ui::ham_gpui::{
     Action, App, AppContext, Axis, Context, Entity, FocusHandle, Focusable, IntoElement,
     ParentElement, Render, Styled, Window,
 };

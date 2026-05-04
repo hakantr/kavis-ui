@@ -1,9 +1,9 @@
-use gpui::{
+use crate::ham_gpui::{
     App, Axis, BorderStyle, Bounds, ContentMask, Edges, Element, ElementId, GlobalElementId,
     Hitbox, Hsla, IntoElement, IsZero as _, LayoutId, PaintQuad, Point, Position, ScrollHandle,
     ScrollWheelEvent, Style, Window, px, relative,
 };
-use gpui::{Corners, Pixels};
+use crate::ham_gpui::{Corners, Pixels};
 
 use crate::EksenUzantisi;
 
@@ -31,7 +31,7 @@ impl KaydirilabilirMaske {
     /// Maske sınırlarını göstermek için hata ayıklama kenarlığını etkinleştirir.
     #[allow(dead_code)]
     pub fn debug(mut self) -> Self {
-        self.debug = Some(gpui::yellow());
+        self.debug = Some(crate::ham_gpui::yellow());
         self
     }
 }
@@ -59,7 +59,7 @@ impl Element for KaydirilabilirMaske {
     fn request_layout(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
@@ -77,7 +77,7 @@ impl Element for KaydirilabilirMaske {
     fn prepaint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -92,13 +92,13 @@ impl Element for KaydirilabilirMaske {
             size: bounds.size,
         };
 
-        window.insert_hitbox(cover_bounds, gpui::HitboxBehavior::Normal)
+        window.insert_hitbox(cover_bounds, crate::ham_gpui::HitboxBehavior::Normal)
     }
 
     fn paint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         _: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         hitbox: &mut Self::PrepaintState,
@@ -115,7 +115,7 @@ impl Element for KaydirilabilirMaske {
                     bounds,
                     border_widths: Edges::all(px(1.0)),
                     border_color: color,
-                    background: gpui::transparent_white().into(),
+                    background: crate::ham_gpui::transparent_white().into(),
                     corner_radii: Corners::all(px(0.)),
                     border_style: BorderStyle::default(),
                 });

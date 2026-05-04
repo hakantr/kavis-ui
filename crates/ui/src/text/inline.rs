@@ -1,11 +1,11 @@
-use gpui::Corners;
+use crate::ham_gpui::Corners;
 use std::{
     ops::Range,
     rc::Rc,
     sync::{Arc, Mutex},
 };
 
-use gpui::{
+use crate::ham_gpui::{
     App, BorderStyle, Bounds, CursorStyle, Edges, Element, ElementId, GlobalElementId, Half,
     HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId, IntoElement, LayoutId,
     MouseMoveEvent, MouseUpEvent, Pixels, Point, SharedString, StyledText, TextLayout, Window,
@@ -80,13 +80,13 @@ impl Inline {
     /// seçili sınırlar için debug. çizer.
     #[allow(unused)]
     fn paint_selected_bounds(&self, bounds: Bounds<Pixels>, window: &mut Window, cx: &mut App) {
-        window.paint_quad(gpui::PaintQuad {
+        window.paint_quad(crate::ham_gpui::PaintQuad {
             bounds,
             background: cx.theme().blue.alpha(0.01).into(),
             corner_radii: Corners::default(),
-            border_color: gpui::transparent_black(),
+            border_color: crate::ham_gpui::transparent_black(),
             border_style: BorderStyle::default(),
-            border_widths: gpui::Edges::all(px(0.)),
+            border_widths: crate::ham_gpui::Edges::all(px(0.)),
         });
     }
 
@@ -176,7 +176,7 @@ impl Inline {
                 px(0.),
                 cx.theme().selection,
                 Edges::default(),
-                gpui::transparent_black(),
+                crate::ham_gpui::transparent_black(),
                 BorderStyle::default(),
             ));
         } else {
@@ -188,7 +188,7 @@ impl Inline {
                 px(0.),
                 cx.theme().selection,
                 Edges::default(),
-                gpui::transparent_black(),
+                crate::ham_gpui::transparent_black(),
                 BorderStyle::default(),
             ));
 
@@ -201,7 +201,7 @@ impl Inline {
                     px(0.),
                     cx.theme().selection,
                     Edges::default(),
-                    gpui::transparent_black(),
+                    crate::ham_gpui::transparent_black(),
                     BorderStyle::default(),
                 ));
             }
@@ -214,7 +214,7 @@ impl Inline {
                 px(0.),
                 cx.theme().selection,
                 Edges::default(),
-                gpui::transparent_black(),
+                crate::ham_gpui::transparent_black(),
                 BorderStyle::default(),
             ));
         }
@@ -415,7 +415,7 @@ fn point_in_text_selection(
 #[cfg(test)]
 mod tests {
     use super::point_in_text_selection;
-    use gpui::{point, px};
+    use crate::ham_gpui::{point, px};
 
     #[test]
     fn test_point_in_text_selection() {

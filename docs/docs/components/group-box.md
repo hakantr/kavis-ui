@@ -10,7 +10,7 @@ description: İlişkili kontrolleri başlıklı bir çerçeve içinde toplar.
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

@@ -7,7 +7,7 @@ mod style;
 mod text_view;
 mod utils;
 
-use gpui::{App, ElementId, IntoElement, RenderOnce, SharedString, Window};
+use crate::ham_gpui::{App, ElementId, IntoElement, RenderOnce, SharedString, Window};
 pub use state::*;
 pub use style::*;
 pub use text_view::*;

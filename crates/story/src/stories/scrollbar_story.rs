@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement, Pixels,
     Render, Size, Styled, UniformListScrollHandle, Window, div, px, size, uniform_list,
 };
@@ -128,7 +128,7 @@ impl super::Story for ScrollbarStory {
 }
 
 impl Focusable for ScrollbarStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -136,9 +136,9 @@ impl Focusable for ScrollbarStory {
 impl Render for ScrollbarStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         v_flex()
             .size_full()
             .gap_4()

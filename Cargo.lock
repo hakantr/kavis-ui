@@ -106,8 +106,6 @@ name = "app_assets"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "rust-embed",
 ]
@@ -1765,8 +1763,6 @@ name = "dialog_overlay"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "kavis-ui-assets",
 ]
@@ -2275,8 +2271,6 @@ name = "focus_trap"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
 ]
 
@@ -3395,8 +3389,6 @@ name = "hello_world"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
 ]
 
@@ -4169,8 +4161,6 @@ name = "input"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "kavis-ui-assets",
 ]
@@ -4486,8 +4476,6 @@ dependencies = [
  "dirs",
  "fake",
  "getrandom 0.4.2",
- "gpui",
- "gpui_platform",
  "gpui_web",
  "gtk",
  "itertools 0.14.0",
@@ -4513,8 +4501,6 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "kavis-ui-assets",
  "kavis-ui-story",
@@ -8204,8 +8190,6 @@ dependencies = [
  "anyhow",
  "battery",
  "core-foundation 0.10.0",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "kavis-ui-assets",
  "metal",
@@ -8645,8 +8629,6 @@ name = "tooltip_top_edge"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
 ]
 
@@ -9915,9 +9897,7 @@ name = "webview"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
  "gpui-wry",
- "gpui_platform",
  "gtk",
  "kavis-ui",
  "lb-wry",
@@ -10173,8 +10153,6 @@ name = "window_title"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "gpui",
- "gpui_platform",
  "kavis-ui",
  "kavis-ui-assets",
 ]

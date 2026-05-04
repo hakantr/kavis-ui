@@ -10,7 +10,7 @@ Bar, çizgi, alan, pasta ve mum grafik bileşenlerini kapsar. Güncel örnekler 
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

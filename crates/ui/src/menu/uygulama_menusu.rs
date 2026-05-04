@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     Action, App, AppContext, Entity, Menu, MenuItem, OwnedMenu, OwnedMenuItem, SharedString,
 };
 
@@ -276,7 +276,7 @@ impl UygulamaMenuOgesi {
         match self {
             Self::Ayirici => OwnedMenuItem::Separator,
             Self::AltMenu(menu) => OwnedMenuItem::Submenu(menu.sahipli_menu()),
-            Self::SistemMenusu { baslik, tur } => OwnedMenuItem::SystemMenu(gpui::OwnedOsMenu {
+            Self::SistemMenusu { baslik, tur } => OwnedMenuItem::SystemMenu(crate::ham_gpui::OwnedOsMenu {
                 name: baslik.clone(),
                 menu_type: (*tur).into(),
             }),
@@ -387,8 +387,8 @@ mod tests {
         assert_eq!(sahipli_menu.items.len(), 3);
     }
 
-    #[gpui::test]
-    fn menu_kaydi_kuresel_duruma_da_yazilir(cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn menu_kaydi_kuresel_duruma_da_yazilir(cx: &mut crate::ham_gpui::TestAppContext) {
         cx.update(|cx| {
             KureselDurum::ensure_global(cx);
             uygulama_menulerini_kaydet(

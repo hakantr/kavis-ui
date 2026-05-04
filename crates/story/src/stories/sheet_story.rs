@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use fake::Fake;
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, InteractiveElement as _, IntoElement,
     ParentElement, Render, SharedString, Styled, Task, WeakEntity, Window, div,
     prelude::FluentBuilder as _, px,
@@ -367,7 +367,7 @@ impl SheetStory {
 }
 
 impl Focusable for SheetStory {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &kavis_ui::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -484,7 +484,7 @@ impl Render for SheetStory {
                             h_flex().gap_1().child("Seçtiniz:").child(
                                 div()
                                     .child(selected_value.to_string())
-                                    .text_color(gpui::red()),
+                                    .text_color(kavis_ui::ham_gpui::red()),
                             ),
                         )
                     }),

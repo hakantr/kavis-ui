@@ -10,7 +10,7 @@ description: Çok adımlı süreçlerin mevcut aşamasını gösterir.
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

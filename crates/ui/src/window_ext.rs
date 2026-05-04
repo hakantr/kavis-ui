@@ -5,7 +5,7 @@ use crate::{
     notification::Bildirim,
     sheet::SayfaKatmani,
 };
-use gpui::{App, ElementId, Entity, Window};
+use crate::ham_gpui::{App, ElementId, Entity, Window};
 use std::rc::Rc;
 
 /// uzantı özellik için [`Window`] için ekler iletişim kutusu, sayfa katmanı. işlev.

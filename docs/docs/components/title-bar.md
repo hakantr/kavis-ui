@@ -10,7 +10,7 @@ description: Özel pencere başlığı ve pencere kontrolleri için kullanılır
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

@@ -10,7 +10,7 @@ Yüklenme veya işlem devam ediyor durumunu gösterir. Güncel örnekler Kavis U
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

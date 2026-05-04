@@ -10,7 +10,7 @@ Birincil ve ikincil metinleri, maskeleme ve vurgulama desteğiyle gösterir. Gü
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

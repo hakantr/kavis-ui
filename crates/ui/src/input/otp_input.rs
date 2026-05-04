@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, AppContext as _, Context, Empty, Entity, EventEmitter, FocusHandle, Focusable,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, ParentElement as _,
     Render, RenderOnce, SharedString, Styled as _, Subscription, Window, div,
@@ -218,7 +218,7 @@ impl OtpState {
     }
 }
 impl Focusable for OtpState {
-    fn focus_handle(&self, _: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _: &crate::ham_gpui::App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }

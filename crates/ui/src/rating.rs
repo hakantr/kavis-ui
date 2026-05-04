@@ -5,11 +5,11 @@ use crate::{
 };
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     App, ElementId, InteractiveElement, IntoElement, ParentElement, RenderOnce, StyleRefinement,
     Styled, Window, div, prelude::FluentBuilder as _,
 };
-use gpui::{ClickEvent, Hsla, StatefulInteractiveElement};
+use crate::ham_gpui::{ClickEvent, Hsla, StatefulInteractiveElement};
 
 /// Basit yıldız puanlama öğesi.
 #[derive(IntoElement)]
@@ -85,7 +85,7 @@ impl Puanlama {
 }
 
 impl Styled for Puanlama {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }

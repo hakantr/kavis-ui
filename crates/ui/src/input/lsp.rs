@@ -1,5 +1,5 @@
 use anyhow::Result;
-use gpui::{App, Context, Hsla, MouseMoveEvent, Task, Window};
+use crate::ham_gpui::{App, Context, Hsla, MouseMoveEvent, Task, Window};
 use ropey::Rope;
 use std::rc::Rc;
 
@@ -91,7 +91,7 @@ impl InputState {
     /// Eylem işlendiyse true, aksi halde false döndürür.
     pub fn handle_action_for_context_menu(
         &mut self,
-        action: Box<dyn gpui::Action>,
+        action: Box<dyn crate::ham_gpui::Action>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> bool {

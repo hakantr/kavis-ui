@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Axis, DefiniteLength, IntoElement, ParentElement, RenderOnce, SharedString,
     Styled, Window, div, prelude::FluentBuilder as _, px, relative,
 };
@@ -250,7 +250,7 @@ impl Boyutlandirilabilir for AciklamaListesi {
 }
 
 impl RenderOnce for AciklamaListesi {
-    fn render(self, _: &mut Window, cx: &mut gpui::App) -> impl gpui::IntoElement {
+    fn render(self, _: &mut Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
         let base_gap = match self.size {
             BilesenBoyutu::CokKucuk | BilesenBoyutu::Kucuk => px(2.),
             BilesenBoyutu::Orta => px(4.),

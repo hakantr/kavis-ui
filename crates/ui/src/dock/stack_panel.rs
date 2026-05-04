@@ -12,7 +12,7 @@ use crate::{
 };
 
 use super::{Panel, PanelEvent, PanelState, PanelView, SekmePaneli, YerlesimAlani};
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext as _, Axis, Context, DismissEvent, Entity, EventEmitter, FocusHandle,
     Focusable, IntoElement, ParentElement, Pixels, Render, Styled, Subscription, WeakEntity,
     Window,

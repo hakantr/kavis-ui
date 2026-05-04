@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{KokGorunum, SimgeAdi, v_flex};
 use rust_embed::RustEmbed;
 use std::borrow::Cow;
@@ -44,7 +44,7 @@ impl Render for Example {
 
 fn main() {
     // Register Varliklar to GPUI application.
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         // We must initialize kavis_ui before using it.

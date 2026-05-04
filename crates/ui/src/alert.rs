@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     App, ClickEvent, ElementId, Empty, Hsla, InteractiveElement, IntoElement, ParentElement as _,
     RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder as _, px, rems, transparent_white,
@@ -166,7 +166,7 @@ impl Boyutlandirilabilir for Uyari {
 }
 
 impl Styled for Uyari {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }

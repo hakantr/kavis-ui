@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Corners, Edges, ElementId, InteractiveElement, IntoElement, ParentElement,
     RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder as _,
@@ -385,8 +385,8 @@ mod tests {
     use super::*;
     use crate::SimgeAdi;
 
-    #[gpui::test]
-    fn test_toggle_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_toggle_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let toggle = Gecis::new("complex-toggle")
             .label("Enable Feature")
             .icon(SimgeAdi::Check)
@@ -404,8 +404,8 @@ mod tests {
         assert!(toggle.on_click.is_some());
     }
 
-    #[gpui::test]
-    fn test_toggle_group_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_toggle_group_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let group = GecisGrubu::new("complex-group")
             .child(Gecis::new("toggle1").label("Option 1"))
             .child(Gecis::new("toggle2").label("Option 2").checked(true))

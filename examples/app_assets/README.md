@@ -19,7 +19,7 @@ app_root
 
 ```rust
 use anyhow::anyhow;
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use rust_embed::RustEmbed;
 use std::borrow::Cow;
 
@@ -50,6 +50,6 @@ impl AssetSource for Varliklar {
 ## Uygulamada Kullanım
 
 ```rust
-let app = gpui_platform::application().with_assets(Varliklar);
-let hazir_paket = gpui_platform::application().with_assets(kavis_ui_assets::Assets);
+let app = kavis_ui::platform::application().with_assets(Varliklar);
+let hazir_paket = kavis_ui::platform::application().with_assets(kavis_ui_assets::Assets);
 ```

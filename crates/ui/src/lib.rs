@@ -144,6 +144,11 @@ pub mod ham_gpui {
     pub use gpui::*;
 }
 
+/// `gpui_platform` uygulama kurulum yuzeyini kavis-ui uzerinden aktarir.
+pub mod platform {
+    pub use gpui_platform::*;
+}
+
 /// `gpui::prelude` icerigini ham haliyle disa aktarir.
 ///
 /// Türkçe isimli prelude için bkz. [`onsoz`].

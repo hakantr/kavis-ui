@@ -1,5 +1,5 @@
 use chrono::{Datelike, Days, Duration, Utc};
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement as _, Render,
     Styled as _, Subscription, Window, div, px,
 };
@@ -163,7 +163,7 @@ impl DatePickerStory {
 }
 
 impl Focusable for DatePickerStory {
-    fn focus_handle(&self, cx: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, cx: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.date_picker.focus_handle(cx)
     }
 }

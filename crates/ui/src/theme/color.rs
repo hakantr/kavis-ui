@@ -1,11 +1,11 @@
 use std::{collections::HashMap, fmt::Display};
 
-use gpui::{Hsla, SharedString, hsla};
+use crate::ham_gpui::{Hsla, SharedString, hsla};
 use serde::{Deserialize, Deserializer, de::Error as _};
 
 use anyhow::{Error, Result, anyhow};
 
-/// Bir [`gpui::Hsla`] renk. oluşturur.
+/// Bir [`crate::ham_gpui::Hsla`] renk. oluşturur.
 ///
 /// - h: 0.360.0
 /// - s: 0.0.100.0
@@ -60,7 +60,7 @@ pub trait Renklendir: Sized {
 
 /// Helper fonksiyonlar için Oklab renk boşluk conversions
 mod oklab {
-    use gpui::Rgba;
+    use crate::ham_gpui::Rgba;
 
     /// sRGB bileşen için doğrusal RGB dönüştürür.
     #[inline]
@@ -301,7 +301,7 @@ impl Renklendir for Hsla {
             1.
         };
 
-        let v = gpui::Rgba { r, g, b, a };
+        let v = crate::ham_gpui::Rgba { r, g, b, a };
         let color: Hsla = v.into();
         Ok(color)
     }
@@ -674,7 +674,7 @@ color_methods!(rose);
 ///
 pub fn try_parse_color(color: &str) -> Result<Hsla> {
     if color.starts_with("#") {
-        let rgba = gpui::Rgba::try_from(color)?;
+        let rgba = crate::ham_gpui::Rgba::try_from(color)?;
         return Ok(rgba.into());
     }
 
@@ -740,7 +740,7 @@ pub fn try_parse_color(color: &str) -> Result<Hsla> {
 
 #[cfg(test)]
 mod tests {
-    use gpui::{rgb, rgba};
+    use crate::ham_gpui::{rgb, rgba};
 
     use super::*;
 
@@ -821,7 +821,7 @@ mod tests {
     fn test_mix_oklab() {
         let red = Hsla::parse_hex("#FF0000").unwrap();
         let blue = Hsla::parse_hex("#0000FF").unwrap();
-        let transparent = gpui::Hsla {
+        let transparent = crate::ham_gpui::Hsla {
             h: 0.0,
             s: 0.0,
             l: 0.0,

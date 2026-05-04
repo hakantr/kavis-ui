@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashSet, rc::Rc, sync::Arc};
 
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, ElementId, InteractiveElement as _, IntoElement, ParentElement, RenderOnce,
     SharedString, StatefulInteractiveElement as _, Styled, Window, div,
     prelude::FluentBuilder as _, rems,

@@ -3,7 +3,7 @@
 //!
 //! Not: diagnostics.rs WASM üzerinde kullanılabilir; yalnızca sözdizimi vurgulama yer tutucu gerektirir.
 
-use gpui::{HighlightStyle, SharedString};
+use crate::ham_gpui::{HighlightStyle, SharedString};
 use std::ops::Range;
 use std::time::Duration;
 
@@ -117,7 +117,7 @@ pub enum YaziKalinligiIcerigi {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, JsonSchema, Serialize, Deserialize)]
 pub struct TemaStili {
-    pub color: Option<gpui::Hsla>,
+    pub color: Option<crate::ham_gpui::Hsla>,
     pub font_style: Option<YaziTipiStili>,
     pub font_weight: Option<YaziKalinligiIcerigi>,
 }
@@ -127,20 +127,20 @@ impl From<TemaStili> for HighlightStyle {
         HighlightStyle {
             color: style.color,
             font_weight: style.font_weight.map(|w| match w {
-                YaziKalinligiIcerigi::Thin => gpui::FontWeight::THIN,
-                YaziKalinligiIcerigi::ExtraLight => gpui::FontWeight::EXTRA_LIGHT,
-                YaziKalinligiIcerigi::Light => gpui::FontWeight::LIGHT,
-                YaziKalinligiIcerigi::Normal => gpui::FontWeight::NORMAL,
-                YaziKalinligiIcerigi::Medium => gpui::FontWeight::MEDIUM,
-                YaziKalinligiIcerigi::Semibold => gpui::FontWeight::SEMIBOLD,
-                YaziKalinligiIcerigi::Bold => gpui::FontWeight::BOLD,
-                YaziKalinligiIcerigi::ExtraBold => gpui::FontWeight::EXTRA_BOLD,
-                YaziKalinligiIcerigi::Black => gpui::FontWeight::BLACK,
+                YaziKalinligiIcerigi::Thin => crate::ham_gpui::FontWeight::THIN,
+                YaziKalinligiIcerigi::ExtraLight => crate::ham_gpui::FontWeight::EXTRA_LIGHT,
+                YaziKalinligiIcerigi::Light => crate::ham_gpui::FontWeight::LIGHT,
+                YaziKalinligiIcerigi::Normal => crate::ham_gpui::FontWeight::NORMAL,
+                YaziKalinligiIcerigi::Medium => crate::ham_gpui::FontWeight::MEDIUM,
+                YaziKalinligiIcerigi::Semibold => crate::ham_gpui::FontWeight::SEMIBOLD,
+                YaziKalinligiIcerigi::Bold => crate::ham_gpui::FontWeight::BOLD,
+                YaziKalinligiIcerigi::ExtraBold => crate::ham_gpui::FontWeight::EXTRA_BOLD,
+                YaziKalinligiIcerigi::Black => crate::ham_gpui::FontWeight::BLACK,
             }),
             font_style: style.font_style.map(|s| match s {
-                YaziTipiStili::Normal => gpui::FontStyle::Normal,
-                YaziTipiStili::Italic => gpui::FontStyle::Italic,
-                YaziTipiStili::Underline => gpui::FontStyle::Normal,
+                YaziTipiStili::Normal => crate::ham_gpui::FontStyle::Normal,
+                YaziTipiStili::Italic => crate::ham_gpui::FontStyle::Italic,
+                YaziTipiStili::Underline => crate::ham_gpui::FontStyle::Normal,
             }),
             ..Default::default()
         }
@@ -171,75 +171,75 @@ pub struct DurumRenkleri {
 }
 
 impl DurumRenkleri {
-    pub fn error(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn error(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn error_background(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn error_background(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn error_border(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn error_border(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn warning(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn warning(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn warning_background(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn warning_background(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn warning_border(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn warning_border(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn info(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn info(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn info_background(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn info_background(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn info_border(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn info_border(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn success(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn success(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn success_background(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn success_background(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn success_border(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn success_border(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn hint(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn hint(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn hint_background(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn hint_background(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 
-    pub fn hint_border(&self, _cx: &gpui::App) -> gpui::Hsla {
-        gpui::Hsla::default()
+    pub fn hint_border(&self, _cx: &crate::ham_gpui::App) -> crate::ham_gpui::Hsla {
+        crate::ham_gpui::Hsla::default()
     }
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, JsonSchema, Serialize, Deserialize)]
 pub struct VurguTemasiStili {
-    pub editor_background: Option<gpui::Hsla>,
-    pub editor_foreground: Option<gpui::Hsla>,
-    pub editor_active_line: Option<gpui::Hsla>,
-    pub editor_line_number: Option<gpui::Hsla>,
-    pub editor_active_line_number: Option<gpui::Hsla>,
-    pub editor_invisible: Option<gpui::Hsla>,
+    pub editor_background: Option<crate::ham_gpui::Hsla>,
+    pub editor_foreground: Option<crate::ham_gpui::Hsla>,
+    pub editor_active_line: Option<crate::ham_gpui::Hsla>,
+    pub editor_line_number: Option<crate::ham_gpui::Hsla>,
+    pub editor_active_line_number: Option<crate::ham_gpui::Hsla>,
+    pub editor_invisible: Option<crate::ham_gpui::Hsla>,
     #[serde(flatten)]
     pub status: DurumRenkleri,
     #[serde(rename = "syntax")]

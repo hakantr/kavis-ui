@@ -1,7 +1,7 @@
 use futures::Stream as _;
 use std::{pin::Pin, task::Poll};
 
-use gpui::{
+use crate::ham_gpui::{
     App, AppContext as _, Bounds, ClipboardItem, Context, FocusHandle, IntoElement, KeyBinding,
     ListState as ListeDurumu, ParentElement as _, Pixels, Point, Render, SharedString, Styled as _,
     Task, Window, prelude::FluentBuilder as _, px,
@@ -110,7 +110,7 @@ impl MetinGorunumuDurumu {
             selection_positions: (None, None),
             selectable: false,
             scrollable: false,
-            list_state: ListeDurumu::new(0, gpui::ListAlignment::Top, px(1000.)),
+            list_state: ListeDurumu::new(0, crate::ham_gpui::ListAlignment::Top, px(1000.)),
             text_view_style: MetinGorunumuStili::default(),
             code_block_actions: None,
             is_selecting: false,
@@ -441,7 +441,7 @@ fn selection_points(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui::point;
+    use crate::ham_gpui::point;
 
     #[test]
     fn test_text_view_state_selection_points() {

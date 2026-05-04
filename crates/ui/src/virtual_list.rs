@@ -4,7 +4,7 @@
 //!
 //! Performans için yalnızca görünür aralık çizilir.
 //!
-//! `gpui::uniform_list` temel alınmıştır.
+//! `crate::ham_gpui::uniform_list` temel alınmıştır.
 //! https://github.com/zed-industries/zed/blob/0ae1603610ab6b265bdfbee7b8dbc23c5ab06edc/crates/gpui/src/elements/uniform_list.rs
 //!
 //! `uniform_list`'ten farklı olarak her öğe farklı boyutta olabilir.
@@ -17,7 +17,7 @@ use std::{
     rc::Rc,
 };
 
-use gpui::{
+use crate::ham_gpui::{
     Along, AnyElement, App, AvailableSpace, Axis, Bounds, ContentMask, Context,
     DeferredScrollToItem, Div, Element, ElementId, Entity, GlobalElementId, Half, Hitbox,
     InteractiveElement, IntoElement, IsZero as _, ListSizingBehavior, Pixels, Point, Render,
@@ -355,10 +355,10 @@ impl Element for SanalListe {
     fn request_layout(
         &mut self,
         global_id: Option<&GlobalElementId>,
-        inspector_id: Option<&gpui::InspectorElementId>,
+        inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
-    ) -> (gpui::LayoutId, Self::RequestLayoutState) {
+    ) -> (crate::ham_gpui::LayoutId, Self::RequestLayoutState) {
         let rem_size = window.rem_size();
         let font_size = window.text_style().font_size.to_pixels(rem_size);
         let mut size_layout = ItemSizeLayout::default();
@@ -518,7 +518,7 @@ impl Element for SanalListe {
     fn prepaint(
         &mut self,
         global_id: Option<&GlobalElementId>,
-        inspector_id: Option<&gpui::InspectorElementId>,
+        inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         layout: &mut Self::RequestLayoutState,
         window: &mut Window,
@@ -728,7 +728,7 @@ impl Element for SanalListe {
     fn paint(
         &mut self,
         global_id: Option<&GlobalElementId>,
-        inspector_id: Option<&gpui::InspectorElementId>,
+        inspector_id: Option<&crate::ham_gpui::InspectorElementId>,
         bounds: Bounds<Pixels>,
         layout: &mut Self::RequestLayoutState,
         hitbox: &mut Self::PrepaintState,

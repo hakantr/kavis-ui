@@ -7,8 +7,6 @@ edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
-gpui.workspace = true
-gpui_platform.workspace = true
 kavis-ui-assets.workspace = true
 kavis-ui.workspace = true
 sysinfo = "0.38.4"

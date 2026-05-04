@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     Action, AnyElement, AnyView, App, AppContext, Bounds, Context, Div, Entity, EventEmitter,
     FocusHandle, Focusable, Global, Hsla, InteractiveElement, IntoElement, KeyBinding,
     ParentElement, Pixels, Render, RenderOnce, SharedString, Size, StyleRefinement, Styled, Window,
@@ -112,15 +112,15 @@ pub fn create_new_window_with_size<F, E>(
         let options = WindowOptions {
             window_bounds: Some(WindowBounds::Windowed(window_bounds)),
             titlebar: Some(BaslikCubugu::title_bar_options()),
-            window_min_size: Some(gpui::Size {
+            window_min_size: Some(kavis_ui::ham_gpui::Size {
                 width: px(480.),
                 height: px(320.),
             }),
             kind: WindowKind::Normal,
             #[cfg(target_os = "linux")]
-            window_background: gpui::WindowBackgroundAppearance::Transparent,
+            window_background: kavis_ui::ham_gpui::WindowBackgroundAppearance::Transparent,
             #[cfg(target_os = "linux")]
-            window_decorations: Some(gpui::WindowDecorations::Client),
+            window_decorations: Some(kavis_ui::ham_gpui::WindowDecorations::Client),
             ..Default::default()
         };
 
@@ -321,7 +321,7 @@ impl ParentElement for StorySection {
 }
 
 impl Styled for StorySection {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut kavis_ui::ham_gpui::StyleRefinement {
         self.base.style()
     }
 }
@@ -577,13 +577,13 @@ fn localized_section_title(title: &str) -> SharedString {
 }
 
 pub struct StoryContainer {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     pub name: SharedString,
     pub navigation_name: SharedString,
     pub title_bg: Option<Hsla>,
     pub description: SharedString,
-    width: Option<gpui::Pixels>,
-    height: Option<gpui::Pixels>,
+    width: Option<kavis_ui::ham_gpui::Pixels>,
+    height: Option<kavis_ui::ham_gpui::Pixels>,
     story: Option<AnyView>,
     story_klass: Option<SharedString>,
     closable: bool,
@@ -859,12 +859,12 @@ impl StoryContainer {
         view
     }
 
-    pub fn width(mut self, width: gpui::Pixels) -> Self {
+    pub fn width(mut self, width: kavis_ui::ham_gpui::Pixels) -> Self {
         self.width = Some(width);
         self
     }
 
-    pub fn height(mut self, height: gpui::Pixels) -> Self {
+    pub fn height(mut self, height: kavis_ui::ham_gpui::Pixels) -> Self {
         self.height = Some(height);
         self
     }
@@ -1042,7 +1042,7 @@ impl Panel for StoryContainer {
 
 impl EventEmitter<PanelEvent> for StoryContainer {}
 impl Focusable for StoryContainer {
-    fn focus_handle(&self, _: &App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

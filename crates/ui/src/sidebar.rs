@@ -5,7 +5,7 @@ use crate::{
     scroll::KaydirilabilirOge,
     v_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     AbsoluteLength, AnyElement, App, ClickEvent, DefiniteLength, EdgesRefinement, ElementId,
     InteractiveElement as _, IntoElement, Length, ListAlignment, ListState as ListeDurumu,
     ParentElement, Pixels, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, list,

@@ -1,4 +1,4 @@
-use gpui::{Action, App, SharedString};
+use kavis_ui::ham_gpui::{Action, App, SharedString};
 use kavis_ui::{Tema, TemaKaydi, TemaModu, scroll::KaydirmaCubuguGosterimi};
 use serde::{Deserialize, Serialize};
 

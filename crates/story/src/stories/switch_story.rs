@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Div, Entity, FocusHandle, Focusable, IntoElement, ParentElement,
     Render, SharedString, Styled, Window, px,
 };
@@ -51,7 +51,7 @@ impl SwitchStory {
 }
 
 impl Focusable for SwitchStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

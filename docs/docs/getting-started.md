@@ -25,7 +25,7 @@ anyhow = "1"
 ## İlk Uygulama
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 
 pub struct Merhaba;
@@ -49,7 +49,7 @@ impl Render for Merhaba {
 }
 
 fn main() {
-    gpui_platform::application().run(move |cx| {
+    kavis_ui::platform::application().run(move |cx| {
         kavis_ui::init(cx);
 
         cx.spawn(async move |cx| {
@@ -72,7 +72,7 @@ fn main() {
 ## Durumsuz Öğe
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 
 struct Panel;

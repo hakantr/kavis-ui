@@ -1,4 +1,4 @@
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, Div, InteractiveElement, IntoElement, ParentElement, RenderOnce, StyleRefinement,
     Styled, div, prelude::FluentBuilder as _,
 };
@@ -59,19 +59,19 @@ impl Daraltilabilir for YanCubukBasligi {
 }
 
 impl ParentElement for YanCubukBasligi {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.children.extend(elements);
     }
 }
 
 impl Styled for YanCubukBasligi {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
 
 impl InteractiveElement for YanCubukBasligi {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.base.interactivity()
     }
 }
@@ -79,7 +79,7 @@ impl InteractiveElement for YanCubukBasligi {
 impl AcilirMenuTetikleyici for YanCubukBasligi {}
 
 impl RenderOnce for YanCubukBasligi {
-    fn render(self, _: &mut gpui::Window, cx: &mut gpui::App) -> impl gpui::IntoElement {
+    fn render(self, _: &mut crate::ham_gpui::Window, cx: &mut crate::ham_gpui::App) -> impl crate::ham_gpui::IntoElement {
         self.base
             .id("sidebar-header")
             .h_flex()

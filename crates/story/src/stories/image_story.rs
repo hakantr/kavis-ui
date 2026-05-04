@@ -1,12 +1,12 @@
 use crate::section;
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, IntoElement, ParentElement as _,
     Render, Styled, Window, img,
 };
 use kavis_ui::{dock::PanelDenetimi, v_flex};
 
 pub struct ImageStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
 }
 
 impl super::Story for ImageStory {

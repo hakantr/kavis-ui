@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     Action, AnyElement, AnyView, App, AppContext, Bounds, Context, Display, Element, ElementId,
     GlobalElementId, Half, InspectorElementId, IntoElement, LayoutId, ParentElement, Pixels, Point,
     Position, Render, SharedString, Size, StatefulInteractiveElement, Style, StyleRefinement,
@@ -605,7 +605,7 @@ impl<E: StatefulInteractiveElement + crate::OgeUzantisi> YonetilenAracIpucuUzant
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui::size;
+    use crate::ham_gpui::size;
 
     fn test_bounds(x: f32, y: f32, width: f32, height: f32) -> Bounds<Pixels> {
         Bounds::new(point(px(x), px(y)), size(px(width), px(height)))

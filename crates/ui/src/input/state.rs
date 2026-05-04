@@ -3,7 +3,7 @@
 //! Based on the `Input` example from the `gpui` crate.
 //! https://github.com/zed-industries/zed/blob/main/crates/gpui/examples/input.rs
 use anyhow::Result;
-use gpui::{
+use crate::ham_gpui::{
     Action, App, AppContext, Bounds, ClipboardItem, Context, Entity, EntityInputHandler,
     EventEmitter, FocusHandle, Focusable, InteractiveElement as _, IntoElement, KeyBinding,
     KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement as _,
@@ -11,7 +11,7 @@ use gpui::{
     Subscription, Task, UTF16Selection, Window, actions, div, point, prelude::FluentBuilder as _,
     px,
 };
-use gpui::{Half, TextAlign};
+use crate::ham_gpui::{Half, TextAlign};
 use ropey::{Rope, RopeSlice};
 use serde::Deserialize;
 use std::ops::Range;
@@ -334,7 +334,7 @@ pub struct InputState {
     /// Ertelenmiş kaydırma ofsetini bir sonraki yerleşimde uygular.
     pub(crate) deferred_scroll_offset: Option<Point<Pixels>>,
     /// boyut scrollable içerik.
-    pub(crate) scroll_size: gpui::Size<Pixels>,
+    pub(crate) scroll_size: crate::ham_gpui::Size<Pixels>,
     pub(super) text_align: TextAlign,
 
     /// maske desen için formatting girdi metin
@@ -447,7 +447,7 @@ impl InputState {
             last_selected_range: None,
             last_cursor: None,
             scroll_handle: ScrollHandle::new(),
-            scroll_size: gpui::size(px(0.), px(0.)),
+            scroll_size: crate::ham_gpui::size(px(0.), px(0.)),
             deferred_scroll_offset: None,
             preferred_column: None,
             placeholder: SharedString::default(),
@@ -1729,12 +1729,12 @@ impl InputState {
     }
 
     /// geçerli kaydırma ofset düzenleyici görünüm alanı.
-    pub fn scroll_offset(&self) -> gpui::Point<gpui::Pixels> {
+    pub fn scroll_offset(&self) -> crate::ham_gpui::Point<crate::ham_gpui::Pixels> {
         self.scroll_handle.offset()
     }
 
     /// Yerleşimi yapılmış satır yüksekliği; ilk yerleşimden önce `None` olur.
-    pub fn line_height(&self) -> Option<gpui::Pixels> {
+    pub fn line_height(&self) -> Option<crate::ham_gpui::Pixels> {
         self.last_layout.as_ref().map(|l| l.line_height)
     }
 
@@ -2562,7 +2562,7 @@ impl EntityInputHandler for InputState {
 
     fn character_index_for_point(
         &mut self,
-        point: gpui::Point<Pixels>,
+        point: crate::ham_gpui::Point<Pixels>,
         _window: &mut Window,
         _cx: &mut Context<Self>,
     ) -> Option<usize> {
@@ -2618,11 +2618,11 @@ impl Render for InputState {
 mod tests {
     use super::*;
     use crate::theme::Tema;
-    use gpui::{TestAppContext, VisualTestContext};
+    use crate::ham_gpui::{TestAppContext, VisualTestContext};
 
     struct InputView {
         input: Entity<InputState>,
-        window_handle: gpui::WindowHandle<KokGorunum>,
+        window_handle: crate::ham_gpui::WindowHandle<KokGorunum>,
     }
 
     /// Helper için oluşturur bir InputState içinde bir pencere için testing
@@ -2651,7 +2651,7 @@ mod tests {
         }
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn test_highlighting_preserved_after_fold(cx: &mut TestAppContext) {
         use crate::highlighter::VurguTemasi;
         use crate::input::display_map::FoldRange;
@@ -2692,7 +2692,7 @@ ORDER BY id
         let comment_start = cx.update(|_, cx| {
             input.read_with(cx, |state, _| state.text.line_start_offset(comment_line))
         });
-        let styles_before: Vec<(Range<usize>, gpui::HighlightStyle)> = cx.update(|_, cx| {
+        let styles_before: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> = cx.update(|_, cx| {
             input.read_with(cx, |state, _| {
                 let mode = &state.mode;
                 if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {
@@ -2736,7 +2736,7 @@ ORDER BY id
         });
 
         // Get styles for the same comment line after folding
-        let styles_after: Vec<(Range<usize>, gpui::HighlightStyle)> = cx.update(|_, cx| {
+        let styles_after: Vec<(Range<usize>, crate::ham_gpui::HighlightStyle)> = cx.update(|_, cx| {
             input.read_with(cx, |state, _| {
                 let mode = &state.mode;
                 if let crate::input::mode::InputMode::CodeEditor { highlighter, .. } = mode {

@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::time::Duration;
 use std::{cell::RefCell, ops::Range};
 
-use gpui::{App, SharedString, Task};
+use crate::ham_gpui::{App, SharedString, Task};
 use ropey::Rope;
 
 use super::display_map::DisplayMap;

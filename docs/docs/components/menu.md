@@ -10,7 +10,7 @@ Popup, bağlam ve uygulama menüsü altyapısını kapsar. Güncel örnekler Kav
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

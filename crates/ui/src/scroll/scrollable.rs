@@ -3,7 +3,7 @@ use std::{panic::Location, rc::Rc};
 use crate::{StilUzantisi, scroll::KaydirmaCubuguTutamaci};
 
 use super::{KaydirmaCubugu, KaydirmaCubuguEkseni};
-use gpui::{
+use crate::ham_gpui::{
     App, Div, Element, ElementId, InteractiveElement, IntoElement, ParentElement, RenderOnce,
     ScrollHandle, Stateful, StatefulInteractiveElement, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder,
@@ -91,19 +91,19 @@ impl<E> ParentElement for Kaydirilabilir<E>
 where
     E: InteractiveElement + Styled + ParentElement + Element,
 {
-    fn extend(&mut self, elements: impl IntoIterator<Item = gpui::AnyElement>) {
+    fn extend(&mut self, elements: impl IntoIterator<Item = crate::ham_gpui::AnyElement>) {
         self.element.extend(elements)
     }
 }
 
 impl InteractiveElement for Kaydirilabilir<Div> {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.element.interactivity()
     }
 }
 
 impl InteractiveElement for Kaydirilabilir<Stateful<Div>> {
-    fn interactivity(&mut self) -> &mut gpui::Interactivity {
+    fn interactivity(&mut self) -> &mut crate::ham_gpui::Interactivity {
         self.element.interactivity()
     }
 }

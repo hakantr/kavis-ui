@@ -7,8 +7,6 @@ edition.workspace = true
 
 [dependencies]
 anyhow.workspace = true
-gpui.workspace = true
-gpui_platform.workspace = true
 kavis-ui = { workspace = true }
 
 [lints]

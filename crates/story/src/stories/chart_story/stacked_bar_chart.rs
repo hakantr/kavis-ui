@@ -1,6 +1,6 @@
 // You can draw any chart you want by using the `Plot`.
 
-use gpui::{App, Bounds, Pixels, TextAlign, Window, px};
+use kavis_ui::ham_gpui::{App, Bounds, Pixels, TextAlign, Window, px};
 use kavis_ui::{
     EtkinTema,
     plot::{

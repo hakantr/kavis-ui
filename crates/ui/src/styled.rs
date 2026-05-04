@@ -1,5 +1,5 @@
 use crate::EtkinTema;
-use gpui::{
+use crate::ham_gpui::{
     App, BoxShadow, Corners, DefiniteLength, Div, Edges, FocusHandle, Hsla, ParentElement, Pixels,
     Refineable, StyleRefinement, Styled, Window, div, point, px,
 };
@@ -45,12 +45,12 @@ macro_rules! font_weight {
         /// [docs](https://tailwindcss.com/docs/font-weight)
         #[inline]
         fn $fn(self) -> Self {
-            self.font_weight(gpui::FontWeight::$const)
+            self.font_weight(crate::ham_gpui::FontWeight::$const)
         }
     };
 }
 
-/// Extends [`gpui::Styled`] ile özel styling yöntemler.
+/// Extends [`crate::ham_gpui::Styled`] ile özel styling yöntemler.
 #[cfg_attr(
     any(feature = "inspector", debug_assertions),
     gpui_macros::derive_inspector_reflection
@@ -642,7 +642,7 @@ pub trait Daraltilabilir {
 
 #[cfg(test)]
 mod tests {
-    use gpui::px;
+    use crate::ham_gpui::px;
 
     use crate::BilesenBoyutu;
 

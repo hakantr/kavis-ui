@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use gpui::prelude::FluentBuilder as _;
-use gpui::{
+use crate::ham_gpui::prelude::FluentBuilder as _;
+use crate::ham_gpui::{
     AnyElement, App, Bounds, Element, ElementId, Entity, GlobalElementId, Hitbox, HitboxBehavior,
     InspectorElementId, InteractiveElement, IntoElement, LayoutId, MouseDownEvent, MouseMoveEvent,
     MouseUpEvent, ParentElement, Pixels, SharedString, StyleRefinement, Styled, Window, div,
@@ -117,7 +117,7 @@ impl MetinGorunumu {
     ///
     /// `scrollable` mod için kullanılır büyük içerik,
     /// Kaydırma çubuğunu gösterir; bunun için üst öğenin sabit yüksekliği olmalıdır,
-    /// ve kullanım [`gpui::list`] çizmek için içerik içinde bir virtualized yol.
+    /// ve kullanım [`crate::ham_gpui::list`] çizmek için içerik içinde bir virtualized yol.
     ///
     /// ## Eğer false için fit içerik
     ///
@@ -336,7 +336,7 @@ impl Element for MetinGorunumu {
 mod tests {
     use super::MetinGorunumu;
     use crate::text::MetinGorunumuDurumu;
-    use gpui::{
+    use crate::ham_gpui::{
         AppContext as _, Context, Entity, IntoElement, Modifiers, MouseButton, ParentElement as _,
         Render, Styled as _, TestAppContext, VisualTestContext, Window, div, point, px,
     };
@@ -367,7 +367,7 @@ mod tests {
         }
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn clipped_markdown_link_does_not_open(cx: &mut TestAppContext) {
         cx.update(crate::init);
         let (_, cx) = cx.add_window_view(|_, cx| {
@@ -380,7 +380,7 @@ mod tests {
         assert_eq!(cx.opened_url(), None);
     }
 
-    #[gpui::test]
+    #[crate::ham_gpui::test]
     fn clipped_markdown_cannot_start_selection(cx: &mut TestAppContext) {
         cx.update(crate::init);
         let (view, cx) = cx

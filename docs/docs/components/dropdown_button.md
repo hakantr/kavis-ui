@@ -10,7 +10,7 @@ Düğme ile açılır menüyü birleştirir. Güncel örnekler Kavis UI'nin Tür
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

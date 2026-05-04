@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     Anchor, Animation, AnimationExt as _, AnyElement, App, Bounds, Div, Edges, ElementId,
     InteractiveElement, IntoElement, ParentElement, Pixels, RenderOnce, ScrollHandle, SharedString,
     Stateful, StatefulInteractiveElement as _, StyleRefinement, Styled, Window, div,
@@ -255,8 +255,8 @@ impl SekmeCubugu {
         &self,
         selected_ix: usize,
         bounds_rc: &Option<Rc<RefCell<TabIndicatorBounds>>>,
-        prev_selected: &gpui::Entity<usize>,
-        anim_params: &gpui::Entity<(Pixels, Pixels, Pixels, Pixels, u64)>,
+        prev_selected: &crate::ham_gpui::Entity<usize>,
+        anim_params: &crate::ham_gpui::Entity<(Pixels, Pixels, Pixels, Pixels, u64)>,
         cx: &mut App,
     ) {
         let rc = match bounds_rc {

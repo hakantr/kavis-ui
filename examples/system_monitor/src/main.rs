@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::time::Duration;
 
-use gpui::{actions, prelude::FluentBuilder as _, *};
+use kavis_ui::ham_gpui::{actions, prelude::FluentBuilder as _, *};
 use kavis_ui::TemaModu;
 use kavis_ui::{
     BaslikCubugu, Boyutlandirilabilir, EtkinTema, KokGorunum, Simge, SimgeAdi, Tema,
@@ -599,7 +599,7 @@ impl Render for SystemMonitor {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(kavis_ui_assets::Varliklar);
+    let app = kavis_ui::platform::application().with_assets(kavis_ui_assets::Varliklar);
 
     app.run(move |cx| {
         kavis_ui::init(cx);

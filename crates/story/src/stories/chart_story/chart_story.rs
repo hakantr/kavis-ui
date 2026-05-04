@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, Hsla, IntoElement, ParentElement,
     Render, SharedString, Styled, Window, div, linear_color_stop, linear_gradient,
     prelude::FluentBuilder, px,

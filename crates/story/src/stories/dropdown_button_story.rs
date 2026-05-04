@@ -1,4 +1,4 @@
-use gpui::{
+use kavis_ui::ham_gpui::{
     Action, Anchor, App, AppContext as _, Context, Entity, Focusable, IntoElement,
     ParentElement as _, Render, Styled as _, Window, prelude::FluentBuilder as _,
 };
@@ -22,7 +22,7 @@ enum ButtonAction {
 }
 
 pub struct DropdownButtonStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     disabled: bool,
     loading: bool,
     selected: bool,
@@ -60,7 +60,7 @@ impl super::Story for DropdownButtonStory {
 }
 
 impl Focusable for DropdownButtonStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

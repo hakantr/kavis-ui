@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt, ElementId, IntoElement, Pixels, Point, Styled, point,
     prelude::FluentBuilder, px,
 };
@@ -159,7 +159,7 @@ impl Transition {
         self,
         element: E,
         id: impl Into<ElementId>,
-    ) -> gpui::AnimationElement<E> {
+    ) -> crate::ham_gpui::AnimationElement<E> {
         let animation = Animation::new(self.duration).with_easing({
             let easing = self.easing.clone();
             move |t| easing(t)

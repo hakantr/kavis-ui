@@ -1,7 +1,7 @@
 use std::{cell::OnceCell, collections::HashMap, fmt::Write as _, rc::Rc, sync::OnceLock};
 
 use anyhow::Result;
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, AppContext, Context, DivInspectorState, Entity, Inspector, InspectorElementId,
     InteractiveElement as _, IntoElement, KeyBinding, ParentElement as _, Refineable as _, Render,
     SharedString, StyleRefinement, Styled, Subscription, Task, Window, actions, div,
@@ -287,7 +287,7 @@ impl StyleMethods {
         STYLE_METHODS.get_or_init(|| {
             let table: Vec<_> = [
                 crate::stil_uzantisi_reflection::methods::<StyleRefinement>(),
-                gpui::styled_reflection::methods::<StyleRefinement>(),
+                crate::ham_gpui::styled_reflection::methods::<StyleRefinement>(),
             ]
             .into_iter()
             .flatten()
@@ -633,7 +633,7 @@ impl CompletionProvider for LspProvider {
 
 #[cfg(test)]
 mod tests {
-    use gpui::{AbsoluteLength, DefiniteLength, Length, rems};
+    use crate::ham_gpui::{AbsoluteLength, DefiniteLength, Length, rems};
     use indoc::indoc;
     use lsp_types::Position;
 

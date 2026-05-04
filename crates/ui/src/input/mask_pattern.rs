@@ -1,5 +1,5 @@
 use crate::i18n::NumberSymbols;
-use gpui::SharedString;
+use crate::ham_gpui::SharedString;
 use std::ops::Range;
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -1,4 +1,4 @@
-use gpui::{App, Styled};
+use crate::ham_gpui::{App, Styled};
 
 use crate::{
     Boyutlandirilabilir as _, EtkinTema as _, Simge, SimgeAdi,

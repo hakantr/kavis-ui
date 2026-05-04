@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     App, ClipboardItem, ElementId, IntoElement, RenderOnce, SharedString, Window,
     prelude::FluentBuilder,
 };

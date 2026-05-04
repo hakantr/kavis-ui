@@ -1,5 +1,5 @@
 use crate::section;
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Entity, Focusable, IntoElement, ParentElement, Render, Styled,
     Window, px,
 };
@@ -8,7 +8,7 @@ use kavis_ui::{EtkinTema, divider::Ayirici, h_flex, label::Etiket, v_flex};
 const DESCRIPTION: &str = "Kavis UI, GPUI ile güçlü çapraz platform masaüstü uygulamaları geliştirmek için Rust GUI bileşenleri sunar.";
 
 pub struct DividerStory {
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
 }
 
 impl super::Story for DividerStory {
@@ -34,7 +34,7 @@ impl DividerStory {
 }
 
 impl Focusable for DividerStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }

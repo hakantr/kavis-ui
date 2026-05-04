@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::ops::Range;
 use std::rc::Rc;
 
-use gpui::{DefiniteLength, SharedString, px, relative};
+use crate::ham_gpui::{DefiniteLength, SharedString, px, relative};
 use html5ever::tendril::TendrilSink;
 use html5ever::{LocalName, ParseOpts, local_name, parse_document};
 use markup5ever_rcdom::{Node, NodeData, RcDom};
@@ -621,7 +621,7 @@ fn consume_paragraph(children: &mut Vec<BlockNode>, paragraph: &mut Paragraph) {
 
 #[cfg(test)]
 mod tests {
-    use gpui::{px, relative};
+    use crate::ham_gpui::{px, relative};
 
     use crate::text::{
         document::ParsedDocument,

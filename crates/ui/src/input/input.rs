@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use gpui::prelude::FluentBuilder as _;
-use gpui::{
+use crate::ham_gpui::prelude::FluentBuilder as _;
+use crate::ham_gpui::{
     AnyElement, App, Context, DefiniteLength, Edges, EdgesRefinement, Entity, Hsla,
     InteractiveElement as _, IntoElement, IsZero, MouseButton, ParentElement as _, Rems,
     RenderOnce, StyleRefinement, Styled, TextAlign, Window, div, px, relative,
@@ -233,7 +233,7 @@ impl Input {
                         paddings.left + last_layout.line_number_width - LINE_NUMBER_RIGHT_MARGIN
                     };
 
-                    let scroll_size = gpui::Size {
+                    let scroll_size = crate::ham_gpui::Size {
                         width: state.scroll_size.width - left + paddings.right + RIGHT_MARGIN,
                         height: state.scroll_size.height,
                     };

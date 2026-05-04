@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     EtkinTema as _, KokGorunum, OdakTuzagiOgesi as _, StilUzantisi as _, button::Dugme, h_flex,
     v_flex,
@@ -136,7 +136,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application();
+    let app = kavis_ui::platform::application();
 
     app.run(move |cx| {
         kavis_ui::init(cx);

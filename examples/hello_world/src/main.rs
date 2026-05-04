@@ -1,4 +1,4 @@
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::{
     EtkinTema as _, KokGorunum, StilUzantisi as _,
     button::{Dugme, DugmeVaryantlari as _},
@@ -24,7 +24,7 @@ impl Render for Example {
 }
 
 fn main() {
-    gpui_platform::application().run(move |cx| {
+    kavis_ui::platform::application().run(move |cx| {
         // This must be called before using any Kavis UI features.
         kavis_ui::init(cx);
 

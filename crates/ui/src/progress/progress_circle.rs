@@ -1,11 +1,11 @@
 use crate::{BilesenBoyutu, Boyutlandirilabilir, EtkinTema, StilUzantisi};
-use gpui::prelude::FluentBuilder as _;
-use gpui::{
+use crate::ham_gpui::prelude::FluentBuilder as _;
+use crate::ham_gpui::{
     Animation, AnimationExt as _, AnyElement, App, ElementId, Hsla, InteractiveElement as _,
     IntoElement, ParentElement, Pixels, RenderOnce, StyleRefinement, Styled, Window, canvas,
     ease_in_out, px, relative,
 };
-use gpui::{Bounds, div};
+use crate::ham_gpui::{Bounds, div};
 use instant::Duration;
 use std::f32::consts::TAU;
 

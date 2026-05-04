@@ -6,7 +6,7 @@
 /// - Metin veya yerleşim değiştiğinde otomatik projeksiyon güncellemeleri
 use std::ops::Range;
 
-use gpui::{App, Font, Pixels};
+use crate::ham_gpui::{App, Font, Pixels};
 use ropey::Rope;
 
 use super::fold_map::FoldMap;

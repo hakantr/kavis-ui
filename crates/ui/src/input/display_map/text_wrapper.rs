@@ -1,7 +1,7 @@
-use gpui::Half;
+use crate::ham_gpui::Half;
 use std::ops::Range;
 
-use gpui::{
+use crate::ham_gpui::{
     App, Font, LineFragment, Pixels, Point, ShapedLine, Size, TextAlign, Window, point, px, size,
 };
 use ropey::Rope;
@@ -165,7 +165,7 @@ impl TextWrapper {
         new_text: &Rope,
         wrap_line: &mut F,
     ) where
-        F: FnMut(&str, Pixels) -> Vec<gpui::Boundary>,
+        F: FnMut(&str, Pixels) -> Vec<crate::ham_gpui::Boundary>,
     {
         // Remove the old changed lines.
         let start_row = self.text.offset_to_point(range.start).row;
@@ -585,11 +585,11 @@ mod tests {
     use super::*;
     use std::rc::Rc;
 
-    use gpui::{Boundary, FontFeatures, FontStyle as YaziTipiStili, FontWeight, px};
+    use crate::ham_gpui::{Boundary, FontFeatures, FontStyle as YaziTipiStili, FontWeight, px};
 
     #[test]
     fn test_update() {
-        let font = gpui::Font {
+        let font = crate::ham_gpui::Font {
             family: "Arial".into(),
             weight: FontWeight::default(),
             style: YaziTipiStili::Normal,
@@ -828,7 +828,7 @@ mod tests {
 
     #[test]
     fn test_offset_to_display_point() {
-        let font = gpui::Font {
+        let font = crate::ham_gpui::Font {
             family: "Arial".into(),
             weight: FontWeight::default(),
             style: YaziTipiStili::Normal,

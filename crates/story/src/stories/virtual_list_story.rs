@@ -1,6 +1,6 @@
 use std::{ops::Range, rc::Rc};
 
-use gpui::{
+use kavis_ui::ham_gpui::{
     App, AppContext, Context, Div, Entity, FocusHandle, Focusable, InteractiveElement, IntoElement,
     ParentElement, Pixels, Render, ScrollStrategy, Size, Styled, Window, div, px, size,
 };
@@ -217,7 +217,7 @@ impl super::Story for VirtualListStory {
 }
 
 impl Focusable for VirtualListStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -225,9 +225,9 @@ impl Focusable for VirtualListStory {
 impl Render for VirtualListStory {
     fn render(
         &mut self,
-        _: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        _: &mut kavis_ui::ham_gpui::Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         let columns_count = self.columns_count;
 
         fn render_item(cx: &App) -> Div {

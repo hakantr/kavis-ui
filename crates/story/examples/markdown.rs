@@ -1,4 +1,4 @@
-use gpui::{prelude::FluentBuilder as _, *};
+use kavis_ui::ham_gpui::{prelude::FluentBuilder as _, *};
 use kavis_ui::{
     Boyutlandirilabilir as _, EtkinTema as _, SimgeAdi,
     button::{Dugme, DugmeVaryantlari as _},
@@ -147,7 +147,7 @@ impl Render for Example {
 }
 
 fn main() {
-    let app = gpui_platform::application().with_assets(Varliklar);
+    let app = kavis_ui::platform::application().with_assets(Varliklar);
 
     app.run(move |cx| {
         kavis_ui_story::init(cx);

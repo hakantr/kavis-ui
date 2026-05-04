@@ -10,7 +10,7 @@ Bölünmüş panellerin sürüklenerek yeniden boyutlandırılmasını sağlar. 
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

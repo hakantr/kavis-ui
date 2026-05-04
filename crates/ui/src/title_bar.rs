@@ -4,7 +4,7 @@ use crate::{
     Boyutlandirilabilir as _, EtkilesimliOgeUzantisi as _, EtkinTema, Simge, SimgeAdi,
     StilUzantisi, h_flex,
 };
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, ClickEvent, Context, Decorations, Hsla, InteractiveElement, IntoElement,
     MouseButton, ParentElement, Pixels, Render, RenderOnce, StatefulInteractiveElement as _,
     StyleRefinement, Styled, TitlebarOptions, Window, WindowControlArea, div,
@@ -43,7 +43,7 @@ impl BaslikCubugu {
         TitlebarOptions {
             title: None,
             appears_transparent: true,
-            traffic_light_position: Some(gpui::point(px(9.0), px(9.0))),
+            traffic_light_position: Some(crate::ham_gpui::point(px(9.0), px(9.0))),
         }
     }
 
@@ -228,7 +228,7 @@ impl RenderOnce for WindowControls {
 }
 
 impl Styled for BaslikCubugu {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }

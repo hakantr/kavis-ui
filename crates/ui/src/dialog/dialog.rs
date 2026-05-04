@@ -1,6 +1,6 @@
 use std::{rc::Rc, sync::LazyLock, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt as _, AnyElement, App, Bounds, BoxShadow, ClickEvent, Edges,
     FocusHandle, Hsla, InteractiveElement, IntoElement, KeyBinding, MouseButton, ParentElement,
     Pixels, Point, RenderOnce, SharedString, StyleRefinement, Styled, Window, WindowControlArea,
@@ -395,7 +395,7 @@ impl ParentElement for IletisimKutusu {
 }
 
 impl Styled for IletisimKutusu {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -449,7 +449,7 @@ impl RenderOnce for IletisimKutusu {
 
         let window_paddings = crate::window_border::window_paddings(window);
         let view_size = window.viewport_size()
-            - gpui::size(
+            - crate::ham_gpui::size(
                 window_paddings.left + window_paddings.right,
                 window_paddings.top + window_paddings.bottom,
             );

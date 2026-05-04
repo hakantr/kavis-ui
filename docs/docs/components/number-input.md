@@ -10,7 +10,7 @@ Sayısal değerler için input state kullanan bileşen. Güncel örnekler Kavis 
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

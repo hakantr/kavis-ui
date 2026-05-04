@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt as _, AnyElement, App, ClickEvent, DefiniteLength, DismissEvent, Edges,
     EventEmitter, FocusHandle, InteractiveElement as _, IntoElement, KeyBinding, MouseButton,
     ParentElement, Pixels, RenderOnce, StyleRefinement, Styled, Window, WindowControlArea,
@@ -128,7 +128,7 @@ impl ParentElement for SayfaKatmani {
     }
 }
 impl Styled for SayfaKatmani {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -138,7 +138,7 @@ impl RenderOnce for SayfaKatmani {
         let placement = self.placement;
         let window_paddings = crate::window_border::window_paddings(window);
         let size = window.viewport_size()
-            - gpui::size(
+            - crate::ham_gpui::size(
                 window_paddings.left + window_paddings.right,
                 window_paddings.top + window_paddings.bottom,
             );

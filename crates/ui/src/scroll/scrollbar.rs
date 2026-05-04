@@ -3,7 +3,7 @@ use std::{cell::Cell, ops::Deref, panic::Location, rc::Rc};
 use instant::{Duration, Instant};
 
 use crate::{EksenUzantisi, EtkinTema};
-use gpui::{
+use crate::ham_gpui::{
     Anchor, App, Axis, BorderStyle, Bounds, ContentMask, CursorStyle, Edges, Element, ElementId,
     GlobalElementId, Hitbox, HitboxBehavior, Hsla, InspectorElementId, IntoElement, IsZero,
     LayoutId, ListState as ListeDurumu, MouseDownEvent, MouseMoveEvent, MouseUpEvent, PaintQuad,
@@ -414,7 +414,7 @@ impl KaydirmaCubugu {
         (
             cx.theme().scrollbar_thumb,
             cx.theme().scrollbar,
-            gpui::transparent_black(),
+            crate::ham_gpui::transparent_black(),
             THUMB_ACTIVE_WIDTH,
             THUMB_ACTIVE_INSET,
             THUMB_ACTIVE_RADIUS,
@@ -431,7 +431,7 @@ impl KaydirmaCubugu {
         (
             cx.theme().scrollbar_thumb,
             cx.theme().scrollbar,
-            gpui::transparent_black(),
+            crate::ham_gpui::transparent_black(),
             width,
             inset,
             radius,
@@ -446,9 +446,9 @@ impl KaydirmaCubugu {
         };
 
         (
-            gpui::transparent_black(),
-            gpui::transparent_black(),
-            gpui::transparent_black(),
+            crate::ham_gpui::transparent_black(),
+            crate::ham_gpui::transparent_black(),
+            crate::ham_gpui::transparent_black(),
             width,
             inset,
             radius,
@@ -493,7 +493,7 @@ impl Element for KaydirmaCubugu {
     type RequestLayoutState = ();
     type PrepaintState = PrepaintState;
 
-    fn id(&self) -> Option<gpui::ElementId> {
+    fn id(&self) -> Option<crate::ham_gpui::ElementId> {
         Some(self.id.clone())
     }
 
@@ -586,7 +586,7 @@ impl Element for KaydirmaCubugu {
                         hitbox.origin.y + hitbox.size.height - WIDTH,
                     )
                 },
-                size: gpui::Size {
+                size: crate::ham_gpui::Size {
                     width: if is_vertical {
                         WIDTH
                     } else {
@@ -695,7 +695,7 @@ impl Element for KaydirmaCubugu {
             };
 
             let bar_hitbox = window.with_content_mask(Some(ContentMask { bounds }), |window| {
-                window.insert_hitbox(bounds, gpui::HitboxBehavior::Normal)
+                window.insert_hitbox(bounds, crate::ham_gpui::HitboxBehavior::Normal)
             });
 
             states.push(AxisPrepaintState {
@@ -776,7 +776,7 @@ impl Element for KaydirmaCubugu {
                         cx.paint_quad(PaintQuad {
                             bounds,
                             corner_radii: (0.).into(),
-                            background: gpui::transparent_black().into(),
+                            background: crate::ham_gpui::transparent_black().into(),
                             border_widths: if is_vertical {
                                 Edges {
                                     top: px(0.),

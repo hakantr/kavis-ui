@@ -8,7 +8,7 @@ use crate::{
     h_flex,
     tooltip::{AracIpucu, YonetilenAracIpucuUzantisi as _},
 };
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, ClickEvent, Corners, Div, Edges, ElementId, Hsla, InteractiveElement,
     Interactivity, IntoElement, MouseButton, ParentElement, Pixels, RenderOnce, SharedString,
     Stateful, StatefulInteractiveElement as _, StyleRefinement, Styled, Window, div,
@@ -201,9 +201,9 @@ pub struct Dugme {
     compact: bool,
     tooltip: Option<(
         SharedString,
-        Option<(Rc<Box<dyn gpui::Action>>, Option<SharedString>)>,
+        Option<(Rc<Box<dyn crate::ham_gpui::Action>>, Option<SharedString>)>,
     )>,
-    tooltip_builder: Option<Rc<dyn Fn(&mut Window, &mut App) -> gpui::AnyView>>,
+    tooltip_builder: Option<Rc<dyn Fn(&mut Window, &mut App) -> crate::ham_gpui::AnyView>>,
     on_click: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>>,
     on_hover: Option<Rc<dyn Fn(&bool, &mut Window, &mut App)>>,
     loading: bool,
@@ -306,7 +306,7 @@ impl Dugme {
     pub fn tooltip_with_action(
         mut self,
         tooltip: impl Into<SharedString>,
-        action: &dyn gpui::Action,
+        action: &dyn crate::ham_gpui::Action,
         context: Option<&str>,
     ) -> Self {
         self.tooltip = Some((
@@ -989,8 +989,8 @@ impl DugmeVaryanti {
 mod tests {
     use super::*;
 
-    #[gpui::test]
-    fn test_button_builder(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_builder(_cx: &mut crate::ham_gpui::TestAppContext) {
         let button = Dugme::new("complex-button")
             .label("Save Changes")
             .primary()
@@ -1022,8 +1022,8 @@ mod tests {
         assert!(matches!(button.rounded, DugmeYuvarlakligi::Medium));
     }
 
-    #[gpui::test]
-    fn test_button_clickable_logic(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_clickable_logic(_cx: &mut crate::ham_gpui::TestAppContext) {
         // Dugme with click handler should be clickable
         let clickable = Dugme::new("test").on_click(|_, _, _| {});
         assert!(clickable.clickable());
@@ -1037,8 +1037,8 @@ mod tests {
         assert!(!loading.clickable());
     }
 
-    #[gpui::test]
-    fn test_button_variant_methods(_cx: &mut gpui::TestAppContext) {
+    #[crate::ham_gpui::test]
+    fn test_button_variant_methods(_cx: &mut crate::ham_gpui::TestAppContext) {
         // Test variant check methods
         assert!(DugmeVaryanti::Link.is_link());
         assert!(DugmeVaryanti::Text.is_text());

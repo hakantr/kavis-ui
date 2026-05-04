@@ -10,7 +10,7 @@ Modal içerik, başlık, açıklama ve eylemler için kullanılır. Güncel örn
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

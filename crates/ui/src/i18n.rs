@@ -1,5 +1,5 @@
 use chrono::{Datelike, NaiveDate};
-use gpui::SharedString;
+use crate::ham_gpui::SharedString;
 use icu::{
     calendar::{Gregorian, types::Weekday, week::WeekInformation},
     datetime::{

@@ -2,7 +2,7 @@ use crate::{
     BilesenBoyutu, Boyutlandirilabilir, DevreDisiBirakilabilir, EtkinTema, Side, StilUzantisi,
     h_flex, text::Text, tooltip::BilesenAracIpucu,
 };
-use gpui::{
+use crate::ham_gpui::{
     Animation, AnimationExt as _, App, ElementId, Hsla, InteractiveElement, IntoElement,
     ParentElement as _, RenderOnce, SharedString, StyleRefinement, Styled, Window, div,
     prelude::FluentBuilder as _, px,
@@ -78,7 +78,7 @@ impl Anahtar {
 }
 
 impl Styled for Anahtar {
-    fn style(&mut self) -> &mut gpui::StyleRefinement {
+    fn style(&mut self) -> &mut crate::ham_gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -210,7 +210,7 @@ impl RenderOnce for Anahtar {
                         .filter(|_| !self.disabled),
                     |this, on_click| {
                         let toggle_state = toggle_state.clone();
-                        this.on_mouse_down(gpui::MouseButton::Left, move |_, window, cx| {
+                        this.on_mouse_down(crate::ham_gpui::MouseButton::Left, move |_, window, cx| {
                             cx.stop_propagation();
                             _ = toggle_state.update(cx, |this, _| *this = checked);
                             on_click(&!checked, window, cx);

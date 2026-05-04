@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{
+use crate::ham_gpui::{
     Anchor, Context, DismissEvent, ElementId, Entity, Focusable, InteractiveElement, IntoElement,
     RenderOnce, SharedString, StyleRefinement, Styled, Window,
 };
@@ -84,7 +84,7 @@ impl<T> RenderOnce for AcilirMenuKatmani<T>
 where
     T: Secilebilir + IntoElement + 'static,
 {
-    fn render(self, window: &mut Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, window: &mut Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         let builder = self.builder.clone();
         let menu_state =
             window.use_keyed_state(self.id.clone(), cx, |_, _| AcilirMenuDurumu::default());

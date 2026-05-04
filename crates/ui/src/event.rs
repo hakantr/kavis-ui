@@ -1,4 +1,4 @@
-use gpui::{App, ClickEvent, InteractiveElement, Stateful, Window};
+use crate::ham_gpui::{App, ClickEvent, InteractiveElement, Stateful, Window};
 
 pub trait EtkilesimliOgeUzantisi: InteractiveElement {
     /// dinleyici için bir double tıklama olay ayarlar.

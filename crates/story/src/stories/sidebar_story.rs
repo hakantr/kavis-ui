@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use gpui::{
+use kavis_ui::ham_gpui::{
     Action, App, AppContext, ClickEvent, Context, Entity, Focusable, IntoElement, ParentElement,
     Render, SharedString, Styled, Window, div, prelude::FluentBuilder, px, relative,
 };
@@ -33,7 +33,7 @@ pub struct SidebarStory {
     side: Side,
     click_to_toggle_submenu: bool,
     show_dynamic_children: bool,
-    focus_handle: gpui::FocusHandle,
+    focus_handle: kavis_ui::ham_gpui::FocusHandle,
     checked: bool,
 }
 
@@ -266,7 +266,7 @@ impl super::Story for SidebarStory {
 }
 
 impl Focusable for SidebarStory {
-    fn focus_handle(&self, _: &gpui::App) -> gpui::FocusHandle {
+    fn focus_handle(&self, _: &kavis_ui::ham_gpui::App) -> kavis_ui::ham_gpui::FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -274,9 +274,9 @@ impl Focusable for SidebarStory {
 impl Render for SidebarStory {
     fn render(
         &mut self,
-        window: &mut gpui::Window,
-        cx: &mut gpui::Context<Self>,
-    ) -> impl gpui::IntoElement {
+        window: &mut kavis_ui::ham_gpui::Window,
+        cx: &mut kavis_ui::ham_gpui::Context<Self>,
+    ) -> impl kavis_ui::ham_gpui::IntoElement {
         let groups: [Vec<Item>; 2] = [
             vec![
                 Item::Playground,

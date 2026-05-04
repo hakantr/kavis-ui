@@ -1,4 +1,4 @@
-use gpui::SharedString;
+use crate::ham_gpui::SharedString;
 use markdown::{
     ParseOptions,
     mdast::{self, Node},

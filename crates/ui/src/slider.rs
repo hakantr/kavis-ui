@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use crate::{EksenUzantisi, EtkinTema, OgeUzantisi, StilUzantisi, h_flex};
-use gpui::{
+use crate::ham_gpui::{
     Along, App, AppContext as _, Axis, Background, Bounds, Context, Corners, DefiniteLength,
     DragMoveEvent, Empty, Entity, EntityId, EventEmitter, Hsla, InteractiveElement, IntoElement,
     IsZero, MouseButton, MouseDownEvent, ParentElement as _, Pixels, Point, Render, RenderOnce,
@@ -423,7 +423,7 @@ impl Kaydirici {
         radius: Corners<Pixels>,
         window: &mut Window,
         cx: &mut App,
-    ) -> impl gpui::IntoElement {
+    ) -> impl crate::ham_gpui::IntoElement {
         let entity_id = self.state.entity_id();
         let axis = self.axis;
         let id = ("slider-thumb", is_start as u32);
@@ -495,7 +495,7 @@ impl Styled for Kaydirici {
 }
 
 impl RenderOnce for Kaydirici {
-    fn render(self, window: &mut Window, cx: &mut gpui::App) -> impl IntoElement {
+    fn render(self, window: &mut Window, cx: &mut crate::ham_gpui::App) -> impl IntoElement {
         let axis = self.axis;
         let entity_id = self.state.entity_id();
         let state = self.state.read(cx);

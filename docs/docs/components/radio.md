@@ -10,7 +10,7 @@ Tekil seçimler ve radyo grupları için kullanılır. Güncel örnekler Kavis U
 ## İçe Aktarma
 
 ```rust
-use gpui::*;
+use kavis_ui::ham_gpui::*;
 use kavis_ui::*;
 ```
 

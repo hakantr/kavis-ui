@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use gpui::{
+use crate::ham_gpui::{
     AnyElement, App, Axis, Element, ElementId, Entity, GlobalElementId, InteractiveElement,
     IntoElement, MouseDownEvent, MouseUpEvent, ParentElement as _, Pixels, Point, Render,
     StatefulInteractiveElement, Styled as _, Window, div, prelude::FluentBuilder as _, px,
@@ -95,10 +95,10 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
     fn request_layout(
         &mut self,
         id: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
-    ) -> (gpui::LayoutId, Self::RequestLayoutState) {
+    ) -> (crate::ham_gpui::LayoutId, Self::RequestLayoutState) {
         let neg_offset = -HANDLE_PADDING;
         let axis = self.axis;
 
@@ -170,8 +170,8 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
     fn prepaint(
         &mut self,
         _: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
-        _: gpui::Bounds<Pixels>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
+        _: crate::ham_gpui::Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         window: &mut Window,
         cx: &mut App,
@@ -182,8 +182,8 @@ impl<T: 'static, E: 'static + Render> Element for ResizeHandle<T, E> {
     fn paint(
         &mut self,
         id: Option<&GlobalElementId>,
-        _: Option<&gpui::InspectorElementId>,
-        bounds: gpui::Bounds<Pixels>,
+        _: Option<&crate::ham_gpui::InspectorElementId>,
+        bounds: crate::ham_gpui::Bounds<Pixels>,
         request_layout: &mut Self::RequestLayoutState,
         _: &mut Self::PrepaintState,
         window: &mut Window,
