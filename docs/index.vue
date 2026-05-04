@@ -93,7 +93,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { useData, withBase } from "vitepress";
+import { withBase } from "vitepress";
 import {
     Blocks,
     Zap,
@@ -103,87 +103,49 @@ import {
     SquareCode,
 } from "lucide-vue-next";
 
-const { localeIndex } = useData();
-const isZh = computed(() => localeIndex.value === "zh-CN");
-const localePrefix = computed(() => (isZh.value ? "/zh-CN" : ""));
 const gettingStartedHref = computed(
-    () => withBase(`${localePrefix.value}/docs/getting-started`),
+    () => withBase("/docs/getting-started"),
 );
 const componentsHref = computed(() =>
-    withBase(`${localePrefix.value}/docs/components`),
+    withBase("/docs/components"),
 );
-const bannerPrefix = computed(() =>
-    isZh.value
-        ? "基于 Rust + "
-        : "Rust + ",
-);
-const bannerSuffix = computed(() =>
-    isZh.value ? " 构建卓越的桌面应用程序" : " ile güçlü çapraz platform masaüstü uygulamaları geliştirin.",
-);
-const getStartedText = computed(() => (isZh.value ? "开始使用" : "Başlarken"));
-const componentsText = computed(() => (isZh.value ? "组件" : "Bileşenler"));
-const versionLabel = computed(() => (isZh.value ? "版本：" : "Sürüm:"));
-const features = computed(() =>
-    isZh.value
-        ? {
-              componentCount: {
-                  title: "60+ 组件",
-                  description: "覆盖丰富桌面场景的跨平台组件库，可直接用于构建复杂应用。",
-              },
-              performance: {
-                  title: "高性能",
-                  description: "内置虚拟列表与虚拟表格，面对大数据量渲染依然保持流畅。",
-              },
-              theme: {
-                  title: "可主题化",
-                  description: "内建主题系统与 20+ 主题，并原生支持明暗模式切换。",
-              },
-              layout: {
-                  title: "灵活布局",
-                  description: "支持 Dock、可调整面板和自由布局，适合复杂桌面应用结构。",
-              },
-              chart: {
-                  title: "数据可视化",
-                  description: "内置折线、柱状、面积、饼图等图表组件，便于快速展示数据。",
-              },
-              editor: {
-                  title: "代码编辑器",
-                  description: "高性能编辑器内置 LSP 与语法高亮，底层基于 Tree-sitter 和 Rope。",
-              },
-          }
-        : {
-              componentCount: {
-                  title: "60+ Bileşen",
-                  description:
-                      "Zengin özellikli uygulamalar kurmak için kapsamlı çapraz platform masaüstü UI bileşenleri.",
-              },
-              performance: {
-                  title: "Yüksek Performans",
-                  description:
-                      "Büyük veri kümelerini düşük bellek kullanımıyla akıcı çizmek için sanallaştırılmış tablo ve liste bileşenleri.",
-              },
-              theme: {
-                  title: "Temalanabilir",
-                  description:
-                      "Yerleşik tema sistemi, 20+ tema ve hazır açık/koyu mod desteği.",
-              },
-              layout: {
-                  title: "Esnek Düzenler",
-                  description:
-                      "Panel yerleşimleri, yeniden boyutlandırılabilir paneller ve farklı uygulama yapıları için serbest düzenler.",
-              },
-              chart: {
-                  title: "Veri Görselleştirme",
-                  description:
-                      "Çizgi, bar, alan ve pasta grafiklerle veri göstermek için yerleşik grafik bileşenleri.",
-              },
-              editor: {
-                  title: "Kod Editörü",
-                  description:
-                      "Tree-sitter ve Rope tabanlı, LSP ve sözdizimi vurgulama destekli yüksek performanslı kod editörü.",
-              },
-          },
-);
+const bannerPrefix = "Rust + ";
+const bannerSuffix = " ile güçlü çapraz platform masaüstü uygulamaları geliştirin.";
+const getStartedText = "Başlarken";
+const componentsText = "Bileşenler";
+const versionLabel = "Sürüm:";
+const features = {
+    componentCount: {
+        title: "60+ Bileşen",
+        description:
+            "Zengin özellikli uygulamalar kurmak için kapsamlı çapraz platform masaüstü UI bileşenleri.",
+    },
+    performance: {
+        title: "Yüksek Performans",
+        description:
+            "Büyük veri kümelerini düşük bellek kullanımıyla akıcı çizmek için sanallaştırılmış tablo ve liste bileşenleri.",
+    },
+    theme: {
+        title: "Temalanabilir",
+        description:
+            "Yerleşik tema sistemi, 20+ tema ve hazır açık/koyu mod desteği.",
+    },
+    layout: {
+        title: "Esnek Düzenler",
+        description:
+            "Panel yerleşimleri, yeniden boyutlandırılabilir paneller ve farklı uygulama yapıları için serbest düzenler.",
+    },
+    chart: {
+        title: "Veri Görselleştirme",
+        description:
+            "Çizgi, bar, alan ve pasta grafiklerle veri göstermek için yerleşik grafik bileşenleri.",
+    },
+    editor: {
+        title: "Kod Editörü",
+        description:
+            "Tree-sitter ve Rope tabanlı, LSP ve sözdizimi vurgulama destekli yüksek performanslı kod editörü.",
+    },
+};
 </script>
 
 <style lang="scss">

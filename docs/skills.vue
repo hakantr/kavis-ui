@@ -20,22 +20,14 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import { useData } from "vitepress";
+import { ref } from "vue";
 import { data } from "./data/skills.data";
 
-const { localeIndex } = useData();
-const isZh = computed(() => localeIndex.value === "zh-CN");
 const skills = data;
 const expandedSkills = ref(new Set());
-const title = computed(() =>
-    isZh.value ? "Kavis UI 技能" : "Kavis UI Yetenekleri",
-);
-const description = computed(() =>
-    isZh.value
-        ? "这里汇总了适用于 Kavis UI 的开发技能、约定和最佳实践。"
-        : "Kavis UI ile çalışırken kullanılan geliştirme notları, kurallar ve GPUI uygulamaları için önerilen pratikler.",
-);
+const title = "Kavis UI Yetenekleri";
+const description =
+    "Kavis UI ile çalışırken kullanılan geliştirme notları, kurallar ve GPUI uygulamaları için önerilen pratikler.";
 
 function toggleSkill(skillId) {
     if (expandedSkills.value.has(skillId)) {

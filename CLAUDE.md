@@ -62,4 +62,4 @@ make dev
 
 ## Dokümantasyon
 
-Markdown içerik Türkçedir. `docs/docs` ve `docs/zh-CN/docs` yolları rota uyumluluğu için korunur; iki ağaç da aynı Türkçe içeriği taşımalıdır.
+Markdown içerik Türkçedir. Ana dokümantasyon ağacı `docs/docs` altında tutulur.
