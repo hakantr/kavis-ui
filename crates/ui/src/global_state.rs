@@ -17,6 +17,7 @@ pub struct KureselDurum {
     open_deferred_popovers: HashSet<ElementId>,
     /// Uygulama menülerinin sahipli kopyalarının saklandığı liste.
     app_menus: Vec<OwnedMenu>,
+    app_menus_revision: u64,
 }
 
 impl KureselDurum {
@@ -25,6 +26,7 @@ impl KureselDurum {
             text_view_state_stack: Vec::new(),
             open_deferred_popovers: HashSet::new(),
             app_menus: Vec::new(),
+            app_menus_revision: 0,
         }
     }
 
@@ -68,8 +70,14 @@ impl KureselDurum {
         &self.app_menus
     }
 
+    /// Uygulama menüleri her değiştiğinde artan sürüm.
+    pub(crate) fn app_menus_revision(&self) -> u64 {
+        self.app_menus_revision
+    }
+
     /// Uygulama menülerini ayarlar.
     pub fn set_app_menus(&mut self, menus: Vec<OwnedMenu>) {
         self.app_menus = menus;
+        self.app_menus_revision = self.app_menus_revision.wrapping_add(1);
     }
 }

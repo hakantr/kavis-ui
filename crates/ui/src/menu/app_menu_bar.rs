@@ -27,6 +27,7 @@ pub struct AppMenuBar {
     menus: Vec<Entity<AppMenu>>,
     selected_index: Option<usize>,
     action_context: Option<FocusHandle>,
+    app_menus_revision: u64,
     _global_observer: Option<Subscription>,
 }
 
@@ -40,11 +41,13 @@ impl AppMenuBar {
     pub fn new_in<Cx: AppContext>(cx: &mut Cx) -> Entity<Self> {
         cx.new(|cx| {
             KureselDurum::ensure_global(cx);
-            let observer = cx.observe_global::<KureselDurum>(|this: &mut Self, cx| this.reload(cx));
+            let observer =
+                cx.observe_global::<KureselDurum>(|this: &mut Self, cx| this.reload_if_changed(cx));
             let mut this = Self {
                 selected_index: None,
                 action_context: None,
                 menus: Vec::new(),
+                app_menus_revision: u64::MAX,
                 _global_observer: Some(observer),
             };
             this.reload(cx);
@@ -74,11 +77,10 @@ impl AppMenuBar {
     /// duzgun geri vermek icin [`yeniden_yukle_pencere`] tercih edilmelidir.
     pub fn reload(&mut self, cx: &mut Context<Self>) {
         let menu_bar = cx.entity();
-        let menus: Vec<OwnedMenu> = KureselDurum::global(cx)
-            .app_menus()
-            .iter()
-            .cloned()
-            .collect();
+        let global_state = KureselDurum::global(cx);
+        let revision = global_state.app_menus_revision();
+        let menus: Vec<OwnedMenu> = global_state.app_menus().iter().cloned().collect();
+        self.app_menus_revision = revision;
         self.menus = menus
             .iter()
             .enumerate()
@@ -91,6 +93,14 @@ impl AppMenuBar {
             }
         }
         cx.notify();
+    }
+
+    fn reload_if_changed(&mut self, cx: &mut Context<Self>) {
+        if self.app_menus_revision == KureselDurum::global(cx).app_menus_revision() {
+            return;
+        }
+
+        self.reload(cx);
     }
 
     fn on_move_left(&mut self, _: &SelectLeft, window: &mut Window, cx: &mut Context<Self>) {
@@ -331,7 +341,7 @@ impl Render for AppMenu {
 mod tests {
     use super::*;
 
-    use crate::ham_gpui::TestAppContext;
+    use crate::ham_gpui::{Menu, MenuItem, Modifiers, TestAppContext, VisualTestContext, point};
 
     struct TestRoot {
         menu_bar: Entity<AppMenuBar>,
@@ -348,6 +358,17 @@ mod tests {
         }
     }
 
+    struct TitleBarTestRoot {
+        menu_bar: Entity<AppMenuBar>,
+    }
+
+    impl Render for TitleBarTestRoot {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            crate::BaslikCubugu::new()
+                .child(div().flex().items_center().child(self.menu_bar.clone()))
+        }
+    }
+
     #[crate::ham_gpui::test]
     fn preserves_action_context_while_switching_menus(cx: &mut TestAppContext) {
         let (root, cx) = cx.add_window_view(|window, cx| {
@@ -360,6 +381,7 @@ mod tests {
                     menus: Vec::new(),
                     selected_index: None,
                     action_context: None,
+                    app_menus_revision: 0,
                     _global_observer: None,
                 }),
                 first_focus,
@@ -391,5 +413,95 @@ mod tests {
             menu_bar.set_selected_index(Some(0), window, cx);
             assert_eq!(menu_bar.action_context.as_ref(), Some(&second_focus));
         });
+    }
+
+    #[crate::ham_gpui::test]
+    fn click_opens_menu(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            crate::init(cx);
+            KureselDurum::global_mut(cx).set_app_menus(vec![
+                Menu {
+                    name: "Kavis".into(),
+                    items: vec![MenuItem::action("Aç", Cancel)],
+                    disabled: false,
+                }
+                .owned(),
+            ]);
+        });
+
+        let (root, cx) = cx.add_window_view(|_, cx| TestRoot {
+            menu_bar: AppMenuBar::new(cx),
+            first_focus: cx.focus_handle(),
+            second_focus: cx.focus_handle(),
+        });
+        let cx: &mut VisualTestContext = cx;
+
+        cx.simulate_click(point(px(18.), px(16.)), Modifiers::default());
+
+        let menu_bar = root.read_with(cx, |root, _| root.menu_bar.clone());
+        assert_eq!(
+            menu_bar.read_with(cx, |menu_bar, _| menu_bar.selected_index),
+            Some(0)
+        );
+    }
+
+    #[crate::ham_gpui::test]
+    fn click_opens_menu_inside_title_bar(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            crate::init(cx);
+            KureselDurum::global_mut(cx).set_app_menus(vec![
+                Menu {
+                    name: "Kavis".into(),
+                    items: vec![MenuItem::action("Aç", Cancel)],
+                    disabled: false,
+                }
+                .owned(),
+            ]);
+        });
+
+        let (root, cx) = cx.add_window_view(|_, cx| TitleBarTestRoot {
+            menu_bar: AppMenuBar::new(cx),
+        });
+        let cx: &mut VisualTestContext = cx;
+
+        cx.simulate_click(point(px(100.), px(16.)), Modifiers::default());
+
+        let menu_bar = root.read_with(cx, |root, _| root.menu_bar.clone());
+        assert_eq!(
+            menu_bar.read_with(cx, |menu_bar, _| menu_bar.selected_index),
+            Some(0)
+        );
+    }
+
+    #[crate::ham_gpui::test]
+    fn unrelated_global_mutation_does_not_reload_menus(cx: &mut TestAppContext) {
+        cx.update(|cx| {
+            crate::init(cx);
+            KureselDurum::global_mut(cx).set_app_menus(vec![
+                Menu {
+                    name: "Kavis".into(),
+                    items: vec![MenuItem::action("Aç", Cancel)],
+                    disabled: false,
+                }
+                .owned(),
+            ]);
+        });
+
+        let (root, cx) = cx.add_window_view(|_, cx| TestRoot {
+            menu_bar: AppMenuBar::new(cx),
+            first_focus: cx.focus_handle(),
+            second_focus: cx.focus_handle(),
+        });
+        let (menu_bar, focus_handle) = root.read_with(cx, |root, _| {
+            (root.menu_bar.clone(), root.first_focus.clone())
+        });
+        let first_menu = menu_bar.read_with(cx, |menu_bar, _| menu_bar.menus[0].clone());
+
+        menu_bar.update(cx, |_, cx| {
+            KureselDurum::global_mut(cx).register_deferred_popover(&focus_handle);
+        });
+
+        let current_menu = menu_bar.read_with(cx, |menu_bar, _| menu_bar.menus[0].clone());
+        assert_eq!(first_menu, current_menu);
     }
 }
