@@ -1,10 +1,10 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::ham_gpui::{
-    Anchor, AnyElement, App, Context, DismissEvent, Element, ElementId, Entity, Focusable,
-    GlobalElementId, Hitbox, HitboxBehavior, InspectorElementId, InteractiveElement, IntoElement,
-    MouseButton, MouseDownEvent, ParentElement, Pixels, Point, StyleRefinement, Styled,
-    Subscription, Window, anchored, deferred, div, prelude::FluentBuilder, px,
+    Anchor, AnyElement, App, Context, DismissEvent, Element, ElementId, Entity, FocusHandle,
+    Focusable, GlobalElementId, Hitbox, HitboxBehavior, InspectorElementId, InteractiveElement,
+    IntoElement, MouseButton, MouseDownEvent, ParentElement, Pixels, Point, StyleRefinement,
+    Styled, Subscription, Window, anchored, deferred, div, prelude::FluentBuilder, px,
 };
 
 use crate::menu::AcilirMenu;
@@ -78,7 +78,9 @@ impl<E: ParentElement + Styled> BaglamMenusu<E> {
         window.with_optional_element_state::<BaglamMenusuDurumu, _>(
             Some(id),
             |element_state, window| {
-                let mut element_state = element_state.unwrap().unwrap_or_default();
+                let mut element_state = element_state
+                    .unwrap()
+                    .unwrap_or_else(|| BaglamMenusuDurumu::new(cx));
                 let result = f(self, &mut element_state, window, cx);
                 (result, Some(element_state))
             },
@@ -104,7 +106,9 @@ impl<E: ParentElement + Styled> Styled for BaglamMenusu<E> {
     }
 }
 
-impl<E: ParentElement + Styled + IntoElement + 'static> IntoElement for BaglamMenusu<E> {
+impl<E: InteractiveElement + ParentElement + Styled + IntoElement + 'static> IntoElement
+    for BaglamMenusu<E>
+{
     type Element = Self;
 
     fn into_element(self) -> Self::Element {
@@ -121,13 +125,15 @@ struct BaglamMenusuPaylasimliDurum {
 
 pub struct BaglamMenusuDurumu {
     element: Option<AnyElement>,
+    focus_handle: FocusHandle,
     shared_state: Rc<RefCell<BaglamMenusuPaylasimliDurum>>,
 }
 
-impl Default for BaglamMenusuDurumu {
-    fn default() -> Self {
+impl BaglamMenusuDurumu {
+    fn new(cx: &App) -> Self {
         Self {
             element: None,
+            focus_handle: cx.focus_handle(),
             shared_state: Rc::new(RefCell::new(BaglamMenusuPaylasimliDurum {
                 menu_view: None,
                 open: false,
@@ -138,7 +144,9 @@ impl Default for BaglamMenusuDurumu {
     }
 }
 
-impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu<E> {
+impl<E: InteractiveElement + ParentElement + Styled + IntoElement + 'static> Element
+    for BaglamMenusu<E>
+{
     type RequestLayoutState = BaglamMenusuDurumu;
     type PrepaintState = Hitbox;
 
@@ -215,6 +223,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
                     .element
                     .take()
                     .expect("Öğe mevcut olmalı.")
+                    .track_focus(&state.focus_handle)
                     .children(menu_element)
                     .into_any_element();
 
@@ -224,7 +233,8 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
                     layout_id,
                     BaglamMenusuDurumu {
                         element: Some(element),
-                        ..Default::default()
+                        focus_handle: state.focus_handle.clone(),
+                        shared_state: state.shared_state.clone(),
                     },
                 )
             },
@@ -269,6 +279,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
             cx,
             |_view, state: &mut BaglamMenusuDurumu, window, _| {
                 let shared_state = state.shared_state.clone();
+                let action_context = state.focus_handle.clone();
 
                 let hitbox = hitbox.clone();
                 // When right mouse click, to build content menu, and show it at the mouse position.
@@ -291,6 +302,7 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
                         window.defer(cx, {
                             let shared_state = shared_state.clone();
                             let builder = builder.clone();
+                            let action_context = action_context.clone();
                             move |window, cx| {
                                 let menu =
                                     AcilirMenu::build(window, cx, move |menu, window, cx| {
@@ -299,6 +311,11 @@ impl<E: ParentElement + Styled + IntoElement + 'static> Element for BaglamMenusu
                                         };
                                         build(menu, window, cx)
                                     });
+
+                                menu.update(cx, |menu, cx| {
+                                    menu.set_action_context(Some(action_context.clone()), cx);
+                                });
+                                menu.focus_handle(cx).focus(window, cx);
 
                                 // Set up the subscription for dismiss handling
                                 let _subscription = window.subscribe(&menu, cx, {

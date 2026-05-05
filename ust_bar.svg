@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="katman_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1193 223">
+  <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke: #d68a3b;
+      }
+
+      .st0, .st1, .st2 {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .st0, .st2 {
+        stroke-width: 2.6px;
+      }
+
+      .st3 {
+        fill: #33c759;
+      }
+
+      .st4 {
+        fill: #3b444b;
+      }
+
+      .st4, .st5, .st6, .st7, .st8 {
+        stroke-width: 2px;
+      }
+
+      .st4, .st8 {
+        stroke: #d99046;
+      }
+
+      .st9 {
+        fill: #ced5da;
+      }
+
+      .st9, .st10 {
+        font-family: ArialMT, Arial;
+        font-size: 16px;
+        opacity: .92;
+      }
+
+      .st9, .st10, .st1, .st7, .st11 {
+        isolation: isolate;
+      }
+
+      .st12 {
+        fill: #4f626e;
+      }
+
+      .st10 {
+        fill: #1d1d1b;
+      }
+
+      .st5 {
+        fill: #3c4650;
+        stroke: #ee5a64;
+      }
+
+      .st6 {
+        stroke: #8aa0ad;
+      }
+
+      .st6, .st8 {
+        fill: #384149;
+      }
+
+      .st1 {
+        opacity: .9;
+        stroke: #c5cdd3;
+        stroke-width: 1.6px;
+      }
+
+      .st13 {
+        fill: #d68a3b;
+      }
+
+      .st7 {
+        fill: #344049;
+        opacity: .96;
+        stroke: #92aec1;
+      }
+
+      .st11 {
+        fill: #5e6971;
+        opacity: .95;
+      }
+
+      .st2 {
+        stroke: #4f626e;
+      }
+
+      .st14 {
+        fill: #ffbd44;
+      }
+
+      .st15 {
+        fill: url(#Adsız_degrade_4);
+        stroke: #101418;
+      }
+
+      .st16 {
+        fill: #b7c0c7;
+      }
+
+      .st17 {
+        fill: #11161a;
+      }
+
+      .st18 {
+        fill: #ff605c;
+      }
+    </style>
+    <linearGradient id="Adsız_degrade_4" data-name="Adsız degrade 4" x1="9.05" y1="233" x2="1184.05" y2="169" gradientTransform="translate(0 298.11) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22282e"/>
+      <stop offset=".5" stop-color="#2f353a"/>
+      <stop offset="1" stop-color="#20262b"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect class="st17" x="9" y="66.11" width="1175" height="64" rx="10" ry="10"/>
+    <rect class="st15" x="13" y="69.11" width="1167" height="56" rx="8" ry="8"/>
+  </g>
+  <g>
+    <rect class="st5" x="20" y="77.11" width="87" height="43" rx="7" ry="7"/>
+    <circle class="st18" cx="39" cy="98.61" r="7"/>
+    <circle class="st14" cx="63" cy="98.61" r="7"/>
+    <circle class="st3" cx="87" cy="98.61" r="7"/>
+  </g>
+  <rect class="st7" x="113" y="78.11" width="743.95" height="42" rx="6" ry="6"/>
+  <rect class="st1" x="123" y="91.11" width="14" height="15" rx="2" ry="2"/>
+  <path class="st1" d="M129,91.11v15"/>
+  <path class="st1" d="M155,92.11l8,7-8,7"/>
+  <text class="st9" transform="translate(176 105.11)"><tspan x="0" y="0">Bilgilendirme alanı</tspan></text>
+  <text class="st10" transform="translate(200.24 18.61)"><tspan x="0" y="0">Kendisine bildirilen alanı gizler(sidebar vb)</tspan></text>
+  <text class="st10" transform="translate(1050.95 21.97)"><tspan x="0" y="0">sağ panel ayarı</tspan></text>
+  <text class="st10" transform="translate(879 212.16)"><tspan x="0" y="0">arayüz panalleri ayarı</tspan></text>
+  <text class="st10" transform="translate(1079 212.16)"><tspan x="0" y="0">profil ve ayarlar</tspan></text>
+  <g>
+    <rect class="st8" x="862.8" y="78.11" width="145.2" height="42" rx="6" ry="6"/>
+    <circle class="st1" cx="875.8" cy="95.11" r="4"/>
+    <circle class="st1" cx="886.8" cy="95.11" r="4"/>
+    <path class="st1" d="M868.8,107.11c1-6,12-6,14,0"/>
+    <path class="st1" d="M879.8,107.11c1-6,12-6,14,0"/>
+    <text class="st9" transform="translate(899.8 105.11)"><tspan x="0" y="0">Oturum Başlat</tspan></text>
+  </g>
+  <g>
+    <rect class="st6" x="1013" y="78.11" width="115" height="42" rx="6" ry="6"/>
+    <circle class="st1" cx="1027" cy="95.11" r="4"/>
+    <circle class="st1" cx="1038" cy="95.11" r="4"/>
+    <path class="st1" d="M1020,107.11c1-6,12-6,14,0"/>
+    <path class="st1" d="M1031,107.11c1-6,12-6,14,0"/>
+    <rect class="st1" x="1061" y="91.11" width="18" height="15" rx="2" ry="2"/>
+    <path class="st1" d="M1063,95.11h14M1063,103.11h14"/>
+    <rect class="st1" x="1100" y="91.11" width="14" height="15" rx="2" ry="2"/>
+    <path class="st1" d="M1107,91.11v15"/>
+  </g>
+  <g>
+    <rect class="st4" x="1133" y="77.11" width="42" height="43" rx="8" ry="8"/>
+    <circle class="st11" cx="1154" cy="98.11" r="16"/>
+    <circle class="st16" cx="1154" cy="94.11" r="6"/>
+    <path class="st16" d="M1142,109.11c2-8,22-8,24,0"/>
+  </g>
+  <path class="st2" d="M192,16.61h-53c-5,0-8,3-8,8v67"/>
+  <circle class="st12" cx="192" cy="16.61" r="3"/>
+  <path class="st2" d="M1107,27.11v51"/>
+  <circle class="st12" cx="1107" cy="27.11" r="3"/>
+  <path class="st2" d="M1070,105.09v43.37c0,6.2-4.06,9.91-8.13,9.91h-111.75c-5.08,0-8.13,4.96-8.13,9.91v19.82"/>
+  <circle class="st12" cx="942" cy="188.11" r="3"/>
+  <path class="st0" d="M1163,121.11v36c0,5-4,8-8,8h-1c-5,0-8,4-8,8v15"/>
+  <circle class="st13" cx="1146" cy="188.11" r="3"/>
+</svg>
