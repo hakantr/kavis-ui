@@ -1249,9 +1249,11 @@ Tuzaklar:
 
 - Element ID render boyunca stabil olmalıdır; değişirse animasyon state sıfırlanır.
 - Animator closure `'static` olduğundan dış state'i `Rc`/`Arc`/`clone` ile yakala.
-- Repeat animasyonu sürekli `cx.notify()` çağırır; gerekmiyorsa oneshot bırak.
+- Repeat animasyonu `window.request_animation_frame()` ile bir sonraki frame'i ister;
+  bu da mevcut view'i sonraki frame'de notify eder. Gerekmiyorsa oneshot bırak.
 - Frame'ler arası progress değeri executor saatinden hesaplanır; testlerde
-  `cx.background_executor.advance_clock(...)` ile ilerlet.
+  `cx.background_executor.advance_clock(...)`, `TestApp::advance_clock(...)` veya
+  `VisualTestContext::advance_clock(...)` ile ilerlet.
 
 ## 31. Renkler, Gradient ve Background
 
@@ -1291,11 +1293,12 @@ linear_gradient(
     linear_color_stop(rgb(0xffffff), 1.0),
 )
 checkerboard(rgb(0xeeeeee), 8.0)
-pattern_slash(rgb(0xff0000), width = 2.0, interval = 6.0)
+pattern_slash(rgb(0xff0000), 2.0, 6.0)
 ```
 
 `linear_gradient(...).color_space(ColorSpace::Oklab)` ile renk uzayı seçilebilir;
-`opacity(factor)` her stop'a uygulanır.
+`opacity(factor)` her stop'a uygulanır. `Background::as_solid()` yalnızca düz
+renk background için `Some(Hsla)` döndürür; gradient/pattern için `None` döner.
 
 `.bg(impl Into<Background>)` her style fluent API'sinde mevcut. Düz `Hsla` da
 `Into<Background>` implement eder, bu yüzden `.bg(theme.colors().panel_background)`
@@ -1327,6 +1330,11 @@ Public API:
 - `scroll_to_item(ix)`, `scroll_to_top_of_item(ix)`: prepaint zamanında istenen
   item'a scroll eder.
 - `scroll_to_bottom()`
+- `set_offset(point)`: offset'i doğrudan ayarlar. Offset içerik origin'inin
+  parent origin'ine uzaklığıdır; aşağı kaydıkça Y genelde negatife gider.
+- `logical_scroll_top()`, `logical_scroll_bottom()`: görünür child index'i ve
+  child içi pixel offset'i döndürür.
+- `children_count()`: scroll edilen child sayısı.
 
 Element üzerine bağlama:
 
@@ -1340,10 +1348,11 @@ div()
     .child(/* ... */)
 ```
 
-`overflow_scroll`, `overflow_x_scroll`, `overflow_y_scroll` üçü de Style'a sahiptir;
-overflow `Scroll` olduğunda input wheel/touch event'i bu container içinde tüketilir.
+`overflow_scroll`, `overflow_x_scroll`, `overflow_y_scroll` `StatefulInteractiveElement`
+metotlarıdır; pratikte önce `.id(...)` çağırıp `Stateful<Div>` üretmen gerekir.
+Overflow `Scroll` olduğunda input wheel/touch event'i bu container içinde tüketilir.
 `track_scroll` aynı handle'ı render geçişleri arasında bağlar; aynı handle başka
-yerden okunabilir.
+yerden okunabilir ve değiştirilebilir.
 
 `ScrollAnchor` (`div.rs:3332+`) bir handle ile çalışan helper'dır; immediate child
 olmasa bile belirli bir element'in görünür kalmasını ister:
@@ -1359,6 +1368,13 @@ Tuzaklar:
 - `track_scroll` çağırılmadan handle değerleri eski kalır; offset güncel olmaz.
 - Klavye ile scroll dispatch için `.on_key_down(...)` veya action ile
   `scroll_to_item` çağrılır; otomatik klavye scroll yoktur.
+
+Liste elementlerinde ayrı handle'lar vardır: `ListHandle::scroll_to_end()`,
+`ListHandle::set_follow_mode(FollowMode::Tail)`, `ListHandle::scroll_to(...)` ve
+`UniformListScrollHandle::scroll_to_item(..., ScrollStrategy)`,
+`scroll_to_item_strict`, `scroll_to_item_with_offset`, `is_scrolled_to_end`,
+`scroll_to_bottom`. Büyük listelerde doğrudan `ScrollHandle` yerine bu listeye
+özel handle'ları kullanmak doğru sonuç verir.
 
 ## 33. Asset, Image ve SVG Yükleme
 
@@ -1386,12 +1402,12 @@ Kaynak gösterimi:
 Image element:
 
 ```rust
-img("path/to/icon.png")
+img(PathBuf::from("path/to/icon.png"))
     .w(px(24.))
     .h(px(24.))
     .object_fit(ObjectFit::Contain)
-    .with_fallback(|| div().bg(rgb(0xeeeeee)))
-    .on_load(cx.listener(|_, _, _, cx| cx.notify()))
+    .with_loading(|| div().bg(rgb(0xeeeeee)).into_any_element())
+    .with_fallback(|| div().bg(rgb(0xffeeee)).into_any_element())
 ```
 
 `img(impl Into<ImageSource>)` kabul eder. `ImageSource`:
@@ -1399,9 +1415,11 @@ img("path/to/icon.png")
 - `Resource(Resource)`
 - `Render(Arc<RenderImage>)` — önceden raster edilmiş frame'ler.
 - `Image(Arc<Image>)` — encoded bytes (PNG/JPEG/WebP).
-- `Custom(Arc<dyn Fn(&mut App) -> Task<...>>)`
+- `Custom(Arc<dyn Fn(&mut Window, &mut App) -> Option<Result<Arc<RenderImage>, ImageCacheError>>>)`
 
-URL string otomatik `Uri` olarak parse edilir; path string `Path` olur.
+URL string otomatik `Uri` olarak parse edilir; URL olmayan `&str`/`String`
+`Resource::Embedded` olur ve `AssetSource` içinden aranır. Dosya sistemi path'i
+için `Path`, `PathBuf` veya `Arc<Path>` geçir.
 
 SVG:
 
@@ -1413,16 +1431,22 @@ SVG path `AssetSource`'tan okunur. `text_color` SVG'deki `currentColor` referans
 boyamak için kullanılır. Custom path string yerine derive edilen `IconName::path()`
 de geçirilebilir (Zed'de `Icon::new(IconName::Check)` doğrudan kullanılır).
 
-Cache davranışı: aynı `Resource` farklı kullanıcılar için tek seferde yüklenir;
-load Task `Arc` ile paylaşılır. Hata loglama `ImgResourceLoader = AssetLogger<...>`
-ile otomatiktir.
+Cache davranışı iki katmanlıdır: `window.use_asset::<A>(source, cx)` aynı source
+için tek async load task'ını paylaşır ve tamamlanınca current view'i yeniden
+çizdirir; `ImageCache` ise decode edilmiş `RenderImage`'ı tutar. Element bazında
+`.image_cache(&entity)` veya ağacın üstünde `image_cache(retain_all("id"))`
+kullanılabilir. Hata loglama `ImgResourceLoader = AssetLogger<...>` ile otomatiktir.
 
 Tuzaklar:
 
-- URL parse başarısızsa load sessizce başarısız olur (ImgResourceLoader log'a düşer).
-- Custom closure `'static` olmalı; `cx`'i closure dışında klonlayıp taşı.
+- URL parse başarısızsa string embedded asset sayılır; gerçek dosya yolu için
+  `PathBuf` kullanmadıysan yanlış kaynaktan arama yapılır.
+- Custom closure `'static` olmalı; `Window`/`App` sadece closure çağrısında
+  parametre olarak kullanılmalı.
 - `with_fallback` yalnızca yükleme tamamlandığında ve hatalıysa fallback render eder.
-- `RenderImage` GIF/animated PNG için `frames()` ile frame loop yönetilir.
+- `with_loading` yükleme 200 ms'den uzun sürerse loading fallback'ini render eder.
+- `RenderImage` GIF/animated WebP için `frame_count()` ve `delay(frame_index)`
+  sağlar; `img` element'i aktif pencerede frame ilerletip animation frame ister.
 
 ## 34. Anchored ve Popover Konumlandırma
 
@@ -1432,7 +1456,7 @@ Tuzaklar:
 
 ```rust
 anchored()
-    .anchor(Corner::TopLeft)
+    .anchor(Anchor::TopLeft)
     .position(point(px(120.), px(80.)))
     .offset(point(px(0.), px(4.)))
     .snap_to_window_with_margin(Edges::all(px(8.)))
@@ -1441,12 +1465,12 @@ anchored()
 
 API:
 
-- `anchor(Corner)`: child'ın hangi köşesinin `position`'a hizalanacağı.
+- `anchor(Anchor)`: child'ın hangi köşesinin `position`'a hizalanacağı.
 - `position(point)`: anchor noktası (window veya local koordinatlarda).
 - `offset(point)`: hizalama sonrası ek kayma.
 - `position_mode(AnchoredPositionMode::Window | Local)`: koordinat referansı.
 - `snap_to_window()` ve `snap_to_window_with_margin(Edges)`: pencere dışına taşıyorsa
-  sığacak şekilde kaydırır veya köşeyi flip eder.
+  aynı anchor'ı koruyarak pencere içine kaydırır.
 
 `AnchoredFitMode`:
 
@@ -1525,16 +1549,16 @@ sağlar. `PathBuilder` lyon tessellator wrapper'ıdır.
 
 ```rust
 canvas(
-    |bounds, window, cx| {
+    |bounds, window, _cx| {
         // prepaint: hitbox, layout-zamanlı state
         window.insert_hitbox(bounds, HitboxBehavior::Normal)
     },
-    |bounds, hitbox, window, cx| {
+    |bounds, _hitbox, window, _cx| {
         // paint: window.paint_path(...) çağrıları
         let mut path = PathBuilder::fill();
         path.move_to(bounds.origin);
-        path.line_to(bounds.origin + point(px(0.), bounds.size.height));
-        path.line_to(bounds.origin + bounds.size);
+        path.line_to(bounds.bottom_left());
+        path.line_to(bounds.bottom_right());
         path.close();
         if let Ok(built) = path.build() {
             window.paint_path(built, rgb(0x4f46e5));
@@ -1547,8 +1571,13 @@ canvas(
 `PathBuilder`:
 
 - `PathBuilder::fill()` ya da `PathBuilder::stroke(width)` ile başlat.
-- `move_to(point)`, `line_to(point)`, `cubic_bezier_to(c1, c2, end)`,
-  `quadratic_bezier_to(c, end)`, `arc(...)`, `close()`.
+- `move_to(point)`, `line_to(point)`, `curve_to(to, ctrl)`,
+  `cubic_bezier_to(to, control_a, control_b)`, `arc_to(radii, x_rotation,
+  large_arc, sweep, to)`, `relative_arc_to(...)`, `add_polygon(...)`, `close()`.
+- `dash_array(&[Pixels])` yalnızca stroke path'lerde anlamlıdır; odd sayıda değer
+  verilirse SVG/CSS davranışı gibi liste iki kez tekrarlanır.
+- `transform(...)`, `translate(point)`, `scale(f32)`, `rotate(degrees)` path'i
+  build öncesi dönüştürür.
 - `build()` → tessellated `Path<Pixels>` döner; `?` ile hata yay.
 
 Window paint API'leri:
@@ -1557,7 +1586,8 @@ Window paint API'leri:
 - `window.paint_quad(quad)`: `fill(bounds, ...).border(...)` shorthand.
 - `window.paint_strikethrough(...)`, `paint_underline(...)`
 - `window.paint_image(...)`: raster image draw.
-- `window.paint_layer(bounds, |window| ...)`: alt katman, clipping ve transform.
+- `window.paint_layer(bounds, |window| ...)`: aynı draw order'da toplanan geometri
+  için yeni layer açar; genellikle performans ve overdraw kontrolü için kullanılır.
 
 Tuzaklar:
 
@@ -1604,22 +1634,27 @@ cx.set_menus(vec![
 ```
 
 `MenuItem::action(name, action)` veri taşımayan unit struct action'lar için kısayoldur;
-veri taşıyan action'lar `Action::boxed_clone()` ile manuel build edilmelidir.
+veri taşıyan action'larda da doğrudan action değerini geçebilirsin:
+`MenuItem::action("Go To Line", GoToLine { line: 1 })`. Aynı menü modelinin
+clone'lanması gerekiyorsa `Menu::owned()`/`MenuItem::owned()` kullanılır.
 
 Diğer menü API'leri (`App` üzerinde):
 
-- `cx.set_dock_menu(Menu)` — macOS dock right-click menüsü.
+- `cx.set_dock_menu(Vec<MenuItem>)` — macOS dock right-click menüsü; Windows'ta
+  dock menu/jump list modelinin parçası.
 - `cx.add_recent_document(path)` — macOS recent items.
-- `cx.update_jump_list(JumpListCategory::Recent, entries)` — Windows jump list,
-  macOS recent stub.
+- `cx.update_jump_list(menus, entries) -> Task<Vec<SmallVec<[PathBuf; 2]>>>` —
+  Windows jump list'i günceller ve kullanıcının listeden kaldırdığı entry'leri
+  task sonucu olarak döndürür. Zed `HistoryManager` bu sonucu history'den siler.
 - `cx.get_menus()` — şu anda set edili menü modelini okur.
 
 Platform davranışı:
 
 - macOS native `NSMenu` ile çizilir; klavye kısayolları binding'lerden okunur.
-- Windows ana pencerede menubar; alt+key access keys otomatik yapılmaz.
-- Linux backend'i çoğunlukla no-op'tur; menülerin uygulama içinde çizilmesi gerekir
-  (Zed'de dropdown menubar Linux'ta kullanılır).
+- Windows ve Linux platform state'i `OwnedMenu` olarak saklar; Zed bu modeli
+  uygulama içi menü/render katmanlarında kullanır.
+- Linux dock menüsü backend'de `todo`/no-op'tur; dock/jump-list davranışı için
+  platforma özel fallback gerekir.
 
 Tuzak: Aynı action birden çok menü item'a bağlanırsa keymap'te tek shortcut
 gösterilir. `os_action` yalnızca macOS native edit menu eşlemesini etkiler;
@@ -1639,25 +1674,26 @@ actions!(my_namespace, [Save, Close, Reload]);
 ```
 
 `actions!` makrosu her isim için unit struct ve `Action` impl üretir; namespace
-`my_namespace::Save` adıyla registery'e kaydolur.
+`my_namespace::Save` adıyla registry'ye kaydolur.
 
 Veri taşıyan action:
 
 ```rust
 use gpui::Action;
 
-#[derive(Clone, PartialEq, Action)]
+#[derive(Clone, PartialEq, serde::Deserialize, schemars::JsonSchema, Action)]
 #[action(namespace = editor)]
 pub struct GoToLine { pub line: u32 }
 ```
 
 `#[action(namespace = ..., name = "...", no_json, deprecated_aliases = [...])]`
 attribute'leri kontrol sağlar. Default olarak `Deserialize` derive edilmesi
-beklenir; pure code action için `no_json` kullan.
+ve `JsonSchema` implement edilmesi beklenir; pure code action için `no_json`
+kullan, register edilmesini istemiyorsan `no_register` ekle.
 
 Dispatch:
 
-- `window.dispatch_action(BoxedAction, cx)`: focused element'ten root'a doğru
+- `window.dispatch_action(action.boxed_clone(), cx)`: focused element'ten root'a doğru
   bubble.
 - `focus_handle.dispatch_action(&action, window, cx)`: belirli handle'dan başlatır.
 - Keymap girdileri eşleştiğinde otomatik dispatch edilir.
@@ -1717,22 +1753,25 @@ Tab navigasyonu `FocusHandle` üzerindeki iki bayrakla kontrol edilir:
 ```rust
 let handle = cx.focus_handle()
     .tab_stop(true)        // Tab tuşuyla durulabilir
-    .tab_index(0);         // Pozitif: sıraya katılır, negatif: atlanır
+    .tab_index(0);         // Sıra path'ine katılır
 ```
 
 Tab traversal sırası TabStopMap içindeki node sıralamasına göre belirlenir:
 
 1. Aynı grup içinde `tab_index` küçükten büyüğe.
 2. `tab_index` eşitse element ağaç sırası (DFS).
-3. `tab_stop(false)` olan veya `tab_index < 0` olan handle atlanır.
+3. `tab_stop(false)` olan handle sırada konum tutar ama klavyeyle durak olmaz.
+   Negatif `tab_index` özel olarak "devre dışı" anlamına gelmez; sadece sıralamada
+   daha erken bir path değeri üretir.
 
-Grup oluşturmak için elementlerin `.begin_group(index)` / `.end_group()`
-operasyonları olur (`tab_stop.rs:92`); tipik kullanım Zed UI'da Pane ve Modal
-seviyesindedir.
+Grup oluşturmak için element tarafında `.tab_group()` kullanılır; grubun sırası
+gerekiyorsa aynı elemente `.tab_index(index)` verilir. `TabStopMap::begin_group`
+ve `end_group` internal traversal operasyonlarıdır; uygulama kodu genelde bunları
+doğrudan çağırmaz.
 
 Window üzerindeki yardımcılar:
 
-- `window.focus_next()` / `window.focus_prev()`: Tab/Shift-Tab sırasında çağrılır.
+- `window.focus_next(cx)` / `window.focus_prev(cx)`: Tab/Shift-Tab sırasında çağrılır.
 - `window.focused(cx)`: o anki odak handle'ı.
 
 Custom input bileşeni yazıyorsan:
@@ -1760,7 +1799,7 @@ sahip olmalı.
 fn test_save(cx: &mut TestAppContext) {
     let window = cx.add_window(|window, cx| cx.new(|cx| Editor::new(window, cx)));
 
-    cx.simulate_keystrokes("cmd-s");
+    cx.simulate_keystrokes(window, "cmd-s");
     cx.run_until_parked();
 
     window.read_with(cx, |editor, _| {
@@ -1772,19 +1811,20 @@ fn test_save(cx: &mut TestAppContext) {
 Sık kullanılan API'ler:
 
 - `cx.add_window(|window, cx| cx.new(...))`: yeni offscreen pencere.
-- `cx.simulate_keystrokes("cmd-s left")`: boşlukla ayrılmış keystroke dizisi.
-- `cx.simulate_input("hello")`: text input simulasyonu (IME yolu üzerinden).
-- `cx.simulate_mouse_move(point, modifiers)`,
-  `cx.simulate_mouse_down(button, point, modifiers)`,
-  `cx.simulate_click(point, modifiers)`.
-- `cx.dispatch_action(window, &action)`.
+- `cx.simulate_keystrokes(window, "cmd-s left")`: boşlukla ayrılmış keystroke dizisi.
+- `cx.simulate_input(window, "hello")`: text input simulasyonu.
+- `cx.dispatch_action(window, action)`.
 - `cx.run_until_parked()`: tüm pending future/task tamamlanıncaya kadar sürer.
 - `cx.background_executor.advance_clock(duration)`: deterministic timer ilerletme.
 - `cx.background_executor.run_until_parked()`: test executor'ında yalnızca background.
 - `window.update(cx, |view, window, cx| ...)`: pencere içi state mutate.
 
-`VisualTestContext` (`add_window` sonucu `cx.into()` ile elde edilir) `Window`
-referansını içerir; render output testleri ve element bounds doğrulaması için.
+`add_window_view` veya `add_empty_window` ile alınan `VisualTestContext` pencere
+bağlamını taşır; bu yüzden kısaltılmış `cx.simulate_keystrokes("cmd-p")`,
+`cx.simulate_input("hello")`, `cx.simulate_mouse_move(position, button, modifiers)`,
+`cx.simulate_mouse_down(position, button, modifiers)`, `cx.simulate_mouse_up(...)`,
+`cx.simulate_click(position, modifiers)`, `cx.debug_bounds("selector")` ve
+`cx.draw(origin, size, |window, cx| element)` gibi yöntemleri kullanırsın.
 
 Pratik kurallar:
 
@@ -1793,8 +1833,9 @@ Pratik kurallar:
   sonra park bekle.
 - Async test için `#[gpui::test]` `async fn(cx: &mut TestAppContext)` formunu
   destekler; foreground task'ları orada `cx.spawn` ile kur.
-- Pencerenin gerçekten render edilmesi için `cx.draw(window)` veya `run_until_parked`
-  zorunlu olabilir; aksi halde layout `viewport_size` boyut sıfır olur.
+- Pencerenin gerçekten render edilmesi için `VisualTestContext::draw(...)`,
+  `TestApp::draw()` veya doğrudan `window.draw(cx).clear()` kullanılan bir
+  pencere update'i gerekebilir; aksi halde debug bounds/layout bilgisi üretilmez.
 
 Tuzaklar:
 
@@ -1808,7 +1849,8 @@ Tuzaklar:
 ## 41. Pencere Bounds Persist ve Restore
 
 `crates/gpui/src/platform.rs::WindowBounds`, Zed tarafında
-`crates/workspace/src/persistence.rs` ve `crates/zed/src/zed.rs`.
+`crates/workspace/src/persistence/`, `crates/workspace/src/workspace.rs` ve
+`crates/zed/src/zed.rs`.
 
 `WindowBounds` enum üç durumu kapsar:
 
@@ -1826,25 +1868,32 @@ içindeki bounds, durum kapatıldığında dönülecek windowed bounds'tır.
 Persist akışı:
 
 ```rust
-let bounds = window.window_bounds();
+let bounds = window.inner_window_bounds();
 serialize(bounds, display_uuid);
 ```
 
-`window.window_bounds()` her zaman restore için kullanılacak `WindowBounds` döner;
-fullscreen iken bile underlying windowed bounds gelir. Display UUID'si ayrı saklanır
-çünkü kullanıcı sonradan monitor'ü ayırabilir.
+Zed varsayılan pencere boyutu persist ederken `inner_window_bounds()` kullanır;
+workspace serialize sırasında bazı akışlarda `window.window_bounds()` da kullanılır.
+İkisi arasındaki fark platform/titlebar dahil edilen rect farklarına bağlıdır.
+Fullscreen/maximized durumlarında enum içindeki bounds restore edilecek windowed
+bounds'u temsil eder. Display UUID'si ayrı saklanır çünkü kullanıcı sonradan
+monitor'ü ayırabilir.
 
-Restore akışı `zed::build_window_options` içinde:
+Restore akışı `Workspace` açılırken `zed::build_window_options` üstüne uygulanır:
 
-1. Saklı `display_uuid` ile `cx.find_display(uuid)` çağrılır.
-2. Display bulunduysa kayıtlı `Bounds` ve durum kullanılır.
-3. Bulunmazsa default display ve `WindowBounds::centered(...)` fallback.
+1. Saklı `display_uuid`, `cx.displays()` içindeki `display.uuid()` değerleriyle
+   eşleştirilir.
+2. Display bulunduysa `options.display_id` set edilir, kayıtlı `WindowBounds`
+   `options.window_bounds` olur.
+3. Workspace-specific bounds yoksa default window bounds okunur.
+4. Hiç kayıt yoksa `WindowOptions.window_bounds = None` kalır ve GPUI platform
+   default/cascade bounds seçer.
 
 Bounds değişimini izlemek için:
 
 ```rust
 cx.observe_window_bounds(window, |this, window, cx| {
-    let bounds = window.window_bounds();
+    let bounds = window.inner_window_bounds();
     this.persist_bounds(bounds);
 }).detach();
 ```
@@ -1854,11 +1903,12 @@ Aynı şekilde `cx.observe_window_appearance(window, ...)` light/dark değişimi
 
 Tuzaklar:
 
-- `window.bounds()` (live screen rect) ve `window.window_bounds()` (restore-ready)
-  farklıdır; persist için her zaman ikincisi.
-- Maximized iken `Bounds<Pixels>` muhtemelen ekran boyutu kadardır; restore sonrası
-  windowed durumda aynı boyutta açılmaz, çünkü `window_bounds` kullanıcı son
-  windowed bounds'unu hatırlar.
+- `window.bounds()` (live screen rect), `window.window_bounds()` ve
+  `window.inner_window_bounds()` farklı olabilir; restore/persist akışında hangi
+  rect'in beklediğini mevcut Zed çağrı noktasına göre seç.
+- Maximized/fullscreen enum'larının içindeki `Bounds<Pixels>` restore size'dır;
+  live platform bounds ekranı doldursa bile restore sonrası bu windowed bounds'a
+  dönülür.
 - Display UUID'si Linux/Wayland'de boş olabilir (`display.uuid().ok()` None döner);
   fallback gerekli.
 
@@ -1871,8 +1921,11 @@ Tuzaklar:
 - `InspectorElementId`: her element için `(file, line, instance)` tabanlı kimlik.
 - Element source location `#[track_caller]` ile yakalanır.
 - Element seçimi window'da `Inspector` global state üzerinden tetiklenir.
-- `Window::with_inspector_state(...)`, `Window::register_inspector_element(...)`
-  ile bileşenler kendi state'lerini inspector UI'a açar.
+- `Window::toggle_inspector(cx)` inspector panelini açar/kapatır.
+- `Window::with_inspector_state(...)` aktif elemente özel geçici inspector state'i
+  tutar.
+- `App::set_inspector_renderer(...)` ve `App::register_inspector_element(...)`
+  inspector UI'ını ve element state render'larını bağlar.
 
 Production build'de inspector kodu sıfır maliyetlidir; release Zed binary'sinde
 dev tooling yoktur.
@@ -1880,10 +1933,12 @@ dev tooling yoktur.
 Diğer debug helper'ları:
 
 - `div().debug_selector(|| "my-button")`: test ve inspector'da selector ata.
-- `gpui::profile_label!("phase")` ve `crates/gpui/src/profiler.rs`: thread/task
-  zamanlama profili.
+- `crates/gpui/src/profiler.rs`: executor task timing buffer'ları; runtime'da
+  `gpui::profiler::set_enabled(true)` ile açılır ve thread timing delta'ları
+  `ProfilingCollector` ile okunur.
 - `RUST_LOG=gpui=debug` ile event/key dispatch log seviyesi yükselir.
-- `ZED_INSPECT_BOUNDS=1` env: bounds debug overlay (workspace seviyesinde).
+- `debug_selector` değerleri testte `VisualTestContext::debug_bounds(selector)`
+  üzerinden okunur; production overlay için ayrı bir env bayrağına güvenme.
 
 ## 43. Subscription Yaşam Döngüsü
 
@@ -1921,8 +1976,8 @@ Tuzaklar:
 
 - `detach()` uzun yaşayan callback'i view ömründen koparır; view drop olduktan
   sonra hâlâ fire ederse `WeakEntity` ile koru.
-- Subscription drop sırası önemli olabilir; `Vec<Subscription>` field'ında saklanan
-  abonelikler struct drop sırasında aşağıdan yukarı kaldırılır.
+- Subscription drop sırasına davranış bağlama; birden çok abonelik birbirini
+  etkiliyorsa açık teardown metodu veya tek owner struct kullan.
 - `observe` sırasında entity'yi update etmek panic verir; `cx.spawn(..)` ile
   ertele veya `cx.defer(|cx| ...)` kullan.
 
@@ -1954,3 +2009,268 @@ Tuzaklar:
 | Keymap | `Keymap` | `keymap/` | Bağlam-duyarlı keybinding tablosu. |
 | Global | `impl Global` | `global.rs` | Tek instance app-genel state. |
 | Event emitter | `EventEmitter<E>` | `app.rs` | Entity event yayınlayıcı. |
+
+## 45. Element Yaşam Döngüsü ve Draw Fazları
+
+`Element` sözleşmesi üç fazdan oluşur:
+
+1. `request_layout(...) -> (LayoutId, RequestLayoutState)`: stil ve child layout
+   istekleri Taffy layout ağacına verilir. Bu fazda paint yapılmaz.
+2. `prepaint(...) -> PrepaintState`: layout bounds bilinir; hitbox, scroll state,
+   element state ve ölçüm gibi paint öncesi işler yapılır.
+3. `paint(...)`: scene primitive'leri üretilir. `paint_quad`, `paint_path`,
+   `paint_image`, `paint_svg`, `set_cursor_style` gibi çağrılar burada yapılır.
+
+`Window` debug assertion'ları faz ihlalini yakalar: `insert_hitbox` yalnızca
+prepaint'te, `paint_*` çağrıları paint'te, `with_text_style` ve bazı ölçüm
+yardımcıları prepaint/paint içinde geçerlidir.
+
+State saklama yolları:
+
+- View state'i: `Entity<T>` alanları.
+- Element-local state: stabil `id(...)` ile `window.with_element_state` veya
+  `with_optional_element_state`; aynı ID değişirse state sıfırlanır.
+- Frame callback: `window.on_next_frame(...)`.
+- Effect sonunda erteleme: `cx.defer(...)`, `window.defer(cx, ...)`,
+  `cx.defer_in(window, ...)`.
+- Sürekli redraw: `window.request_animation_frame()`.
+
+Render katmanı:
+
+- `Render`: entity/view state'ini her render'da element ağacına çevirir.
+- `RenderOnce`: sadece elemente dönüştürülecek hafif bileşenler için uygundur.
+- `ParentElement`: child kabul eden elementler.
+- `Styled`: style refinement zincirine dahil olan elementler.
+- `InteractiveElement`: focus, action, key, mouse, hover, drag/drop dinleyicileri.
+- `StatefulInteractiveElement`: `id(...)` sonrası scroll/focus gibi stateful
+  interaktif davranışlar.
+
+Kritik kural: `cx.notify()` view render çıktısını etkileyen state değiştiğinde
+çağrılır. `window.refresh()` tüm pencerenin tekrar çizimini ister; local view
+state değişiminde önce `cx.notify()` tercih edilir.
+
+## 46. Text, Font ve Metin Ölçümü
+
+Ana tipler `crates/gpui/src/text_system.rs`, `style.rs` ve
+`elements/text.rs` içinde:
+
+- `TextStyle`: renk, font family, font size, line height, weight/style,
+  decoration, whitespace, overflow, align, line clamp.
+- `HighlightStyle`: belirli range'lere uygulanacak partial stil.
+- `TextRun`: UTF-8 byte uzunluğu + font + renk/dekorasyon. Run toplam uzunluğu
+  metin byte uzunluğunu tam karşılamalıdır.
+- `StyledText`: `SharedString` + run/highlight/font override ile render edilir.
+- `InteractiveText`: character/range bazlı click, hover ve tooltip sağlar.
+- `Font`, `FontWeight`, `FontStyle`, `FontFeatures`, `FontFallbacks`.
+
+Örnek:
+
+```rust
+let text = StyledText::new("Error: missing field")
+    .with_highlights([(0..5, HighlightStyle {
+        color: Some(rgb(0xff0000).into()),
+        font_weight: Some(FontWeight::BOLD),
+        ..Default::default()
+    })]);
+
+div()
+    .text_size(rems(0.875))
+    .font_family(".SystemUIFont")
+    .line_height(relative(1.4))
+    .child(text)
+```
+
+Metin ölçümü ve layout:
+
+- `window.text_style()` aktif inherited style'ı verir.
+- `window.text_system()` pencereye bağlı `WindowTextSystem`'dır.
+- `App::text_system()` global text system'a erişir.
+- `TextStyle::to_run(len)` inherited style'dan run üretir.
+- `TextStyle::line_height_in_pixels(rem_size)` line-height değerini pixel'e çevirir.
+- `window.line_height()` aktif text style'a göre satır yüksekliği döndürür.
+
+Tuzaklar:
+
+- Highlight range'leri byte range'dir; UTF-8 char boundary olmalıdır.
+- `SharedString` kopyalamayı azaltır; render child'larında `String` yerine tercih et.
+- `text_ellipsis`, `line_clamp`, `white_space` gibi overflow davranışları layout
+  genişliğine bağlıdır; parent width belirsizse truncation beklediğin gibi çalışmaz.
+- Uygulama genel text rendering modu `cx.set_text_rendering_mode(...)` ile
+  `PlatformDefault`, `Subpixel`, `Grayscale` arasında seçilir.
+
+## 47. Input, Clipboard, Prompt ve Platform Servisleri
+
+Element event ailesi:
+
+- Keyboard: `.on_key_down`, `.capture_key_down`, `.on_key_up`, `.capture_key_up`.
+- Mouse: `.on_mouse_down`, `.capture_any_mouse_down`, `.on_mouse_up`,
+  `.capture_any_mouse_up`, `.on_mouse_move`, `.on_mouse_down_out`,
+  `.on_mouse_up_out`, `.on_click`, `.on_hover`.
+- Gesture/scroll: `.on_scroll_wheel`, `.on_pinch`, `.capture_pinch`.
+- Drag/drop: `.on_drag`, `.on_drag_move`, `.on_drop`.
+- Action: `.capture_action::<A>`, `.on_action::<A>`, `.on_boxed_action`.
+
+Event tipleri `interactive.rs` ve `platform.rs` içinde tanımlıdır:
+`KeyDownEvent`, `KeyUpEvent`, `MouseDownEvent`, `MouseUpEvent`,
+`MouseMoveEvent`, `MousePressureEvent`, `ScrollWheelEvent`, `PinchEvent`,
+`FileDropEvent`, `ExternalPaths`, `ClickEvent`. `ScrollDelta::pixel_delta(line_height)`
+line-based scroll'u pixel'e çevirir; `coalesce` aynı yöndeki delta'ları birleştirir.
+
+Clipboard:
+
+```rust
+cx.write_to_clipboard(ClipboardItem::new_string("metin".to_string()));
+
+if let Some(item) = cx.read_from_clipboard()
+    && let Some(text) = item.text()
+{
+    // kullan
+}
+```
+
+`ClipboardItem` birden çok `ClipboardEntry` taşıyabilir: `String`, `Image`,
+`ExternalPaths`. String entry metadata'sı `new_string_with_metadata` veya
+`new_string_with_json_metadata` ile yazılır. Linux/FreeBSD için primary selection
+`read_from_primary`/`write_to_primary`, macOS Find pasteboard için
+`read_from_find_pasteboard`/`write_to_find_pasteboard` cfg-gated API'lerdir.
+
+Prompt ve dosya seçici:
+
+- `window.prompt(level, message, detail, answers, cx) -> oneshot::Receiver<usize>`.
+- `cx.set_prompt_builder(...)` custom GPUI prompt UI kurar; `reset_prompt_builder`
+  native/default akışa döner.
+- `cx.prompt_for_paths(PathPromptOptions { files, directories, multiple, prompt })`
+  dosya/dizin seçici açar.
+- `cx.prompt_for_new_path(directory, suggested_name)` save dialog açar.
+- `cx.open_url(url)`, `cx.register_url_scheme(scheme)`, `cx.reveal_path(path)`,
+  `cx.open_with_system(path)` platform servislerine gider.
+
+## 48. Layer Shell ve Özel Platform Pencereleri
+
+Normal Zed pencereleri `WindowKind::Normal` ile açılır. Linux Wayland feature
+aktifken `WindowKind::LayerShell(LayerShellOptions)` overlay/dock/wallpaper
+benzeri yüzeyler için kullanılabilir:
+
+```rust
+use gpui::layer_shell::*;
+
+WindowOptions {
+    titlebar: None,
+    window_background: WindowBackgroundAppearance::Transparent,
+    kind: WindowKind::LayerShell(LayerShellOptions {
+        namespace: "gpui".to_string(),
+        layer: Layer::Overlay,
+        anchor: Anchor::LEFT | Anchor::RIGHT | Anchor::BOTTOM,
+        margin: Some((px(0.), px(0.), px(40.), px(0.))),
+        keyboard_interactivity: KeyboardInteractivity::None,
+        ..Default::default()
+    }),
+    ..Default::default()
+}
+```
+
+Layer shell alanları:
+
+- `Layer`: `Background`, `Bottom`, `Top`, `Overlay`.
+- `layer_shell::Anchor`: bitflag; `TOP/BOTTOM/LEFT/RIGHT` kombine edilir.
+- `exclusive_zone`: compositor'ın başka surface'leri bu alanı kapatmamasını ister.
+- `exclusive_edge`: exclusive zone kenarı.
+- `margin`: CSS sırası ile top/right/bottom/left.
+- `KeyboardInteractivity`: `None`, `Exclusive`, `OnDemand`.
+
+Bu API yalnızca `#[cfg(all(target_os = "linux", feature = "wayland"))]` altında
+vardır. Compositor protocol desteklemiyorsa backend `LayerShellNotSupportedError`
+döndürür; normal app penceresi fallback'i planla.
+
+## 49. Zed Workspace Dock ve Panel Modeli
+
+Bu bölüm GPUI çekirdeği değil, Zed'in `workspace` crate'i üstündeki dock/panel
+katmanıdır. Dosyalar: `crates/workspace/src/workspace.rs`,
+`crates/workspace/src/dock.rs`, `crates/workspace/src/pane.rs`.
+
+Workspace yapısı:
+
+- `Workspace` merkezde pane grubu, solda `left_dock`, sağda `right_dock`, altta
+  `bottom_dock` taşır.
+- Dock entity'si `DockPosition::{Left, Bottom, Right}` ile konumlanır.
+- `Workspace::left_dock()`, `right_dock()`, `bottom_dock()`, `all_docks()`,
+  `dock_at_position(position)` erişim sağlar.
+- Aksiyonlar: `ToggleLeftDock`, `ToggleRightDock`, `ToggleBottomDock`,
+  `ToggleAllDocks`, `CloseActiveDock`, `CloseAllDocks`,
+  `Increase/DecreaseActiveDockSize`, `ResetActiveDockSize` vb.
+
+Panel yazmak için `Panel` trait'i uygulanır:
+
+- `persistent_name()` ve `panel_key()` persist/keymap/telemetry kimliğidir.
+- `position`, `position_is_valid`, `set_position` panelin hangi dock'ta olacağını
+  yönetir.
+- `default_size`, `min_size`, `initial_size_state`, `size_state_changed`,
+  `supports_flexible_size`, `set_flexible_size` boyut/persist davranışıdır.
+- `icon`, `icon_tooltip`, `icon_label`, `toggle_action`, `activation_priority`
+  status bar button ve sıralamayı belirler.
+- `starts_open`, `set_active`, `is_zoomed`, `set_zoomed`, `pane`, `remote_id`
+  dock state ve remote workspace entegrasyonudur.
+- Panel `Focusable + EventEmitter<PanelEvent> + Render` olmalıdır.
+
+Dock davranışı:
+
+- `Dock::add_panel` paneli `activation_priority` sırasına göre ekler. Aynı priority
+  debug build'de panic eder; her panel benzersiz priority seçmelidir.
+- `Dock::set_open`, `activate_panel`, `active_panel`, `visible_panel`,
+  `panel::<T>()`, `remove_panel`, `resize_active_panel`, `resize_all_panels`
+  temel yönetim API'leridir.
+- Panel `PanelEvent::Activate` emit ederse dock açılır, panel aktiflenir ve focus
+  panele taşınır.
+- `PanelEvent::Close` aktif görünür paneli kapatır.
+- `PanelEvent::ZoomIn/ZoomOut` workspace zoom layer state'ini günceller.
+- Boyut state'i `PanelSizeState { size, flex }` olarak persist edilir.
+
+Workspace `toggle_dock` akışı:
+
+1. Dock görünürse açık pozisyonlar kaydedilir.
+2. Dock open state terslenir.
+3. Aktif panel yoksa ilk enabled panel aktiflenir.
+4. Açılıyorsa focus panel focus handle'a taşınır; kapanıyorsa focused panelden
+   geliyorsa focus center pane'e döner.
+5. Workspace serialize edilir.
+
+Yeni panel eklerken kontrol:
+
+- Panel `panel_key` değişirse eski persist ve keymap adları kırılır.
+- `position_is_valid` bottom/side sınırlamalarını net tanımlamalıdır.
+- `toggle_action()` action'ı register edilmiş olmalıdır.
+- `activation_priority()` benzersiz olmalıdır.
+- `set_active` içinde UI state değişiyorsa `cx.notify()` çağrısı unutulmamalıdır.
+- Dock değiştiren settings gözlemlerinde panel taşınırken size state axis değişirse
+  reset edilebilir; bu mevcut `Dock::add_panel`/settings observer akışında yapılır.
+
+## 50. Style ve Layout Haritası
+
+GPUI style sistemi CSS/Tailwind'e benzer fluent metotlardan oluşur, fakat Rust
+tipleriyle daha nettir:
+
+- Boyut: `w`, `h`, `size`, `min_w`, `max_w`, `flex_basis`, `size_full`,
+  `h_auto`, `relative(f32)`, `px`, `rems`.
+- Layout: `flex`, `grid`, `flex_row`, `flex_col`, `items_*`, `justify_*`,
+  `content_*`, `gap_*`, `flex_wrap`, `flex_grow`, `flex_shrink`.
+- Position: `relative`, `absolute`, `inset_*`, `top/right/bottom/left`,
+  `z_index`.
+- Overflow: plain style overflow ve stateful `.overflow_*_scroll()`.
+- Background/border: `bg`, `border_*`, `border_color`, `rounded_*`,
+  `box_shadow`, `opacity`.
+- Text: `text_color`, `text_bg`, `text_size`, `text_*`, `font_family`,
+  `font_weight`, `italic`, `line_height`, `text_ellipsis`, `line_clamp`.
+- Interaction: `hover`, `active`, `focus`, `focus_visible`, `cursor_*`,
+  `track_focus`, `key_context`, action/key/mouse handlers.
+- Group styling: `.group("name")` ve `group_hover/group_focus` benzeri
+  durumlar aynı isimli hitbox/focus grubuna göre uygulanır.
+
+Pratik kararlar:
+
+- Görünüm state'e bağlıysa `Render` içinde koşullu `.when(...)` kullan; style'ı
+  sonradan imperative değiştirmeye çalışma.
+- Scroll, focus, tooltip, animation gibi stateful elementlerde ID stabil olmalıdır.
+- Parent layout genişliği belirsizse text overflow, image aspect ratio ve absolute
+  child konumu beklediğin sonucu vermeyebilir.
+- Kart/toolbar/list gibi tekrar eden UI'da boyutları `min/max/aspect_ratio` ile
+  sabitle; hover veya loading state layout shift üretmemeli.
