@@ -1313,9 +1313,10 @@ Tuzaklar:
 - Animator closure `'static` olduğundan dış state'i `Rc`/`Arc`/`clone` ile yakala.
 - Repeat animasyonu `window.request_animation_frame()` ile bir sonraki frame'i ister;
   bu da mevcut view'i sonraki frame'de notify eder. Gerekmiyorsa oneshot bırak.
-- Frame'ler arası progress değeri executor saatinden hesaplanır; testlerde
-  `cx.background_executor.advance_clock(...)`, `TestApp::advance_clock(...)` veya
-  `VisualTestContext::advance_clock(...)` ile ilerlet.
+- Frame'ler arası progress değeri executor saatinden hesaplanır; normal
+  `TestAppContext`/`VisualTestContext` testlerinde `cx.background_executor.advance_clock(...)`
+  veya `TestApp::advance_clock(...)` kullan. macOS'a özel `VisualTestAppContext`
+  üzerinde ayrıca doğrudan `advance_clock(...)` helper'ı vardır.
 
 ## 31. Renkler, Gradient ve Background
 
@@ -1431,12 +1432,18 @@ Tuzaklar:
 - Klavye ile scroll dispatch için `.on_key_down(...)` veya action ile
   `scroll_to_item` çağrılır; otomatik klavye scroll yoktur.
 
-Liste elementlerinde ayrı handle'lar vardır: `ListHandle::scroll_to_end()`,
-`ListHandle::set_follow_mode(FollowMode::Tail)`, `ListHandle::scroll_to(...)` ve
-`UniformListScrollHandle::scroll_to_item(..., ScrollStrategy)`,
-`scroll_to_item_strict`, `scroll_to_item_with_offset`, `is_scrolled_to_end`,
-`scroll_to_bottom`. Büyük listelerde doğrudan `ScrollHandle` yerine bu listeye
-özel handle'ları kullanmak doğru sonuç verir.
+Liste elementlerinde ayrı state/handle tipleri vardır:
+
+- `ListState`: `scroll_by`, `scroll_to`, `scroll_to_reveal_item`, `scroll_to_end`,
+  `set_follow_mode(FollowMode::Tail)`, `logical_scroll_top`,
+  `is_scrolled_to_end`, `is_following_tail`.
+- `UniformListScrollHandle`: `scroll_to_item(..., ScrollStrategy)`,
+  `scroll_to_item_strict`, `scroll_to_item_with_offset`,
+  `scroll_to_item_strict_with_offset`, `logical_scroll_top_index`,
+  `is_scrolled_to_end`, `scroll_to_bottom`.
+
+Büyük listelerde doğrudan `ScrollHandle` yerine bu listeye özel
+`ListState`/`UniformListScrollHandle` API'lerini kullanmak doğru sonuç verir.
 
 ## 33. Asset, Image ve SVG Yükleme
 
@@ -1535,7 +1542,8 @@ API:
   `BottomRight`, `TopCenter`, `BottomCenter`, `LeftCenter`, `RightCenter`.
 - `position(point)`: anchor noktası (window veya local koordinatlarda).
 - `offset(point)`: hizalama sonrası ek kayma.
-- `position_mode(AnchoredPositionMode::Window | Local)`: koordinat referansı.
+- `position_mode(AnchoredPositionMode::Window)` veya
+  `position_mode(AnchoredPositionMode::Local)`: koordinat referansı.
 - `snap_to_window()` ve `snap_to_window_with_margin(Edges)`: pencere dışına taşıyorsa
   aynı anchor'ı koruyarak pencere içine kaydırır.
 
@@ -1868,10 +1876,13 @@ sahip olmalı.
 
 ## 40. Test Bağlamları ve Simülasyon
 
-`crates/gpui/src/app/test_context.rs`, `visual_test_context.rs`.
+`crates/gpui/src/app/test_context.rs`, `crates/gpui/src/app/visual_test_context.rs`.
 
 `#[gpui::test]` makrosu bir `TestAppContext` sağlar. Görsel test için
 `add_window` bir `WindowHandle<V>` döndürür ve `VisualTestContext` ile sürülür.
+İsim benzerliğine dikkat: `VisualTestContext` test penceresini kendi içinde tutar;
+macOS `test-support` altındaki `VisualTestAppContext` ise window handle'ı açık
+argüman olarak alan ayrı bir bağlamdır.
 
 ```rust
 #[gpui::test]
@@ -1907,23 +1918,30 @@ bağlamını taşıdığı için *bazı* metotları window argümansız çağrı
 - `cx.run_until_parked()`, `cx.window_title()`, `cx.document_path()` window-less
   helper'lardır.
 
-Mouse simülasyon metotları VisualTestContext üzerinde de window argümanı ister
-(`visual_test_context.rs:257-320`):
+Mouse simülasyon metotları `VisualTestContext` üzerinde de `self.window`
+üzerinden çalışır ve window argümanı almaz (`test_context.rs:764-809`):
 
-- `cx.simulate_mouse_move(window, position, button, modifiers)`
-- `cx.simulate_mouse_down(window, position, button, modifiers)`
-- `cx.simulate_mouse_up(window, position, button, modifiers)`
-- `cx.simulate_click(window, position, modifiers)`
+- `cx.simulate_mouse_move(position, button, modifiers)`
+- `cx.simulate_mouse_down(position, button, modifiers)`
+- `cx.simulate_mouse_up(position, button, modifiers)`
+- `cx.simulate_click(position, modifiers)`
 
-`VisualTestContext.window` private field olduğu için dışarıdan erişilemez;
-`add_window` çağrısının döndürdüğü `WindowHandle<V>`'i ayrı sakla ve mouse
-metotlarına `handle.into()` veya `AnyWindowHandle` olarak geçir.
+Pencere argümanı isteyen helper'lar `TestAppContext` üzerindeki
+`simulate_keystrokes(window, ...)`, `simulate_input(window, ...)`,
+`dispatch_action(window, ...)` ve `dispatch_keystroke(window, ...)` ailesidir.
+`VisualTestContext` bu window handle'ı kendi içinde tuttuğu için aynı klavye ve
+action helper'larını window-less sarmallar olarak sunar.
+`VisualTestAppContext` ise `simulate_keystrokes(window, ...)`,
+`simulate_mouse_move(window, ...)`, `simulate_click(window, ...)` ve
+`dispatch_action(window, ...)` şeklindeki window argümanlı formu kullanır.
 
 Pratik kurallar:
 
 - Real tutarlılık için `smol::Timer` yerine `cx.background_executor.timer(d)` kullan.
 - `run_until_parked` ile `advance_clock` kombine edilirken önce clock ilerlet,
-  sonra park bekle.
+  sonra park bekle. `VisualTestContext` `TestAppContext` içine deref ettiği için
+  normal yolda `cx.background_executor.advance_clock(d)` kullanılır; direct
+  `advance_clock(d)` helper'ı `VisualTestAppContext` üzerindedir.
 - Async test için `#[gpui::test]` `async fn(cx: &mut TestAppContext)` formunu
   destekler; foreground task'ları orada `cx.spawn` ile kur.
 - Pencerenin gerçekten render edilmesi için `VisualTestContext::draw(...)`,
@@ -2364,8 +2382,13 @@ tipleriyle daha nettir:
   `font_weight`, `italic`, `line_height`, `text_ellipsis`, `line_clamp`.
 - Interaction: `hover`, `active`, `focus`, `focus_visible`, `cursor_*`,
   `track_focus`, `key_context`, action/key/mouse handlers.
-- Group styling: `.group("name")` ve `group_hover/group_focus` benzeri
-  durumlar aynı isimli hitbox/focus grubuna göre uygulanır.
+- Group styling: `.group("name")`, `group_hover(...)`, `group_active(...)` ve
+  `group_drag_over::<T>(...)` aynı isimli interaction grubuna göre uygulanır.
+- Grid placement: container için `grid_cols`, `grid_cols_min_content`,
+  `grid_cols_max_content`, `grid_rows`; child için `col_start`, `col_end`,
+  `col_span`, `col_span_full`, `row_start`, `row_end`, `row_span`,
+  `row_span_full` kullanılır. Altta `GridTemplate`,
+  `TemplateColumnMinSize` ve `GridPlacement::{Line, Span, Auto}` vardır.
 
 Pratik kararlar:
 
@@ -3333,8 +3356,10 @@ impl Settings for YourSettings {
 YourSettings::register(cx);
 ```
 
-`RegisterSetting` derive `inventory::collect!` ile build-time topluluk yaratır;
-`SettingsStore::new(cx)` çağrısı tüm registered setting'leri otomatik yükler.
+`RegisterSetting` derive `inventory::collect!` ile build-time topluluk yaratır.
+Store kurulumu `SettingsStore::new(cx, &settings::default_settings())` imzasıyla
+yapılır; Zed'in normal başlangıç yolunda bunu `settings::init(cx)` çağırır ve
+oluşan store'u `cx.set_global(settings)` ile global yapar.
 
 Okuma:
 
@@ -3510,9 +3535,9 @@ div()
         |this| this.opacity(1.0),
     )
     .map(|this| match self.density {
-        Density::Compact => this.gap_1(),
-        Density::Comfortable => this.gap_2(),
-        Density::Spacious => this.gap_4(),
+        UiDensity::Compact => this.gap_1(),
+        UiDensity::Default => this.gap_2(),
+        UiDensity::Comfortable => this.gap_4(),
     })
 ```
 
@@ -4749,15 +4774,33 @@ Zed'e özgü component/style katmanını ekler.
 
 `ui::prelude::*` içinde önemli export'lar:
 
-- GPUI temelleri: `App`, `Context`, `Window`, `Element`, `IntoElement`,
-  `RenderOnce`, `Styled`, `InteractiveElement`, `ParentElement`, `div`, `px`,
-  `rems`, `relative`, `SharedString`.
-- Zed layout helper'ları: `h_flex()`, `v_flex()`, `h_group*`, `v_group*`.
+- `gpui::prelude::*` üzerinden gelen trait/tipler: `AppContext` (anonim),
+  `BorrowAppContext`, `Context`, `Element`, `InteractiveElement`, `IntoElement`,
+  `ParentElement`, `Refineable`, `Render`, `RenderOnce`, `StatefulInteractiveElement`,
+  `Styled`, `StyledImage`, `TaskExt` (anonim), `VisualContext`, `FluentBuilder`.
+- `gpui` doğrudan tipleri: `App`, `Window`, `Div`, `AnyElement`, `ElementId`,
+  `SharedString`, `Pixels`, `Rems`, `AbsoluteLength`, `DefiniteLength`,
+  `div`, `px`, `rems`, `relative`.
+- Zed layout helper'ları: `h_flex()`, `v_flex()`, `h_group()`, `h_group_sm()`,
+  `h_group_lg()`, `h_group_xl()`, `v_group()`, `v_group_sm()`, `v_group_lg()`,
+  `v_group_xl()`.
 - Theme erişimi: `theme::ActiveTheme`, `Color`, `PlatformStyle`, `Severity`.
-- Component'ler: `Button`, `IconButton`, `ButtonLike`, `Label`, `LoadingLabel`,
-  `Icon`, `Headline`, `SelectableButton`.
-- Trait'ler: `StyledExt`, `StyledTypography`, `Clickable`, `Disableable`,
+- Stil/spacing yardımcıları: `StyledTypography`, `TextSize`, `DynamicSpacing`,
+  `rems_from_px`, `vh`, `vw`.
+- Animasyon: `AnimationDirection`, `AnimationDuration`, `DefaultAnimations`.
+- Component sistemi: `Component`, `ComponentScope`, `RegisterComponent`,
+  `example_group`, `example_group_with_title`, `single_example`.
+- Component'ler: `Button`, `ButtonCommon`, `ButtonSize`, `ButtonStyle`,
+  `IconButton`, `SelectableButton`, `Headline`, `HeadlineSize`, `Icon`,
+  `IconName`, `IconPosition`, `IconSize`, `Label`, `LabelCommon`, `LabelSize`,
+  `LineHeightStyle`, `LoadingLabel`.
+- Trait'ler (`crate::traits::*`): `StyledExt`, `Clickable`, `Disableable`,
   `Toggleable`, `VisibleOnHover`, `FixedWidth`.
+
+`ButtonLike` prelude'da değildir; `ui::ButtonLike` yoluyla doğrudan import edilir.
+Yine prelude'da olmayanlar (örn. `Tooltip`, `ContextMenu`, `Popover`,
+`PopoverMenu`, `Modal`, `RightClickMenu`) doğrudan `ui::` namespace'inden
+çağrılır.
 
 Style extension'ları:
 
@@ -5646,8 +5689,9 @@ macOS dışındaki client-side application menu `title_bar::ApplicationMenu` ile
 - `OpenApplicationMenu(String)` action'ı belirli menüyü açar.
 - `ActivateMenuLeft`/`ActivateMenuRight` client-side menu bar içinde yatay gezinir.
 - `ApplicationMenu` boş submenu'leri ve ardışık/trailing separator'ları temizler,
-  sonra `OwnedMenuItem::{Action, Submenu, Separator}` değerlerini `ContextMenu`
-  entry'lerine dönüştürür.
+  sonra `OwnedMenuItem::{Action, Submenu, Separator, SystemMenu}` değerlerini
+  işler. `Action`/`Submenu`/`Separator` `ContextMenu` entry'lerine dönüşür;
+  `SystemMenu(_)` client-side context'te anlamlı olmadığı için yok sayılır.
 
 ### FocusFollowsMouse
 
@@ -5955,3 +5999,409 @@ sarmaldır. `new(picker, trigger, tooltip, anchor, cx)` picker'ın
 `offset(...)` ile dış popover handle/konum ayarı yapılır. Picker bir toolbar
 butonu veya popover tetikleyicisi arkasında açılacaksa doğrudan modal yerine bu
 sarmalı kullan.
+
+## 101. Entity Type Erasure, Callback Adaptörleri ve View Cache
+
+Bu bölüm GPUI çekirdeğinde public olan ama günlük kullanımda kolay atlanan küçük
+API yüzeylerini toplar.
+
+### Entity ve WeakEntity Tam Yüzeyi
+
+`Entity<T>` güçlü handle'dır:
+
+- `entity.entity_id() -> EntityId`
+- `entity.downgrade() -> WeakEntity<T>`
+- `entity.into_any() -> AnyEntity`
+- `entity.read(cx: &App) -> &T`
+- `entity.read_with(cx, |state, cx| ...) -> R`
+- `entity.update(cx, |state, cx| ...) -> R`
+- `entity.update_in(visual_cx, |state, window, cx| ...) -> C::Result<R>`
+- `entity.as_mut(cx) -> GpuiBorrow<T>`: mutable borrow verir; borrow drop
+  olurken entity notify edilir.
+- `entity.write(cx, value)`: state'i komple değiştirir ve `cx.notify()` çağırır.
+
+`WeakEntity<T>` zayıf handle'dır:
+
+- `weak.upgrade() -> Option<Entity<T>>`
+- `weak.update(cx, |state, cx| ...) -> Result<R>`
+- `weak.read_with(cx, |state, cx| ...) -> Result<R>`
+- `weak.update_in(cx, |state, window, cx| ...) -> Result<R>`: entity'nin current
+  window'ını `App::with_window(entity_id, ...)` üzerinden bulur; entity düşmüşse
+  veya current window yoksa hata döner.
+- `WeakEntity::new_invalid()` hiçbir zaman upgrade edilemeyen sentinel handle
+  üretir; opsiyon yerine "geçersiz ama tipli handle" gereken yerlerde kullanılır.
+
+`AnyEntity` ve `AnyWeakEntity` heterojen koleksiyonlar içindir:
+
+- `AnyEntity::{entity_id, entity_type, downgrade, downcast::<T>}`
+- `AnyWeakEntity::{entity_id, is_upgradable, upgrade, new_invalid}`
+- `AnyWeakEntity::assert_released()` yalnız test/leak-detection feature altında
+  vardır; güçlü handle sızıntısını yakalamak için kullanılır.
+
+Kural: plugin/dock/workspace gibi heterojen koleksiyon sınırı yoksa typed
+`Entity<T>`/`WeakEntity<T>` kullan. `AnyEntity` downcast zorunluluğu getirir ve
+yanlış tipte `downcast::<T>()` entity'yi `Err(AnyEntity)` olarak geri verir.
+
+### AnyView, AnyWeakView ve EmptyView
+
+`AnyView`, `Render` implement eden bir `Entity<V>` için element olarak
+kullanılabilen type-erased view handle'dır:
+
+```rust
+let view: AnyView = pane.clone().into();
+div().child(view.clone());
+```
+
+Önemli metotlar:
+
+- `AnyView::from(entity)` veya `entity.into_element()` typed view'i type-erased
+  element yapar.
+- `any_view.downcast::<T>() -> Result<Entity<T>, AnyView>` typed handle'a geri
+  dönmek içindir.
+- `any_view.downgrade() -> AnyWeakView`; `AnyWeakView::upgrade() -> Option<AnyView>`.
+- `any_view.entity_id()` ve `entity_type()` debug/registry mantığı için kullanılır.
+- `EmptyView` hiçbir şey render etmeyen `Render` view'idir.
+
+`AnyView::cached(style_refinement)` pahalı child view render'ını cache'lemek için
+kullanılır:
+
+```rust
+div().child(
+    AnyView::from(pane.clone())
+        .cached(StyleRefinement::default().v_flex().size_full()),
+)
+```
+
+Cache, view `cx.notify()` çağırmadıysa önceki layout/prepaint/paint aralıklarını
+yeniden kullanır. `Window::refresh()` çağrısı cache'i bypass eder; inspector
+picking açıkken de hitbox'ların eksiksiz olması için caching devre dışı kalır.
+Cache key bounds, aktif `ContentMask` ve aktif `TextStyle` içerir. Bu nedenle
+`cached(...)` için verdiğin root `StyleRefinement` view'in gerçek root layout
+stiliyle uyumlu olmalıdır; yanlış refinement layout'u bayat veya hatalı gösterir.
+
+### Callback Adaptörleri
+
+Çoğu element callback'i view state almaz:
+
+```rust
+Fn(&Event, &mut Window, &mut App)
+```
+
+State'e dönmek için doğru adaptörü seç:
+
+- `cx.listener(|this, event, window, cx| ...)`:
+  `Fn(&Event, &mut Window, &mut App)` üretir. İçeride current entity'nin
+  `WeakEntity` handle'ı kullanılır; entity düşmüşse callback sessizce no-op olur.
+- `cx.processor(|this, event, window, cx| -> R { ... })`:
+  `Fn(Event, &mut Window, &mut App) -> R` üretir. Event'i sahiplenir ve dönüş
+  değeri gerekirken kullanılır.
+- `window.listener_for(&entity, |state, event, window, cx| ...)`:
+  current `Context<T>` dışında, elde typed `Entity<T>` varken listener üretir.
+- `window.handler_for(&entity, |state, window, cx| ...)`:
+  event parametresi olmayan `Fn(&mut Window, &mut App)` handler üretir.
+
+`cx.listener` dışındaki adaptörleri reusable component veya window-level helper
+yazarken kullan. Handler içinde `cx.notify()` çağrısı yine state değişimine göre
+senin sorumluluğundadır.
+
+### FocusHandle Zayıf Handle ve Dispatch
+
+`FocusHandle` yalnız focus vermek için değildir:
+
+- `focus_handle.downgrade() -> WeakFocusHandle`
+- `WeakFocusHandle::upgrade() -> Option<FocusHandle>`
+- `focus_handle.contains(&other, window) -> bool`: son rendered frame'deki focus
+  ağaç ilişkisini kontrol eder.
+- `focus_handle.dispatch_action(&action, window, cx)`: dispatch'i focused node
+  yerine belirli focus handle'ın node'undan başlatır.
+
+`contains_focused(window, cx)` "ben veya descendant focused mı?", `within_focused`
+ise "ben focused node'un içinde miyim?" sorusunu cevaplar. `within_focused`
+imzasında `cx: &mut App` vardır; çünkü dispatch/focus path hesaplarında app
+state'iyle çalışır.
+
+### ElementId Tam Varyantları
+
+Stabil element state için kullanılan `ElementId` varyantları:
+
+- `View(EntityId)`, `Integer(u64)`, `Name(SharedString)`, `Uuid(Uuid)`
+- `FocusHandle(FocusId)`, `NamedInteger(SharedString, u64)`, `Path(Arc<Path>)`
+- `CodeLocation(Location<'static>)`, `NamedChild(Arc<ElementId>, SharedString)`
+- `OpaqueId([u8; 20])`
+
+`ElementId::named_usize(name, usize)` `NamedInteger` üretir. Debug selector veya
+string tabanlı ID gerektiğinde `Name`; liste satırı gibi tekrar eden yapılarda
+`NamedInteger`; text anchor gibi byte-level kimliklerde `OpaqueId` kullanılır.
+
+## 102. Kalan GPUI Tipleri: Dış API ve Crate-İçi Sınır
+
+Bu bölüm, iki farklı yüzeyi ayırır: `crates/gpui/src/gpui.rs` üzerinden dışarı
+export edilen public API ve private modüllerde `pub` tanımlanmış olsa da yalnız
+crate içinde erişilebilen taşıyıcılar. `pub` kelimesi tek başına dış API anlamına
+gelmez; dış kullanıcı açısından asıl sınır `gpui.rs` içindeki `pub use ...` /
+`pub(crate) use ...` kararlarıdır.
+
+### Style ve Layout Enumları
+
+`style.rs` tarafındaki temel enum/type alias'lar `Styled` fluent metotlarının
+arkasındaki ham değerlerdir:
+
+- Hizalama: `AlignItems`, `AlignSelf`, `JustifyItems`, `JustifySelf`,
+  `AlignContent`, `JustifyContent`.
+- Flex: `FlexDirection`, `FlexWrap`.
+- Görünürlük ve metin: `Visibility`, `WhiteSpace`, `TextOverflow`, `TextAlign`.
+- Dolgu: `Fill` (`style.rs:808`); şu an tek varyantı `Color(Background)`'tır.
+  Tek varyantlı bir enum olmasının nedeni gelecekte ek dolgu tipleri (örn. örüntü
+  tabanlı fill) eklenebilmesi için API'yi sabit tutmak. Solid renk dışında bir
+  şey üretmek istiyorsan `Background` tipinin `linear_gradient`/`pattern_slash`/
+  `checkerboard` constructor'larını kullan.
+- Debug: `DebugBelow`, yalnız `debug_assertions` altında derlenir; `debug_below`
+  styling'ini custom element içinden okumak için global marker olarak kullanılır.
+
+Uygulama kodunda genellikle bu enumları doğrudan construct etmek yerine
+`.items_center()`, `.justify_between()`, `.flex_col()`, `.whitespace_nowrap()`,
+`.text_ellipsis()` gibi helper metotlar kullanılır. Custom element veya style
+refinement yazarken ham enumlar gerekir.
+
+### Geometri Yardımcıları
+
+`geometry.rs` public yüzeyindeki düşük seviye yardımcılar:
+
+- `Axis` ve `Along`: yatay/dikey eksene göre `Point`, `Size`, `Bounds` gibi
+  tiplerden ilgili boyutu seçmek için kullanılır.
+- `Half` ve `IsZero`: generic geometri hesaplarında yarıya bölme ve sıfır testi
+  sağlayan trait'lerdir.
+- `Radians`/`radians(value)` ve `Percentage`/`percentage(value)`: transform,
+  gradient ve responsive ölçü değerlerini tip güvenli taşır.
+- `GridLocation` ve `GridPlacement`: `.grid_row(...)`, `.grid_col(...)`,
+  `.grid_area(...)` gibi style metotlarının ham grid yerleşim girdisidir.
+- `PathStyle`: path çiziminde fill/stroke stil seçimini taşır.
+
+Bu tipleri özellikle custom layout hesaplarında, canvas/path çiziminde ve grid
+placement değerlerini programatik üretirken kullan.
+
+### Element ve Frame-State Taşıyıcıları
+
+Bazı public tipler element ağacının layout/prepaint/paint fazları arasında state
+taşır:
+
+- `Drawable<E>`, `Canvas<T>`, `AnimationElement<E>`, `Svg`, `Img`, `SurfaceSource`.
+- `AnchoredState`, `DivFrameState`, `DivInspectorState`, `ImgLayoutState`,
+  `ListPrepaintState`, `InteractiveTextState`, `UniformListFrameState`,
+  `UniformListScrollState`.
+- `InteractiveElementState`, `ElementClickedState`, `ElementHoverState`,
+  `GroupStyle`, `DragMoveEvent<T>`.
+- `DeferredScrollToItem`, `ItemSize`, `UniformListDecoration`,
+  `ListScrollEvent`, `ListMeasuringBehavior`, `ListHorizontalSizingBehavior`.
+
+Normal uygulama kodunda bu state tipleri çoğunlukla doğrudan tutulmaz; `div()`,
+`canvas(...)`, `img(...)`, `svg()`, `list(...)`, `uniform_list(...)`,
+`anchored()`, `deferred(...)` ve ilgili element builder'ları bunları üretir.
+Custom element implementasyonu yazarken `Element::request_layout`,
+`Element::prepaint` ve `Element::paint` dönüş değerlerinde bu taşıyıcıların
+benzer desenlerini izle.
+
+### Input Event Tipleri
+
+`interactive.rs` event ailesi:
+
+- Trait sınıfları: `InputEvent`, `KeyEvent`, `MouseEvent`, `GestureEvent`.
+- Klavye: `ModifiersChangedEvent`, `KeyboardClickEvent`, `KeyboardButton`.
+- Mouse: `MouseClickEvent`, `MouseExitEvent`, `PressureStage`.
+- Dokunma/gesture: `TouchPhase`, `NavigationDirection`.
+- Hitbox: `HitboxId` rendered frame içinde hitbox'ı tanımlayan opaque id'dir;
+  uygulama kodu genellikle `Hitbox` handle'ı ve `window.hitbox(...)` sonucu ile
+  çalışır.
+- Drag/drop tarafında `ExternalPaths` ve `FileDropEvent` Bölüm 54'te ayrıca
+  ele alındı.
+
+Element callback'lerinde çoğu zaman concrete event tipi otomatik gelir:
+`.on_mouse_down(|event, window, cx| ...)`, `.on_scroll_wheel(...)`,
+`.on_modifiers_changed(...)` gibi. Synthetic test event'i veya platform input
+çevirimi yazarken `InputEvent::to_platform_input()` hattı önemlidir.
+
+### Image, SVG ve Cache Taşıyıcıları
+
+Image/SVG hattında public fakat genelde framework tarafından taşınan tipler:
+
+- `ImageId`, `ImageFormat`, `ClipboardString`.
+- `ImageStyle`, `ImageAssetLoader`, `ImageCacheProvider`, `AnyImageCache`,
+  `ImageCacheItem`, `ImageLoadingTask`, `RetainAllImageCacheProvider`.
+- `RenderImageParams` ve `RenderSvgParams`: renderer'a verilecek rasterization
+  parametrelerini taşır.
+
+Uygulama seviyesinde çoğunlukla `img(source)`, `svg().path(...)`,
+`image_cache(retain_all(id))`, `window.use_asset(...)`, `window.paint_image(...)`
+ve `window.paint_svg(...)` kullanılır. Cache implementasyonu yazıyorsan
+`ImageCacheProvider -> ImageCache -> ImageCacheItem` zincirine inilir.
+
+### Platform, Dispatcher, Atlas ve Renderer Sınırı
+
+Platform implementasyonu veya headless renderer yazılmadıkça aşağıdaki tipler
+application kodunda nadiren doğrudan kullanılır:
+
+- Display/diagnostic: `DisplayId`, `ThermalState`, `SourceMetadata`,
+  `RequestFrameOptions`, `WindowParams`, `InputLatencySnapshot`.
+- Dispatcher/executor: `PlatformDispatcher`, `RunnableVariant`,
+  `TimerResolutionGuard`, `Scope`.
+- Text/keyboard: `PlatformTextSystem`, `NoopTextSystem`,
+  `PlatformKeyboardLayout`, `PlatformKeyboardMapper`, `DummyKeyboardMapper`,
+  `PlatformInputHandler`.
+- GPU atlas: `PlatformAtlas`, `AtlasKey`, `AtlasTextureList<T>`, `AtlasTile`,
+  `AtlasTextureId`, `AtlasTextureKind`, `TileId`.
+- Headless/screen capture: `PlatformHeadlessRenderer`, `scap_screen_sources(...)`.
+- Test platformu: `TestDispatcher`, `TestScreenCaptureSource`,
+  `TestScreenCaptureStream`, `TestWindow`.
+- İç scheduler: `PlatformScheduler` modül içinde public olsa da crate kökünden
+  normal application API olarak export edilen bir yüzey değildir.
+
+Bu tiplerin doğru sahibi `gpui_platform` implementasyonlarıdır. Zed uygulama
+katmanında genelde `cx.platform()`, `cx.text_system()`, `cx.svg_renderer()`,
+`window.drop_image(...)`, `window.input_latency_snapshot()` veya Bölüm 55'teki
+headless/screen capture API'leri üzerinden dolaylı erişilir.
+
+### Scene, Primitive ve Crate-İçi Arena Taşıyıcıları
+
+`scene.rs`, `arena.rs` ve `taffy.rs` renderer/layout boru hattının alt katmanıdır:
+
+- Scene tarafı dış API'ye re-export edilir: `Scene`, `Primitive`,
+  `PrimitiveBatch`, `DrawOrder`, `Quad`, `Underline`, `Shadow`, `PaintSurface`,
+  `MonochromeSprite`, `SubpixelSprite`, `PolychromeSprite`, `PathId`,
+  `PathVertex<P>`, `PathVertex_ScaledPixels`.
+- Layout tarafında `AvailableSpace` ve `LayoutId` crate kökünden public export
+  edilir. `TaffyLayoutEngine` ise `taffy` private modülünde `pub struct` olsa da
+  `gpui.rs` sadece `use taffy::TaffyLayoutEngine` yaptığı için dış API değildir.
+- Arena tarafında `Arena` ve `ArenaBox<T>` `arena` private modülünde `pub`
+  tanımlanır ama `gpui.rs` bunları `pub(crate) use arena::*` ile yalnız crate
+  içine açar; dış application kodunun API'si değildir.
+
+Uygulama kodu genellikle bu tipleri elle üretmez. `Element` implementasyonları
+`window.paint_quad`, `window.paint_image`, `window.paint_path`,
+`window.paint_layer` gibi API'ler üzerinden scene'e primitive ekler. Arena
+yönetimi `Window::draw` boyunca dahili olarak yapılır; arena'yı açıp kapatan
+`ElementArenaScope` da `window.rs` içinde `pub(crate)` olduğu için uygulama kodu
+doğrudan kullanmaz, `AnyElement`/`Element` API'leri üzerinden çalışır.
+
+### Text System ve Line Layout Taşıyıcıları
+
+`text_system.rs` ve alt modülleri font shaping, wrapping ve glyph rasterization
+verilerini public tiplerle taşır:
+
+- Font/glyph kimlikleri: `TextSystem`, `FontId`, `FontFamilyId`, `GlyphId`,
+  `FontMetrics`, `RenderGlyphParams`, `GlyphRasterData`.
+- Satır shaping: `ShapedLine`, `ShapedRun`, `ShapedGlyph`, `LineLayout`,
+  `WrappedLine`, `WrappedLineLayout`, `FontRun`.
+- Wrapping: `LineWrapper`, `LineWrapperHandle`, `LineFragment`, `Boundary`,
+  `WrapBoundary`, `TruncateFrom`.
+- Decoration: `DecorationRun`.
+
+Normal UI kodu bunlara `window.text_system()`, `window.line_height()`,
+`window.text_style()`, `StyledText`, `TextLayout` ve `InteractiveText` üzerinden
+dokunur. Custom text renderer veya editor-level ölçüm kodunda ham tipler gerekir.
+
+### Profiler, Queue ve Global Traitleri
+
+Performans ve queue altyapısındaki public taşıyıcılar:
+
+- Profiler: `TaskTiming`, `ThreadTaskTimings`, `ThreadTimings`,
+  `ThreadTimingsDelta`, `GlobalThreadTimings`, `GuardedTaskTimings`,
+  `SerializedLocation`, `SerializedTaskTiming`, `SerializedThreadTaskTimings`.
+- Priority queue: `SendError<T>`, `RecvError`, `Iter<T>`, `TryIter<T>`.
+- Global helper trait'leri: `ReadGlobal`, `UpdateGlobal`.
+
+Profiler tipleri `gpui::profiler` yüzeyinden task/thread zamanlamalarını okumak
+ve serialize etmek içindir. Queue hata/iterator tipleri
+`PriorityQueueSender`/`PriorityQueueReceiver` kullanıldığında görünür. `ReadGlobal`
+ve `UpdateGlobal` trait'leri global state okuma/güncelleme kısayollarını sağlar;
+uygulama kodunda çoğu zaman doğrudan `cx.global`, `cx.read_global`,
+`cx.update_global` çağrıları yeterlidir.
+
+### Prompt Renderer Taşıyıcıları
+
+Prompt katmanında iki ek tip vardır:
+
+- `RenderablePromptHandle`: prompt sonucunu custom `RenderOnce` UI ile
+  gösterebilen handle.
+- `FallbackPromptRenderer`: platform native prompt yoksa GPUI içinde fallback
+  prompt render etmek için kullanılan renderer hook'u.
+
+Uygulama tarafında çoğu zaman `cx.prompt(...)`, `cx.prompt_for_path(...)`,
+`cx.prompt_for_new_path(...)` ve `PromptBuilder` yeterlidir; custom platform veya
+headless prompt davranışı yazarken bu taşıyıcılara inilmelidir.
+
+### Menu, Keymap, Action ve Test Taşıyıcıları
+
+Doğrudan kullanıcı akışında nadiren görülen public yardımcılar:
+
+- Menu: `SystemMenuType`, `OwnedOsMenu`.
+- Keymap: `KeymapVersion`, `BindingIndex`, `KeyBindingMetaIndex`,
+  `ContextEntry`.
+- Tab sırası: `TabStopOperation` `tab_stop.rs` içinde `pub enum` olsa da modül
+  `gpui.rs` tarafından `pub(crate) use tab_stop::*` ile açılır; dış API değildir.
+  Focus traversal için dış kod `FocusHandle`, `tab_stop`, `tab_group` ve
+  `tab_index` API'lerini kullanır.
+- Action registry: `MacroActionBuilder`, `MacroActionData`,
+  `generate_list_of_all_registered_actions()`.
+- Test: `TestAppWindow<V>` ve macOS `test-support` için `VisualTestAppContext`.
+- App internals: `AppCell`, `AppRef`, `AppRefMut`, `ArenaClearNeeded`,
+  `KeystrokeEvent`, `AnyDrag`, `LeakDetectorSnapshot`.
+
+`generate_list_of_all_registered_actions()` action registry'yi dokümantasyon,
+komut paleti veya test doğrulaması için tarar. `AppCell`/`AppRef`/`AppRefMut`
+normal uygulama kodunun sahiplenmesi gereken tipler değildir; `App`, `Context<T>`
+ve async context'ler üzerinden çalışmak doğru sınırdır.
+
+### Küçük Public Fonksiyonlar
+
+- `guess_compositor()`: Linux/Wayland/X11 compositor adını tahmin eder; Bölüm 21'deki
+  `cx.compositor_name()` akışının düşük seviye yardımcısıdır.
+- `get_gamma_correction_ratios(gamma)`: atlas/glyph rendering gamma düzeltme
+  oranlarını üretir; tema rengi seçmek için kullanılmaz.
+- `LinearColorStop`: gradient stop verisidir; `linear_gradient(...)` helper'ları
+  bunu üretir.
+- `combine_highlights(...)`: text highlight katmanlarını birleştirir; editor/text
+  rendering hattında kullanılır.
+- `hash(data)`: asset cache key üretimi için helper'dır.
+- `percentage(value)`: `Percentage` constructor helper'ıdır.
+- `scap_screen_sources(...)`: screen capture kaynaklarını platforma göre toplar;
+  uygulama kodunda çoğu zaman `cx.screen_capture_sources(...)` tercih edilir.
+
+### Kök Re-export ve Makro Yüzeyi
+
+`gpui.rs` crate kökünde yalnız GPUI modüllerini değil, bazı yardımcı crate'leri de
+yeniden export eder:
+
+- `Result`: `anyhow::Result` alias'ıdır; GPUI API'leriyle aynı hata tipini
+  kullanmak için tercih edilir.
+- `ArcCow`: `gpui_util::arc_cow::ArcCow`; clone maliyeti düşük copy-on-write
+  paylaşımlı veri taşımak içindir.
+- `FutureExt` ve `Timeout`: `future.with_timeout(duration, executor)` zincirinin
+  trait ve hata tipidir. Zincirin döndürdüğü future wrapper tipi
+  `WithTimeout<T>`'dir.
+- `block_on`: `pollster::block_on`; sync köprü gerektiğinde foreground olmayan
+  küçük future'lar için kullanılır.
+- `ctor`: inventory/action registration gibi startup registration desenleri için
+  yeniden export edilir.
+- `http_client`: GPUI platform HTTP client trait'lerine crate kökünden erişim
+  sağlar.
+- `proptest`: yalnız `test-support`/test build'lerinde property test yardımcılarını
+  export eder.
+- Makrolar: `Action`, `IntoElement`, `Render`, `AppContext`, `VisualContext`,
+  `register_action`, `test`, `property_test`.
+
+Bu re-export'lar yeni API anlamına gelmez; modüllerde anlatılan aynı yüzeyin
+crate kökünden ergonomik erişimidir. Özellikle `property_test` ve `proptest`
+yalnız test kodunda, `ctor` ise registration altyapısı gibi dar alanlarda
+kullanılmalıdır.
+
+Test helper fonksiyonları `gpui::test` modülünde tutulur: `seed_strategy()`,
+`apply_seed_to_proptest_config(...)`, `run_test_once(...)`, `run_test(...)` ve
+`Observation<T>`. Bunlar `#[gpui::test]` ve `#[gpui::property_test]` makrolarının
+altyapısıdır; normal app kodu çağırmaz.
+
+Profiler helper'ları `add_task_timing(...)` ve
+`get_current_thread_task_timings()` thread-local task timing toplama için
+kullanılır. Text fallback helper'ları `font_name_with_fallbacks(...)` ve
+`font_name_with_fallbacks_shared(...)` platform font ailesi fallback adını
+döndürür. `swap_rgba_pa_to_bgra(...)` premultiplied RGBA byte buffer'ını platform
+BGRA düzenine çevirmek için renk/bitmap alt katmanında kullanılır.
