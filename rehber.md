@@ -1635,6 +1635,27 @@ div().w(px(120.))           // Pixels
 Generic container'lar `Point<T>`, `Size<T>`, `Bounds<T>`, `Edges<T>`, `Corners<T>`
 çoğu metot için aritmetik destekler (`+`, `-`, `*`, `/`).
 
+Kaynakta public inherent metot yüzeyi:
+
+- `Point<T>`: `map`, `scale`, `magnitude`, `relative_to`, `max`, `min`, `clamp`.
+- `Size<T>`: `new`, `map`, `center`, `scale`, `max`, `min`, `full`, `auto`,
+  `to_pixels`, `to_device_pixels`.
+- `Bounds<T>`: `centered`, `maximized`, `new`, `from_corners`,
+  `from_anchor_and_size`, `centered_at`, `top_center`, `bottom_center`,
+  `left_center`, `right_center`, `intersects`, `center`, `half_perimeter`,
+  `dilate`, `extend`, `inset`, `space_within`, `top`, `bottom`, `left`,
+  `right`, `top_right`, `bottom_right`, `bottom_left`, `corner`, `contains`,
+  `is_contained_within`, `map`, `map_origin`, `map_size`, `localize`,
+  `is_empty`, `scale`, `to_device_pixels`, `to_pixels`.
+- `Edges<T>`: `all`, `map`, `any`, `auto`, `zero`, `to_pixels`, `scale`, `max`.
+  Birden fazla `zero`/`to_pixels` impl'i farklı generic specialization'lardan
+  gelir.
+- `Corners<T>`: `all`, `corner`, `to_pixels`, `scale`, `max`,
+  `clamp_radii_for_quad_size`, `map`.
+- Birim wrapper'ları: `Pixels::{as_f32, floor, round, ceil, scale, pow, abs,
+  signum, to_f64}`, `ScaledPixels::{as_f32, floor, round, ceil}`,
+  `Rems::{is_zero, to_pixels, to_rems}`, `DevicePixels::to_bytes`.
+
 Hazır oran sabitleri:
 
 - `phi() -> DefiniteLength` (`geometry.rs:3698`): altın oranı `relative(1.618_034)`
@@ -3016,11 +3037,29 @@ cx.bind_keys([
 Önemli parçalar:
 
 - `KeyContext::parse("Editor mode = insert")`: elementin bağlamını üretir.
+- `KeyContext::new_with_defaults()`: default context set'iyle başlar.
+  `primary()`, `secondary()` parse edilen ana/ek context entry'lerine erişir;
+  `is_empty()`, `clear()`, `extend(&other)`, `add(identifier)`, `set(key, value)`,
+  `contains(key)` ve `get(key)` düşük seviyeli context inşa/sorgu yüzeyidir.
 - `KeyBindingContextPredicate`: binding tarafındaki predicate dilidir:
   `Editor`, `mode == insert`, `!Terminal`, `Workspace > Editor`,
   `A && B`, `A || B`.
+- `KeyBindingContextPredicate::parse(source)` predicate'i üretir.
+  `eval(context_stack)` bool eşleşme, `depth_of(context_stack)` en derin eşleşme
+  derinliği, `is_superset(&other)` ise keymap önceliği ve conflict analizinde
+  kullanılır. `eval_inner(...)` public olsa da parser/validator gibi düşük
+  seviyeli kodlar içindir; normal component kodu doğrudan çağırmaz.
 - `Keymap::bindings_for_input(input, context_stack)`: eşleşen action'ları ve
   pending multi-stroke durumunu döndürür.
+- `Keymap::possible_next_bindings_for_input(input, context_stack)`: mevcut
+  chord prefix'ini takip edebilecek binding'leri precedence sırasıyla verir.
+- `Keymap::version() -> KeymapVersion`: binding set'i değiştikçe artan sayaçtır;
+  keybinding UI cache'lerinde invalidation anahtarı olarak kullanılabilir.
+- `Keymap::new(bindings)`, `add_bindings(bindings)`, `bindings()`,
+  `bindings_for_action(action)`, `all_bindings_for_input(input)` ve `clear()`
+  ham keymap tablosunu kurma/sorgulama/reset yüzeyidir. Uygulama akışında çoğu
+  zaman `cx.bind_keys(...)` ve settings loader tercih edilir; bu metotlar test,
+  validator, diagnostic ve özel keymap UI için doğrudan kullanılır.
 - `window.context_stack()`: focused node'dan root'a dispatch path context'leri.
 - `window.keystroke_text_for(&action)`: UI'da gösterilecek en yüksek öncelikli
   binding string'i.
@@ -3048,6 +3087,14 @@ Tuzaklar:
   `cx.on_action(...)`, local handler için element `.on_action(...)` kullan.
 - `KeyBinding::new` parse hatasında panic edebilir; kullanıcı JSON'undan yükleme
   yaparken `KeyBinding::load` ve error reporting tercih edilir.
+- `KeyBinding::load(keystrokes, action, context_predicate, use_key_equivalents,
+  action_input, keyboard_mapper)` fallible loader'dır; `KeyBindingKeystroke`
+  mapping'ini de burada kurar. `context_predicate` `Option<Rc<KeyBindingContextPredicate>>`,
+  `action_input` ise `Option<SharedString>` alır ve hata durumunda
+  `InvalidKeystrokeError` döner. Runtime'da `with_meta(...)`/`set_meta(...)`
+  binding'in hangi keymap katmanından geldiğini taşır; `match_keystrokes(...)`
+  tam/pending eşleşmeyi, `keystrokes()`, `action()`, `predicate()`, `meta()` ve
+  `action_input()` getter'ları diagnostic ve command/keymap UI'ı besler.
 
 ## 59. List ve UniformList Sanallaştırma
 
@@ -3093,13 +3140,42 @@ list(self.list_state.clone(), |ix, window, cx| {
 
 `ListState` yönetimi:
 
+- `new(item_count, alignment, overdraw)`: builder.
+- `measure_all()` (consuming): `ListMeasuringBehavior::Measure(false)` set ederek
+  scrollbar boyutunun yalnızca render edilmiş elementlere değil, **tüm liste**
+  ölçümüne dayanmasını sağlar.
+- `item_count() -> usize`: o anki item sayısı.
 - `reset(count)`: tüm item seti değişti.
 - `splice(old_range, count)`: aralık değişti; scroll offset'i korunur.
+- `splice_focusable(old_range, focus_handles)`: focusable item'ları sanallaştırırken
+  focus handle dizisi geçilir; aksi halde görünür olmayan focused item render
+  dışı kalabilir.
 - `remeasure()`: font/theme gibi tüm yükseklikleri etkileyen değişim.
 - `remeasure_items(range)`: streaming text veya lazy content gibi belirli item'lar.
 - `set_follow_mode(FollowMode::Tail)`: chat/log gibi tail-follow davranışı.
-- `scroll_to_end()`, `scroll_to(ListOffset)`, `scroll_to_reveal_item(ix)`.
+- `is_following_tail() -> bool`: aktif takip durumu.
+- `is_scrolled_to_end() -> Option<bool>`: en alta scroll mu? `None` henüz layout
+  yapılmamışsa.
+- `scroll_by(distance)`, `scroll_to_end()`, `scroll_to(ListOffset)`,
+  `scroll_to_reveal_item(ix)`.
+- `logical_scroll_top() -> ListOffset`: aktif scroll konumu.
+- `bounds_for_item(ix) -> Option<Bounds<Pixels>>`: render edilmişse item rect'i.
 - `set_scroll_handler(...)`: görünür range ve follow state takibi.
+
+Custom scrollbar API'si (kendi scrollbar widget'ını yazıyorsan; `ui::Scrollbars`
+zaten bu metotlar üzerinde kuruludur):
+
+- `viewport_bounds() -> Bounds<Pixels>`: en son layout edilmiş viewport rect'i.
+- `scroll_px_offset_for_scrollbar() -> Point<Pixels>`: scrollbar için adapte
+  edilmiş güncel scroll konumu.
+- `max_offset_for_scrollbar() -> Point<Pixels>`: ölçülmüş item'lara göre maksimum
+  scroll. Drag sırasında bu değer sabit kalır ki scrollbar sıçramasın.
+- `set_offset_from_scrollbar(point)`: scrollbar drag/click'inden gelen offset'i
+  uygular.
+- `scrollbar_drag_started()` / `scrollbar_drag_ended()`: drag sırasında overdraw
+  ölçümünden kaynaklı yükseklik dalgalanmasını dondurmak/serbest bırakmak için.
+  Drag'a girerken started, bırakırken ended çağırmazsan scrollbar drag boyunca
+  beklenmedik şekilde sürünebilir.
 
 Uniform liste:
 
@@ -3783,6 +3859,23 @@ fallible değildir, bu yüzden `?` ile yayılmaz. Pencere içi async çalışmad
 `AsyncWindowContext::update(|window, cx| ...) -> Result<R>` ya da
 `Entity::update(cx, ...)` fallible varyantları kullanılır.
 
+Async context convenience yüzeyi:
+
+- `AsyncApp::refresh()` tüm pencereler için redraw planlar; `update(|cx|
+  cx.refresh_windows())` yazmadan async path'ten redraw tetiklemek içindir.
+- `AsyncApp::background_executor()` ve `foreground_executor()` executor
+  handle'larını verir. Timer/timeout veya nested spawn gerekiyorsa bunları kullan.
+- `AsyncApp::subscribe(&entity, ...)`, `open_window(options, ...)`, `spawn(...)`,
+  `has_global::<G>()`, `read_global`, `try_read_global`, `read_default_global`,
+  `update_global` ve `on_drop(&weak, ...)` await edilebilir app task'larında aynı
+  foreground state'e güvenli dönüş noktalarıdır.
+- `AsyncWindowContext::window_handle()` bağlı pencereyi verir.
+  `update(|window, cx| ...)` sadece window state'i, `update_root(|root, window,
+  cx| ...)` root `AnyView` de gerektiğinde kullanılır.
+- `AsyncWindowContext::on_next_frame(...)`, `read_global`, `update_global`,
+  `spawn(...)` ve `prompt(...)` pencereye bağlı async işlerde `Window` kapanmış
+  olabilir durumunu `Result`/fallback receiver ile yönetir.
+
 Entity ve window bağlı priority spawn:
 
 - `cx.spawn_in_with_priority(priority, window, async move |weak, cx| { ... })`
@@ -3853,8 +3946,13 @@ let handled = window.dispatch_keystroke(keystroke, cx);
 
 Modifier yardımcıları:
 
-- `Modifiers::none()`, `command()`, `secondary_key()`, `control()`, `alt()`,
-  `shift()`, `function()`, `command_shift()`, `control_shift()`.
+- `Modifiers::none()`, `command()`, `windows()`, `super_key()`,
+  `secondary_key()`, `control()`, `alt()`, `shift()`, `function()`,
+  `command_shift()`, `control_shift()`.
+- `command()`, `windows()`, `super_key()` üçü de aynı şeyi yapar:
+  `Modifiers { platform: true, .. }` üretir. Tek bir `platform` field'ı OS'a
+  göre command (macOS), windows (Windows) veya super (Linux) anlamına gelir;
+  bu üç constructor sadece kavramsal vurgu için ayrı isimle export edilir.
 - `secondary_key()` macOS'ta command, Linux/Windows'ta control üretir; Zed'de
   platform bağımsız kısayol yazarken çoğu durumda doğru seçim budur.
 - `modified()`, `secondary()`, `number_of_modifiers()`,
@@ -3866,6 +3964,20 @@ IME:
 - `window.dispatch_keystroke(...)` test/simülasyon path'inde
   `with_simulated_ime()` uygular; doğrudan lower-level event üretirken IME
   state'ini ayrıca düşünmek gerekir.
+
+`KeybindingKeystroke` yüzeyi:
+
+- `KeybindingKeystroke::new_with_mapper(inner, use_key_equivalents,
+  keyboard_mapper)`: platform keyboard mapper üzerinden display key/modifier
+  üretir. `from_keystroke(keystroke)` platform mapping yapmadan sarar.
+  Windows'ta `new(inner, display_modifiers, display_key)` constructor'ı da vardır;
+  macOS/Linux build'lerinde bu constructor yoktur.
+- `inner()`, `modifiers()`, `key()` getter'ları display ve gerçek keystroke
+  ayrımını saklar. Windows'ta `modifiers()`/`key()` display değerini döndürebilir;
+  gerçek GPUI input'u için `inner()` okunur.
+- `set_modifiers(...)`, `set_key(...)`, `remove_key_char()` ve `unparse()`
+  keybinding editor/normalizer akışında kullanılır. `remove_key_char()` yalnız
+  `inner.key_char = None` yapar; `key` alanını silmez.
 
 Binding sorguları:
 
@@ -4119,8 +4231,15 @@ schema ve dosya güncelleme tarafını kapsar.
 Dosya modeli:
 
 - `KeymapFile(Vec<KeymapSection>)`: top-level JSON array.
-- `KeymapSection { context, use_key_equivalents, unbind, bindings, ... }`:
-  context predicate ve binding/unbind map'lerini taşır.
+- `KeymapSection`: context predicate ve binding/unbind map'lerini taşır. Alan
+  görünürlüğü dengesizdir — yalnız `pub context: String` dış erişime açıktır;
+  `use_key_equivalents: bool`, `unbind: Option<IndexMap<...>>`,
+  `bindings: Option<IndexMap<...>>` ve `unrecognized_fields: IndexMap<...>`
+  alanları **private**'tır. `KeymapFile` parser'ı bu alanlara crate içinden
+  doğrudan erişir; dış kod yalnız `KeymapSection::bindings(&self)` getter'ını
+  kullanabilir, bu da `(keystroke, KeymapAction)` çiftlerini dönen tek public
+  iterator'dır (`keymap_file.rs:101`). `unbind` ve `use_key_equivalents` için
+  ayrı public getter şu sürümde yoktur.
 - `KeymapAction(Value)`: `null`, `"action::Name"` veya
   `["action::Name", { ...args... }]` biçimlerini temsil eder.
 - `UnbindTargetAction(Value)`: `unbind` map'indeki hedef action değeri.
@@ -6332,6 +6451,22 @@ API yüzeylerini toplar.
   olurken entity notify edilir.
 - `entity.write(cx, value)`: state'i komple değiştirir ve `cx.notify()` çağırır.
 
+`Context<T>` current entity için aynı kimlik/handle yüzeyini verir:
+
+- `cx.entity_id() -> EntityId`
+- `cx.entity() -> Entity<T>`: current entity hâlâ canlı olmak zorunda olduğu için
+  strong handle döndürür.
+- `cx.weak_entity() -> WeakEntity<T>`: async task, listener veya döngüsel sahiplik
+  riski olan alanlarda saklanacak handle budur.
+
+Kimlik dönüşümleri:
+
+- `EntityId::as_u64()` ve `EntityId::as_non_zero_u64()` FFI, telemetry veya
+  debug map anahtarı gibi typed id dışına çıkılan yerlerde kullanılır.
+- `WindowId::as_u64()` aynı işi pencere kimliği için yapar. Bu değerleri domain
+  id'si veya kalıcı workspace serialization anahtarı gibi kullanma; GPUI runtime
+  kimliğidir.
+
 `WeakEntity<T>` zayıf handle'dır:
 
 - `weak.upgrade() -> Option<Entity<T>>`
@@ -6622,6 +6757,16 @@ yönetimi `Window::draw` boyunca dahili olarak yapılır; arena'yı açıp kapat
 `ElementArenaScope` da `window.rs` içinde `pub(crate)` olduğu için uygulama kodu
 doğrudan kullanmaz, `AnyElement`/`Element` API'leri üzerinden çalışır.
 
+Scene public metot envanteri:
+
+- `Scene`: `clear`, `len`, `push_layer`, `pop_layer`, `insert_primitive`,
+  `replay`, `finish`, `batches`.
+- `Primitive`: `bounds`, `content_mask`.
+- `TransformationMatrix`: `unit`, `translate`, `rotate`, `scale`, `compose`,
+  `apply`.
+- `Path`: `new`, `scale`, `move_to`, `line_to`, `curve_to`, `push_triangle`,
+  `clipped_bounds`.
+
 ### Text System ve Line Layout Taşıyıcıları
 
 `text_system.rs` ve alt modülleri font shaping, wrapping ve glyph rasterization
@@ -6638,6 +6783,30 @@ verilerini public tiplerle taşır:
 Normal UI kodu bunlara `window.text_system()`, `window.line_height()`,
 `window.text_style()`, `StyledText`, `TextLayout` ve `InteractiveText` üzerinden
 dokunur. Custom text renderer veya editor-level ölçüm kodunda ham tipler gerekir.
+
+Text public metot envanteri:
+
+- `TextSystem`: `new`, `all_font_names`, `add_fonts`, `get_font_for_id`,
+  `resolve_font`, `bounding_box`, `typographic_bounds`, `advance`,
+  `layout_width`, `em_width`, `em_advance`, `em_layout_width`, `ch_width`,
+  `ch_advance`, `units_per_em`, `cap_height`, `x_height`, `ascent`, `descent`,
+  `baseline_offset`, `line_wrapper`.
+- `WindowTextSystem`: `new`, `shape_line`, `shape_line_by_hash`, `shape_text`,
+  `layout_line`, `try_layout_line_by_hash`, `layout_line_by_hash`.
+- `Font`: `bold`, `italic`.
+- `FontMetrics`: `ascent`, `descent`, `line_gap`, `underline_position`,
+  `underline_thickness`, `cap_height`, `x_height`, `bounding_box`.
+- `ShapedLine`: `len`, `width`, `with_len`, `paint`, `paint_background`,
+  `split_at`.
+- `WrappedLine`: `len`, `paint`, `paint_background`.
+- `LineLayout`: `index_for_x`, `closest_index_for_x`, `x_for_index`,
+  `font_id_for_index`.
+- `WrappedLineLayout`: `len`, `width`, `size`, `ascent`, `descent`,
+  `wrap_boundaries`, `font_size`, `runs`, `index_for_position`,
+  `closest_index_for_position`, `position_for_index`.
+- `LineWrapper`: `wrap_line`, `should_truncate_line`, `truncate_line`.
+- `FontFeatures`: `disable_ligatures`, `tag_value_list`, `is_calt_enabled`.
+- `FontFallbacks`: `fallback_list`, `from_fonts`.
 
 ### Profiler, Queue ve Global Traitleri
 
