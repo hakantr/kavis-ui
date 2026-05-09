@@ -2110,19 +2110,67 @@ Tuzaklar:
 
 `crates/gpui/src/inspector.rs` (feature: `inspector`).
 
-`gpui` crate'i `inspector` feature ile derlendiğinde dev tool entegrasyonu sağlar:
+`gpui` crate'i `inspector` feature ile derlendiğinde (veya `debug_assertions`
+açıkken) dev tool entegrasyonu sağlar:
 
 - `InspectorElementId`: her element için `(file, line, instance)` tabanlı kimlik.
-- Element source location `#[track_caller]` ile yakalanır.
+- `InspectorElementPath` (`inspector.rs:30`): bir elementin
+  `GlobalElementId` zincirini ve construction'dan `&'static Location` source
+  location'ını birleştiren kimlik. Element seçildiğinde inspector UI'ı bu
+  path üzerinden source link gösterir. Hem alanları hem `Clone` impl'i feature
+  gate altındadır.
+- Element source location `#[track_caller]` ile yakalanır ve
+  `InspectorElementPath.source_location` alanına yazılır.
 - Element seçimi window'da `Inspector` global state üzerinden tetiklenir.
 - `Window::toggle_inspector(cx)` inspector panelini açar/kapatır.
 - `Window::with_inspector_state(...)` aktif elemente özel geçici inspector state'i
   tutar.
-- `App::set_inspector_renderer(...)` ve `App::register_inspector_element(...)`
-  inspector UI'ını ve element state render'larını bağlar.
+- `App::set_inspector_renderer(InspectorRenderer)` inspector UI'ını bağlar.
+  `InspectorRenderer` (`inspector.rs:55`) bir type alias'tır:
 
-Production build'de inspector kodu sıfır maliyetlidir; release Zed binary'sinde
-dev tooling yoktur.
+  ```rust
+  pub type InspectorRenderer =
+      Box<dyn Fn(&mut Inspector, &mut Window, &mut Context<Inspector>) -> AnyElement>;
+  ```
+
+  Yani inspector panelinin içeriği bu closure tarafından üretilir; argümanlar
+  Inspector state, ait olduğu Window ve Inspector için Context.
+- `App::register_inspector_element(...)` belirli element tipinin inspector
+  panel render'ını kaydeder; element seçildiğinde state için custom UI çizer.
+
+Reflection katmanı (Styled metotlarını runtime'da listelemek için):
+
+`Styled` trait `cfg(any(feature = "inspector", debug_assertions))` altında
+`#[gpui_macros::derive_inspector_reflection]` ile annote edilir
+(`styled.rs:18-21`). Bu macro yan etki olarak iki API üretir:
+
+- **`gpui::styled_reflection`** — proc macro çıktısı modül.
+  - `pub fn methods<T: Styled + 'static>() -> Vec<FunctionReflection<T>>`:
+    `Styled` trait'inin tüm reflectable metotlarını belirli bir somut tip için
+    wrap eder.
+  - `pub fn find_method<T: Styled + 'static>(name: &str) -> Option<FunctionReflection<T>>`:
+    aynı listeyi name eşleşmesiyle filtreler.
+- **`gpui::inspector_reflection::FunctionReflection<T>`** (`inspector.rs:233`):
+  ```rust
+  pub struct FunctionReflection<T> {
+      pub name: &'static str,
+      pub function: fn(Box<dyn Any>) -> Box<dyn Any>,
+      pub documentation: Option<&'static str>,
+      pub _type: PhantomData<T>,
+  }
+  ```
+  `documentation` alanı trait metodunun `///` doc comment'inden çıkarılır
+  (`gpui_macros::extract_doc_comment`). Inspector UI bu metni markdown olarak
+  render eder — örn. `inspector_ui/src/div_inspector.rs:670` Styled metodu
+  autocomplete'inde `CompletionDocumentation::MultiLineMarkdown` formuna
+  sarmalıyor. Tailwind doc linki gibi ham link'ler de bu yolla hyperlink olur.
+- `FunctionReflection::invoke(value: T) -> T` — metodu çalışma zamanında
+  çağırır; inspector "method picker" akışında kullanıcı bir style metodunu
+  seçince mevcut element'in `StyleRefinement`'ı bu invoke ile dönüştürülür.
+
+Production build'de inspector kodu sıfır maliyetlidir; reflection module ve
+`FunctionReflection` da feature gate'in dışında bulunmadığı için release Zed
+binary'sinde derlenmez.
 
 Diğer debug helper'ları:
 
@@ -6482,6 +6530,13 @@ Element callback'lerinde çoğu zaman concrete event tipi otomatik gelir:
 Image/SVG hattında public fakat genelde framework tarafından taşınan tipler:
 
 - `ImageId`, `ImageFormat`, `ClipboardString`.
+- `ImageFormatIter`: `ImageFormat` üzerindeki `#[derive(EnumIter)]`
+  (`platform.rs:1973`) ile otomatik üretilen iterator tipi. Uygulama kodu
+  doğrudan adlandırmaz; `ImageFormat::iter()` çağrısı (strum'dan) bu tipi
+  döndürür. `from_mime_type` fonksiyonu kendi içinde
+  `Self::iter().find(...)` ile clipboard içeriğini "olası en yaygın formattan
+  başlayarak" eşleştirir; varyant sırası — Png, Jpeg, Webp, Gif, Svg, Bmp,
+  Tiff, Ico, Pnm — kasıtlıdır ve iter sonucunu doğrudan etkiler.
 - `ImageStyle`, `ImageAssetLoader`, `ImageCacheProvider`, `AnyImageCache`,
   `ImageCacheItem`, `ImageLoadingTask`, `RetainAllImageCacheProvider`.
 - `RenderImageParams` ve `RenderSvgParams`: renderer'a verilecek rasterization
@@ -6499,8 +6554,25 @@ application kodunda nadiren doğrudan kullanılır:
 
 - Display/diagnostic: `DisplayId`, `ThermalState`, `SourceMetadata`,
   `RequestFrameOptions`, `WindowParams`, `InputLatencySnapshot`.
-- Dispatcher/executor: `PlatformDispatcher`, `RunnableVariant`,
-  `TimerResolutionGuard`, `Scope`.
+- Dispatcher/executor: `PlatformDispatcher`, `RunnableVariant` (`Runnable<RunnableMeta>`
+  type alias'ı; ham scheduler runnable wrapper'ı), `TimerResolutionGuard`,
+  `Scope`. Buna ek olarak:
+  - `RunnableMeta { location: &'static Location<'static> }`
+    (`scheduler/src/scheduler.rs:59`) — her scheduled task'a iliştirilen debug
+    metadata. `track_caller` ile yakalanan kaynak konumunu taşır; profiler ve
+    log akışı `RunnableVariant`'tan bu alana ulaşır.
+  - `FallibleTask<T>` (`scheduler/src/executor.rs:250`) — `Task::fallible(self)`
+    çağrısının döndürdüğü wrapper. Future olarak poll edildiğinde `Option<T>`
+    döner; iptal edilirse panik atmaz, `None` üretir. `must_use` işaretli olduğu
+    için sessizce drop edilirse derleme uyarısı verir.
+  - `SchedulerForegroundExecutor` — `gpui::executor.rs:10` `pub use scheduler::ForegroundExecutor as SchedulerForegroundExecutor`
+    re-export'u. GPUI tarafındaki `ForegroundExecutor` bunun üzerinde wrapper'dır;
+    ham scheduler handle'ına `ForegroundExecutor::scheduler_executor()`
+    (`executor.rs:369`) çağrısıyla inilir, `BackgroundExecutor::scheduler_executor()`
+    de paralel `scheduler::BackgroundExecutor` döner. Uygulama kodu genelde
+    `cx.foreground_executor()` veya `cx.background_executor()` kullanır;
+    scheduler handle yalnızca scheduler crate'iyle doğrudan etkileşim gerekirse
+    çekilir.
 - Text/keyboard: `PlatformTextSystem`, `NoopTextSystem`,
   `PlatformKeyboardLayout`, `PlatformKeyboardMapper`, `DummyKeyboardMapper`,
   `PlatformInputHandler`.
