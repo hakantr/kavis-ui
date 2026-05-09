@@ -804,12 +804,12 @@ Entity task:
 
 ```rust
 cx.spawn(|this, cx| async move {
-    let result = cx.background_executor().timer(Duration::from_millis(200)).await;
+    cx.background_executor().timer(Duration::from_millis(200)).await;
     this.update(cx, |this, cx| {
         this.ready = true;
         cx.notify();
     })?;
-    anyhow::Ok(())
+    Ok::<(), anyhow::Error>(())
 })
 .detach_and_log_err(cx);
 ```
@@ -822,7 +822,7 @@ cx.spawn_in(window, |this, cx| async move {
         window.activate_window();
         cx.notify();
     })?;
-    anyhow::Ok(())
+    Ok::<(), anyhow::Error>(())
 })
 .detach_and_log_err(cx);
 ```
@@ -904,7 +904,7 @@ Window observe:
 içinde wrapper, gerçek davranış `Platform` trait implementasyonunda):
 
 - Uygulama yaşam döngüsü: `quit`, `restart`, `set_restart_path`,
-  `on_app_quit(|cx| async ...)`, `on_app_will_restart`, `activate`, `hide`,
+  `on_app_quit(|cx| async ...)`, `on_app_restart(|cx| ...)`, `activate`, `hide`,
   `hide_other_apps`, `unhide_other_apps`.
 - Pencereler: `windows`, `active_window`, `window_stack`, `refresh_windows`.
 - Display: `displays`, `primary_display`, `find_display`.
@@ -923,7 +923,10 @@ içinde wrapper, gerçek davranış `Platform` trait implementasyonunda):
 - Menü: `set_menus`, `get_menus`, `set_dock_menu`, `add_recent_document`,
   `update_jump_list`.
 - Termal durum: `thermal_state`, `on_thermal_state_change`.
-- Cursor: `set_cursor_style`, `hide_cursor_until_mouse_moves`, `is_cursor_visible`.
+- Cursor görünürlüğü: `cursor_hide_mode`, `set_cursor_hide_mode`,
+  `is_cursor_visible`. İşaretçi stili pencere/hitbox bağlamında
+  `window.set_cursor_style(style, &hitbox)`, drag sırasında ise
+  `cx.set_active_drag_cursor_style(...)` ile yönetilir.
 - Screen capture: `is_screen_capture_supported`, `screen_capture_sources`.
 - Klavye: `keyboard_layout()`, `keyboard_mapper()`,
   `on_keyboard_layout_change(|cx| ...)`.
@@ -3274,9 +3277,11 @@ Yazma:
 
 - `YourSettings::override_global(value, cx)`: programatik override; persist
   edilmez, sadece runtime state'i değiştirir.
-- `SettingsStore::update_global(cx, |store, cx| store.update_user_settings(...))`:
-  user JSON'unu yazma yolu; `crates/settings/src/settings_file.rs::update_settings_file`
-  helper'ı dosya I/O dahil tüm akışı yapar.
+- `settings::update_settings_file(fs, cx, |content, cx| { ... })`: user
+  JSON'unu kalıcı yazma yolu; dosya okuma/yazma, parse ve store update akışı
+  `SettingsStore::update_settings_file(...)` üzerinden tamamlanır.
+- `SettingsStore::update_user_settings(...)` yalnızca `test-support` altında
+  vardır; uygulama kodunda kalıcı yazma için kullanılmaz.
 
 Observer akışı:
 
@@ -3294,10 +3299,13 @@ Migration:
 
 - Kullanıcı JSON'u eski schema kullanıyorsa
   `crates/settings/src/migrator/` modülü değerleri yeni anahtarlara taşır.
-- `SettingsStore::set_user_settings(...)` çağrısında migration otomatik denenir;
-  başarısız olursa orijinal JSON parse edilir ve UI'ya warning gönderilir.
-- `MigrationStatus::Migrated`/`MigrationFailed`/`NoMigrationNeeded` state'leri
-  observer'lar için `SettingsStore::user_settings_migration_status()` ile okunur.
+- `SettingsStore::set_user_settings(...)` ve file watcher/update callback'leri
+  `SettingsParseResult { parse_status, migration_status }` döndürür veya taşır.
+- `MigrationStatus` değerleri `NotNeeded`, `Succeeded` ve
+  `Failed { error }` şeklindedir. Başarılı migration in-memory uygulanır;
+  çağıran taraf gerekiyorsa dosyayı yeniden yazar veya kullanıcıya uyarı üretir.
+- Parse sonucu `ParseStatus::Success`, `ParseStatus::Unchanged` veya
+  `ParseStatus::Failed { error }` olur; migration durumu ayrı alandır.
 
 Tuzaklar:
 
@@ -3324,10 +3332,20 @@ Tema veri modeli:
 `ThemeRegistry`:
 
 - `ThemeRegistry::global(cx) -> Arc<Self>`: aktif registry.
+- `ThemeRegistry::default_global(cx)` ve `try_global(cx)`: init/test kodunda
+  registry erişimi.
+- `registry.assets()`: bundled theme/icon asset source'u.
 - `registry.list_names() -> Vec<SharedString>`: yüklü tema adları.
+- `registry.list() -> Vec<ThemeMeta>`: tema adı ve appearance metadata'sı.
 - `registry.get(name) -> Result<Arc<Theme>, ThemeNotFoundError>`.
-- `registry.insert_user_theme_families(families)`: kullanıcı yüklü temaları ekle.
-- `registry.remove_user_themes()`: kullanıcı temalarını temizle.
+- `registry.insert_theme_families(families)` veya `insert_themes(themes)`:
+  tema ekleme.
+- `registry.remove_user_themes(&names)`: verilen tema adlarını temizleme.
+- `registry.list_icon_themes()`, `get_icon_theme(name)`,
+  `default_icon_theme()`, `load_icon_theme(content, icons_root_dir)`,
+  `remove_icon_themes(&names)`: icon theme yönetimi.
+- `registry.extensions_loaded()` ve `set_extensions_loaded()`: extension
+  temalarının yüklenip yüklenmediği bayrağı.
 
 Aktif tema akışı:
 
@@ -3344,28 +3362,41 @@ let syntax = theme.syntax();   // &SyntaxTheme
 hesaplanır:
 
 ```rust
-// crates/theme_settings içinde:
 pub fn reload_theme(cx: &mut App) {
-    let appearance = SystemAppearance::global(cx).0;
-    let settings = ThemeSettings::get_global(cx);
-    let name = settings.theme.name(appearance);
-    let theme = ThemeRegistry::global(cx).get(&name)?;
-    ThemeSettings::set_active(theme, cx);
+    let theme = configured_theme(cx);
+    GlobalTheme::update_theme(cx, theme);
+    cx.refresh_windows();
 }
 ```
+
+`reload_icon_theme(cx)` aynı modeli icon theme için uygular. `theme::init(...)`
+registry, `SystemAppearance`, font family cache ve fallback `GlobalTheme`
+kurar; `theme_settings::init(...)` bunun üzerine settings observer'larını ve
+bundled/user theme yükleme akışını bağlar.
+
+Tema ayar sağlayıcısı:
+
+- `theme::set_theme_settings_provider(provider, cx)`: UI font, buffer font,
+  font size ve UI density kaynağını global olarak bağlar.
+- `theme::theme_settings(cx) -> &dyn ThemeSettingsProvider`: theme crate'inin
+  concrete settings crate'ine bağımlı olmadan font/density okumasını sağlar.
+- `UiDensity::{Compact, Default, Comfortable}` ve `spacing_ratio()` spacing
+  ölçeğini verir; Zed tarafında provider implementasyonu `theme_settings`
+  crate'indedir.
 
 Custom tema yükleme:
 
 ```rust
-let theme_json: ThemeFamilyContent = serde_json::from_str(&user_json)?;
-let family: ThemeFamily = theme_json.try_into()?;
-ThemeRegistry::global(cx).insert_user_theme_families([family]);
+theme_settings::load_user_theme(&ThemeRegistry::global(cx), bytes)?;
 theme_settings::reload_theme(cx);
 ```
 
-`crates/theme_importer/` VS Code temalarından `ThemeFamily` üretmek için
-yardımcılar içerir. Live theme reload için `crates/theme/src/registry.rs`
-file watcher entegrasyonu zaten kuruludur.
+`load_user_theme` JSON'u `ThemeFamilyContent` olarak deserialize eder,
+`refine_theme_family` ile gerçek `ThemeFamily` üretir ve
+`insert_theme_families` çağırır. `crates/theme_importer/` VS Code temalarından
+`theme_settings::ThemeContent` üretmek için yardımcılar içerir. Zed tarafında
+`load_user_themes_in_background` ve watcher akışı dosya değişiminden sonra
+`theme_settings::reload_theme(cx)` çağırır.
 
 Tuzaklar:
 
@@ -3427,3 +3458,473 @@ Tuzaklar:
   state'i normal `if let` ile pre-compute edip tek `child` çağrısı tercih edilir.
 - `map` element tipini değiştirebilir; `when` ise tipi değiştirmez (refinement
   zincirinde tutulur).
+
+## 70. Executor, Priority, Timeout ve Test Zamanı
+
+GPUI'da foreground iş UI thread üzerinde, background iş scheduler/thread pool
+üzerinde çalışır. Bu ayrım sadece performans değil, hangi context'in await
+noktası boyunca tutulabileceğini de belirler.
+
+Temel tipler:
+
+- `BackgroundExecutor`: `spawn`, `spawn_with_priority`, `timer`,
+  `scoped`, `scoped_priority`, testlerde `advance_clock`, `run_until_parked`,
+  `simulate_random_delay`.
+- `ForegroundExecutor`: main thread'e future koyar; `spawn`,
+  `spawn_with_priority`, synchronous köprü için `block_on` ve
+  `block_with_timeout` sağlar.
+- `Priority`: `RealtimeAudio`, `High`, `Medium`, `Low`. Realtime ayrı thread
+  ister; UI dışı audio gibi çok sınırlı işler dışında kullanılmaz.
+- `Task<T>`: await edilebilir handle. Drop edilirse iş iptal edilir;
+  tamamlanması isteniyorsa await edilir, struct alanında saklanır veya
+  `detach()`/`detach_and_log_err(cx)` kullanılır.
+- `FutureExt::with_timeout(duration, executor)`: future ile executor timer'ını
+  yarışır ve `Result<T, Timeout>` döndürür.
+
+Örnek:
+
+```rust
+let executor = cx.background_executor().clone();
+let task = cx.background_spawn(async move {
+    parse_large_file(path).await
+});
+
+let result = task
+    .with_timeout(Duration::from_secs(5), &executor)
+    .await?;
+```
+
+Foreground priority:
+
+```rust
+cx.spawn_with_priority(Priority::High, async move |cx| {
+    cx.update(|cx| {
+        cx.refresh_windows();
+    })?;
+    Ok::<(), anyhow::Error>(())
+})
+.detach_and_log_err(cx);
+```
+
+Hazır değer:
+
+```rust
+fn cached_or_async(cached: Option<Data>, cx: &App) -> Task<anyhow::Result<Data>> {
+    if let Some(data) = cached {
+        Task::ready(Ok(data))
+    } else {
+        cx.background_spawn(async move { load_data().await })
+    }
+}
+```
+
+Test zamanı:
+
+- `cx.background_executor().timer(duration).await` GPUI scheduler'a bağlıdır;
+  `smol::Timer::after` GPUI `run_until_parked()` ile uyumsuz kalabilir.
+- `advance_clock(duration)` sadece fake clock'u ilerletir; runnable işleri
+  yürütmek için ayrıca `run_until_parked()` gerekir.
+- `allow_parking()` outstanding task varken parked olmayı testte bilerek
+  kabul etmek içindir; production path'e taşınmaz.
+- `block_with_timeout` timeout olduğunda future'ı geri verir; bu, işi iptal
+  etmek ya da sonra yeniden poll etmek için çağıranın karar vermesini sağlar.
+
+## 71. Keystroke, Modifiers ve Platform Bağımsız Kısayollar
+
+`crates/gpui/src/platform/keystroke.rs` klavye girdisinin normalized modelidir.
+Keymap sadece action binding değildir; pending input, IME ve gösterim metni de
+bu tiplerle taşınır.
+
+Ana tipler:
+
+- `Keystroke { modifiers, key, key_char, ime_key }`: gerçek input.
+- `KeybindingKeystroke`: binding dosyalarında görünen display modifier/key ile
+  eşleşme için kullanılan sarıcı.
+- `InvalidKeystrokeError`: parse hatası.
+- `Modifiers`: `control`, `alt`, `shift`, `platform`, `function` alanları.
+- `AsKeystroke`: hem `Keystroke` hem display wrapper'ları üzerinden ortak
+  keystroke erişimi sağlayan küçük trait.
+- `Capslock { on }`: platform input snapshot'ında capslock durumunu taşır.
+
+Kullanım:
+
+```rust
+let keystroke = Keystroke::parse("cmd-shift-p")?;
+let text = keystroke.unparse();
+let handled = window.dispatch_keystroke(keystroke, cx);
+```
+
+Modifier yardımcıları:
+
+- `Modifiers::none()`, `command()`, `secondary_key()`, `control()`, `alt()`,
+  `shift()`, `function()`, `command_shift()`, `control_shift()`.
+- `secondary_key()` macOS'ta command, Linux/Windows'ta control üretir; Zed'de
+  platform bağımsız kısayol yazarken çoğu durumda doğru seçim budur.
+- `modified()`, `secondary()`, `number_of_modifiers()`,
+  `is_subset_of(&other)` input ayrıştırmada kullanılır.
+
+IME:
+
+- `Keystroke::is_ime_in_progress()` IME composition sırasında true döner.
+- `window.dispatch_keystroke(...)` test/simülasyon path'inde
+  `with_simulated_ime()` uygular; doğrudan lower-level event üretirken IME
+  state'ini ayrıca düşünmek gerekir.
+
+Binding sorguları:
+
+- `window.bindings_for_action(&Action)` ve `window.keystroke_text_for(&Action)`
+  kullanıcıya gösterilecek kısayol metni için tercih edilir.
+- `cx.all_bindings_for_input(&[Keystroke])` ve
+  `window.possible_bindings_for_input(&[Keystroke])` multi-stroke veya prefix
+  binding durumlarında kullanılabilir.
+- `window.pending_input_keystrokes()` henüz tamamlanmamış input zincirini verir.
+
+## 72. WindowHandle, AnyWindowHandle ve VisualContext
+
+`open_window` veya test helper'ları typed `WindowHandle<V>` döndürür. Bu handle
+pencerenin root view tipini bilir; `AnyWindowHandle` ise root tipini runtime'da
+taşır ve gerektiğinde downcast edilir.
+
+`WindowHandle<V>`:
+
+```rust
+handle.update(cx, |root: &mut Workspace, window, cx| {
+    root.focus_active_pane(window, cx);
+})?;
+
+let title = handle.read_with(cx, |root, cx| root.title(cx))?;
+let entity = handle.entity(cx)?;
+let active = handle.is_active(cx);
+```
+
+`AnyWindowHandle`:
+
+```rust
+if let Some(workspace) = any_handle.downcast::<Workspace>() {
+    workspace.update(cx, |workspace, window, cx| {
+        workspace.activate(window, cx);
+    })?;
+}
+
+any_handle.update(cx, |root_view, window, cx| {
+    let root_entity_id = root_view.entity_id();
+    window.refresh();
+    (root_entity_id, window.is_window_active())
+})?;
+```
+
+Context trait'leri:
+
+- `AppContext`: `new`, `reserve_entity`, `insert_entity`, `update_entity`,
+  `read_entity`, `update_window`, `with_window`, `read_window`,
+  `background_spawn`, `read_global`.
+- `VisualContext`: pencere bağlı context'lerde `window_handle`,
+  `update_window_entity`, `new_window_entity`, `replace_root_view`, `focus`
+  sağlar.
+- `BorrowAppContext`: `App`, `Context<T>`, async/test context gibi farklı
+  context'lerle çalışan yardımcı fonksiyonlar için ortak global API yüzeyidir.
+
+`with_window(entity_id, ...)` entity'nin en son render edildiği pencereyi bulur.
+Entity aynı anda birden fazla pencerede render ediliyorsa bu API bilinçli bir
+"current window" kısayoludur; kesin pencere gerekiyorsa `WindowHandle` sakla.
+
+## 73. StyledText, TextLayout ve InteractiveText
+
+Basit metin `SharedString` olarak child verilebilir; ölçüm, highlight,
+font override veya tıklanabilir aralık gerekiyorsa `StyledText` kullanılır.
+
+`StyledText`:
+
+```rust
+let text = StyledText::new("Open settings")
+    .with_highlights(vec![(0..4, highlight_style)])
+    .with_font_family_overrides(vec![(5..13, "ZedMono".into())]);
+
+let layout = text.layout().clone();
+```
+
+Precomputed `TextRun` varsa delayed highlight yerine `.with_runs(runs)` kullan;
+`with_default_highlights(&default_style, ranges)` ise parent style yerine açık
+bir `TextStyle` baz alarak run üretir.
+
+Ölçüm/prepaint sonrası `TextLayout`:
+
+- `index_for_position(point) -> Result<usize, usize>`: piksel pozisyonundan
+  UTF-8 byte index'i.
+- `position_for_index(index) -> Option<Point<Pixels>>`: byte index'ten piksel.
+- `line_layout_for_index(index)`, `bounds()`, `line_height()`, `len()`,
+  `text()`, `wrapped_text()`.
+
+`TextLayout` değerleri layout/prepaint yapılmadan okunursa panic edebilir; bu
+nedenle event handler veya after-layout path'inde kullanılır, render sırasında
+ölçülmemiş layout'a güvenilmez.
+
+`InteractiveText`:
+
+```rust
+InteractiveText::new("settings-link", StyledText::new("Open settings"))
+    .on_click(vec![0..13], |range_index, window, cx| {
+        window.dispatch_action(OpenSettings.boxed_clone(), cx);
+    })
+    .on_hover(|index, event, window, cx| {
+        update_hover(index, event, window, cx);
+    })
+    .tooltip(|index, window, cx| build_tooltip(index, window, cx))
+```
+
+Aralıklar byte index aralığıdır; Unicode metinde character sınırlarını yanlış
+hesaplamak hover/click eşleşmesini bozabilir. `on_click` yalnızca mouse down ve
+mouse up aynı verilen range içinde kaldığında listener çağırır.
+
+## 74. ManagedView, DismissEvent, Modal, Popover ve Tooltip Yaşam Döngüsü
+
+`ManagedView` GPUI'da başka bir view tarafından yaşam döngüsü yönetilen UI
+parçaları için blanket trait'tir:
+
+```rust
+pub trait ManagedView: Focusable + EventEmitter<DismissEvent> + Render {}
+```
+
+Bir modal, popover veya context menu kapatılmak istediğinde kendi entity
+context'inden `DismissEvent` yayar:
+
+```rust
+impl EventEmitter<DismissEvent> for MyModal {}
+
+fn dismiss(&mut self, cx: &mut Context<Self>) {
+    cx.emit(DismissEvent);
+}
+```
+
+Zed/UI bileşenleri:
+
+- `ContextMenu`: `ManagedView` uygular; command listesi ve separator yönetimi
+  için kullanılır.
+- `PopoverMenu<M: ManagedView>`: anchor element'ten focus edilebilir popover
+  açar; `PopoverMenuHandle<M>` dışarıdan toggle/close için tutulabilir.
+- `right_click_menu(id)`: context menu'yu mouse event akışına bağlayan UI
+  helper'ıdır.
+- Workspace modal layer `ModalView`/`ToastView` gibi katmanlarda
+  `DismissEvent` subscription'ı ile kapanmayı yönetir; `on_before_dismiss`
+  varsa kapanmadan önce çağrılır.
+
+Tooltip:
+
+- Element fluent API: `.tooltip(|window, cx| AnyView)` ve
+  `.hoverable_tooltip(|window, cx| AnyView)`.
+- Imperative `Interactivity` API aynı callback imzasını kullanır.
+- `hoverable_tooltip` mouse tooltip içine geçince kapanmaz; normal tooltip
+  pointer owner element'ten ayrılınca release edilir.
+
+Tuzaklar:
+
+- Modal/popover view `Focusable` sağlamazsa klavye ve dismiss davranışı eksik
+  kalır.
+- `DismissEvent` emit eden entity subscription'ı saklanmazsa layer kapanma
+  callback'i düşer.
+- Aynı elementte birden fazla tooltip tanımlamak debug assert'e yol açar.
+
+## 75. Default Colors, GPU Specs ve Platform Diagnostics
+
+Tema sistemi dışındaki küçük ama pratik platform yüzeyleri:
+
+- `Colors::for_appearance(window)`: `WindowAppearance::Light/VibrantLight`
+  için light, `Dark/VibrantDark` için dark default palet döndürür.
+- `Colors::light()`, `Colors::dark()`, `Colors::get_global(cx)`: GPUI örnekleri
+  ve base component'lerde kullanılan framework renkleri. Zed uygulama UI'ında
+  esas kaynak `cx.theme().colors()` olmalıdır.
+- `DefaultColors` trait'i `cx.default_colors()` kısayolunu sağlar; bunun için
+  `GlobalColors(Arc<Colors>)` global state olarak set edilmiş olmalıdır.
+- `DefaultAppearance::{Light, Dark}` `WindowAppearance` değerinden türetilir ve
+  base GPUI renk setini seçmek için kullanılır.
+- `window.gpu_specs() -> Option<GpuSpecs>`: Linux/Vulkan tarafında GPU/driver
+  bilgisi ve software emulation durumu; macOS ve Windows'ta şu anda `None`
+  dönebilir.
+- `window.set_window_edited(true)`: platform seviyesinde "dirty document"
+  göstergesi.
+- `window.set_document_path(Some(path))`: macOS'ta `AXDocument` accessibility
+  property değerini ayarlar.
+- `window.play_system_bell()`: platform alert sesi.
+- `window.window_title()`, `titlebar_double_click()`, `tabbed_windows()`,
+  `merge_all_windows()`, `move_tab_to_new_window()`,
+  `toggle_window_tab_overview()`, `set_tabbing_identifier(...)`: macOS'a özgü
+  pencere/tab entegrasyonlarıdır.
+
+Bu API'ler tema veya pencere oluşturma akışının merkezinde değildir; ama
+diagnostic ekranları, test harness'leri, macOS doküman pencereleri ve platforma
+duyarlı davranışlarda rehbere dahil edilmelidir.
+
+## 76. Prompt Builder, PromptHandle ve Fallback Prompt
+
+`Window::prompt` platform dialog'u açar; platform prompt desteklemiyorsa veya
+custom prompt builder set edilmişse GPUI içinde render edilen prompt kullanılır.
+
+```rust
+let response = window.prompt(
+    PromptLevel::Warning,
+    "Unsaved changes",
+    Some("Close without saving?"),
+    &[PromptButton::cancel("Cancel"), PromptButton::ok("Close")],
+    cx,
+);
+
+let selected_index = response.await?;
+```
+
+Prompt tipleri:
+
+- `PromptLevel::{Info, Warning, Critical}` görsel önem seviyesidir.
+- `PromptButton::ok(label)`, `cancel(label)`, `new(label)` sırasıyla ok/cancel
+  ve generic action butonu üretir; `label()` ve `is_cancel()` okunabilir.
+- `PromptResponse(pub usize)`: custom prompt view'in seçilen buton index'ini
+  emit ettiği event.
+- `Prompt`: `EventEmitter<PromptResponse> + Focusable` trait birleşimidir.
+- `PromptHandle::with_view(view, window, cx)`: custom prompt entity'sini
+  window'a bağlar, önceki focus'u kaydeder, prompt yanıtında focus'u geri verir.
+- `fallback_prompt_renderer(...)`: `set_prompt_builder` ile default GPUI prompt
+  render'ını zorlamak için kullanılabilir.
+
+Custom builder:
+
+```rust
+cx.set_prompt_builder(|level, message, detail, actions, handle, window, cx| {
+    let message = message.to_string();
+    let detail = detail.map(ToString::to_string);
+    let actions = actions.to_vec();
+    let view = cx.new(|cx| MyPrompt::new(level, message, detail, actions, cx));
+    handle.with_view(view, window, cx)
+});
+```
+
+Tuzaklar:
+
+- GPUI re-entrant prompt desteklemez; bir prompt açıkken aynı window'da ikinci
+  prompt açma path'i tasarlanmalıdır.
+- Custom prompt `Focusable` sağlamalıdır; aksi halde `PromptHandle::with_view`
+  focus restore zincirini tamamlayamaz.
+- Prompt sonucu buton label'ı değil, `answers` dizisindeki index'tir.
+
+## 77. Zed Keymap Dosyası, Validator ve Unbind Akışı
+
+GPUI action/keybinding modeli Zed'de `settings::keymap_file` ile kullanıcı
+dosyasına bağlanır. Bu bölüm runtime dispatch'ten farklı olarak JSON yükleme,
+schema ve dosya güncelleme tarafını kapsar.
+
+Dosya modeli:
+
+- `KeymapFile(Vec<KeymapSection>)`: top-level JSON array.
+- `KeymapSection { context, use_key_equivalents, unbind, bindings, ... }`:
+  context predicate ve binding/unbind map'lerini taşır.
+- `KeymapAction(Value)`: `null`, `"action::Name"` veya
+  `["action::Name", { ...args... }]` biçimlerini temsil eder.
+- `UnbindTargetAction(Value)`: `unbind` map'indeki hedef action değeri.
+- `KeymapFileLoadResult::{Success, SomeFailedToLoad, JsonParseFailure}`:
+  dosyanın kısmen yüklenebildiği senaryoyu açıkça ayırır.
+
+Yükleme:
+
+```rust
+let keymap = KeymapFile::parse(&contents)?;
+let result = KeymapFile::load(&contents, cx);
+```
+
+`load_asset(asset_path, source, cx)` bundled keymap dosyalarını yükler ve
+`KeybindSource` metadata'sı set edebilir. `load_panic_on_failure` sadece
+startup/test gibi "asset bozuksa devam etmeyelim" path'leri içindir.
+
+Base keymap:
+
+- `BaseKeymap::{VSCode, JetBrains, SublimeText, Atom, TextMate, Emacs, Cursor,
+  None}`.
+- Base/default/vim/user binding'leri `KeybindSource` metadata'sı taşır; UI
+  hangi binding'in nereden geldiğini bu metadata ile gösterir.
+
+Validator:
+
+- `KeyBindingValidator`: belirli action type'ı için binding doğrulaması yapar.
+- `KeyBindingValidatorRegistration(pub fn() -> Box<dyn KeyBindingValidator>)`
+  inventory ile toplanır.
+- Validator hatası `MarkdownString` döner; keymap UI bunu kullanıcıya
+  açıklanabilir hata olarak gösterebilir.
+
+Dosya güncelleme:
+
+```rust
+let updated = KeymapFile::update_keybinding(
+    operation,
+    keymap_contents,
+    tab_size,
+    keyboard_mapper,
+)?;
+```
+
+- `KeybindUpdateOperation::Add { source, from }`: yeni binding ekler.
+- `Replace { source, target, target_keybind_source }`: user binding ise değiştirir;
+  user dışı binding değişiyorsa add + suppression unbind'e dönüştürebilir.
+- `Remove { target, target_keybind_source }`: user binding'i dosyadan siler;
+  user dışı binding'i kaldırmak için `unbind` yazar.
+- `KeybindUpdateTarget` action adı, optional action arguments, context ve
+  `KeybindingKeystroke` dizisini taşır.
+
+Tuzaklar:
+
+- `use_key_equivalents` yalnızca destekleyen platformlarda anlamlıdır; keyboard
+  mapper verilmeden dosya güncelleme doğru keystroke string'i üretemez.
+- Non-user binding'i "silmek" gerçek kaynağı değiştirmez; kullanıcı keymap'ine
+  suppress eden `unbind` entry'si yazılır.
+- Kullanıcı JSON'u bozuksa `update_keybinding` dosyayı değiştirmez; önce parse
+  başarıyla geçmelidir.
+
+## 78. Platform Trait Implementasyonu ve Wrapper Sınırları
+
+Uygulama kodu normalde `Platform` veya `PlatformWindow` trait'lerini doğrudan
+çağırmaz; `App` ve `Window` wrapper'ları üzerinden gider. Yeni platform portu,
+test platformu veya headless backend yazarken trait sözleşmesi gerekir.
+
+`Platform` ana grupları:
+
+- Executor/text: `background_executor`, `foreground_executor`, `text_system`.
+- App lifecycle: `run`, `quit`, `restart`, `activate`, `hide`,
+  `hide_other_apps`, `unhide_other_apps`, `on_quit`, `on_reopen`.
+- Display/window: `displays`, `primary_display`, `active_window`,
+  `window_stack`, `open_window`.
+- Appearance/UI policy: `window_appearance`, `button_layout`,
+  `should_auto_hide_scrollbars`, cursor visibility/style.
+- URL/path/prompt: `open_url`, `on_open_urls`, `register_url_scheme`,
+  `prompt_for_paths`, `prompt_for_new_path`, `reveal_path`,
+  `open_with_system`.
+- Menüler: `set_menus`, `get_menus`, `set_dock_menu`,
+  `on_app_menu_action`, `on_will_open_app_menu`,
+  `on_validate_app_menu_command`.
+- Clipboard/credentials: normal clipboard, Linux primary selection, macOS find
+  pasteboard, credential store task'leri.
+- Screen capture ve keyboard: `is_screen_capture_supported`,
+  `screen_capture_sources`, `keyboard_layout`, `keyboard_mapper`,
+  `on_keyboard_layout_change`.
+
+`PlatformWindow` ana grupları:
+
+- Bounds/state: `bounds`, `window_bounds`, `content_size`, `resize`,
+  `scale_factor`, `display`, `appearance`, `modifiers`, `capslock`.
+- Input: `set_input_handler`, `take_input_handler`, `on_input`,
+  `update_ime_position`.
+- Window lifecycle: `activate`, `is_active`, `is_hovered`, `minimize`, `zoom`,
+  `toggle_fullscreen`, `on_should_close`, `on_close`.
+- Render: `on_request_frame`, `draw(scene)`, `completed_frame`,
+  `sprite_atlas`, `is_subpixel_rendering_supported`.
+- Decoration/hit-test: `set_title`, `set_background_appearance`,
+  `on_hit_test_window_control`, `request_decorations`,
+  `window_decorations`, `window_controls`.
+- Platform özel: macOS tab/document APIs, Linux move/resize/menu/app-id/inset,
+  Windows raw handle, test-only `render_to_image`.
+
+Wrapper sınırı:
+
+- `Platform::set_cursor_style` global platform cursor'ıdır; uygulama UI'ında
+  hitbox'a bağlı stil için `Window::set_cursor_style` kullan.
+- `PlatformWindow::prompt` native prompt döndürebilir; `Window::prompt` custom
+  prompt fallback'ini de yönetir.
+- `PlatformWindow::map_window` Linux map/show ayrımı için vardır; uygulama
+  kodunda `WindowOptions.show` ve window wrapper davranışına güven.
+- Trait default method'ları "desteklenmiyor" anlamı taşır; wrapper üzerinden
+  dönen `None` veya no-op sonuçlarını platform capability olarak ele al.
