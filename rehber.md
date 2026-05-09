@@ -3500,11 +3500,15 @@ Foreground priority:
 cx.spawn_with_priority(Priority::High, async move |cx| {
     cx.update(|cx| {
         cx.refresh_windows();
-    })?;
-    Ok::<(), anyhow::Error>(())
+    });
 })
-.detach_and_log_err(cx);
+.detach();
 ```
+
+`AsyncApp::update(|cx| ...)` doğrudan `R` döndürür; entity'lerden farklı olarak
+fallible değildir, bu yüzden `?` ile yayılmaz. Pencere içi async çalışmada
+`AsyncWindowContext::update(|window, cx| ...) -> Result<R>` ya da
+`Entity::update(cx, ...)` fallible varyantları kullanılır.
 
 Hazır değer:
 
@@ -3537,7 +3541,11 @@ bu tiplerle taşınır.
 
 Ana tipler:
 
-- `Keystroke { modifiers, key, key_char, ime_key }`: gerçek input.
+- `Keystroke { modifiers, key, key_char }`: gerçek input. `key` basılan tuşun
+  ASCII karşılığıdır (örn. option-s için `s`); `key_char` o tuşla üretilebilecek
+  karakteri tutar (örn. option-s için `Some("ß")`, cmd-s için `None`). Asciiye
+  çevrilemeyen layout'larda `key` yine ASCII fallback'idir, asıl yazılan
+  karakter `key_char`'a düşer. Ayrı bir `ime_key` alanı yoktur.
 - `KeybindingKeystroke`: binding dosyalarında görünen display modifier/key ile
   eşleşme için kullanılan sarıcı.
 - `InvalidKeystrokeError`: parse hatası.
@@ -3928,3 +3936,450 @@ Wrapper sınırı:
   kodunda `WindowOptions.show` ve window wrapper davranışına güven.
 - Trait default method'ları "desteklenmiyor" anlamı taşır; wrapper üzerinden
   dönen `None` veya no-op sonuçlarını platform capability olarak ele al.
+
+## 79. DispatchPhase, Event Propagation ve DispatchEventResult
+
+Mouse, key ve action olayları element ağacında iki fazda akar:
+
+```rust
+pub enum DispatchPhase {
+    Capture, // root → focused
+    Bubble,  // focused → root (default)
+}
+```
+
+`Window::on_mouse_event`, `on_key_event`, `on_modifiers_changed` listener'ları
+faza göre çağrılır. Element fluent API'lerinde `.on_*` ailesi bubble fazına,
+`.capture_*` ailesi capture fazına bağlanır.
+
+Kontrol bayrakları (`crates/gpui/src/app.rs:2021+`):
+
+- `cx.stop_propagation()`: aynı tipteki diğer handler'ların çağrılmasını keser
+  (mouse'ta z-index'te alt katman, key'de ağaçta üst element).
+- `cx.propagate()`: bir önceki `stop_propagation()` etkisini geri alır. Action
+  handler'lar bubble fazında default olarak propagation'ı durdurur, bu yüzden
+  parent'a düşmesini istiyorsan handler içinden `cx.propagate()` çağır.
+- `window.prevent_default()` / `window.default_prevented()`: özellikle keystroke
+  observer'larında "platform varsayılan davranışı yapma" sinyali. Örneğin IME
+  composition'ı tüketildiğinde set edilir.
+
+Platform tarafına döndürülen sonuç:
+
+```rust
+pub struct DispatchEventResult {
+    pub propagate: bool,        // hâlâ bubble ediliyorsa true
+    pub default_prevented: bool, // platform default'u atla
+}
+```
+
+`PlatformWindow::on_input` callback'i `Fn(PlatformInput) -> DispatchEventResult`
+döndürür. macOS native key handling, Windows IME ve Wayland keyboard akışı
+buradaki `default_prevented` ve `propagate` değerlerine bakar; menü kısayolları
+veya browser tarzı default davranışları seçici olarak iptal etmek için kullanılır.
+
+Pratik akış:
+
+1. Element listener fire eder, view state günceller, gerekirse `cx.notify()`.
+2. Listener event'i tüketmek istiyorsa `cx.stop_propagation()` çağırır.
+3. Action handler default davranışı korumak istiyorsa `cx.propagate()` ile
+   bubble'ı yeniden açar.
+4. Keystroke handler platforma "ben hallettim, default tetikleme" demek için
+   `window.prevent_default()` çağırır.
+
+Tuzaklar:
+
+- `capture_*` handler'ları focus path bilinmeden çalışır; pencere global
+  shortcut/observer için kullanılır, ama state mutate etmek istiyorsan focused
+  element'i runtime'da kontrol et.
+- Action propagation davranışı mouse/key event'lerden ters çalışır. Yeni action
+  yazarken ezbere `stop_propagation` koymak parent action'larını öldürebilir.
+- `default_prevented` yalnızca keystroke ve bazı pointer event'lerinde anlamlıdır;
+  custom event tipinde set etmek no-op'tur.
+
+## 80. Refineable, StyleRefinement ve MergeFrom
+
+GPUI ve Zed'de iki kompozisyon paterni paralel çalışır: render zincirinde
+`Refineable`, settings/tema yüklemesinde `MergeFrom`.
+
+### Refineable
+
+`crates/refineable/src/refineable.rs`:
+
+```rust
+pub trait Refineable: Clone {
+    type Refinement;
+    fn refine(&mut self, refinement: &Self::Refinement);
+    fn refined(self, refinement: Self::Refinement) -> Self;
+}
+```
+
+`#[derive(Refineable)]` (gpui re-export'lu): orijinal struct ile aynı alanlara
+sahip ama her alanı `Option`'lı hale getirilmiş `XRefinement` türü üretir.
+`refine` çağrısı yalnızca `Some` alanları yazar.
+
+Tipik kullanım `Style`/`StyleRefinement` (`crates/gpui/src/style.rs:178`):
+
+```rust
+let mut style = Style::default();
+style.refine(&StyleRefinement::default()
+    .text_size(px(20.))
+    .font_weight(FontWeight::SEMIBOLD));
+```
+
+Element fluent zinciri (örn. `div().text_size(px(14.)).bg(rgb(0xff))`)
+arka planda `StyleRefinement` topluyor; render sırasında base style üzerine
+refine ediliyor. `TextStyle`/`TextStyleRefinement`, `HighlightStyle`,
+`PlayerColors`, `ThemeColors` gibi tüm tema yapıları aynı pattern'i kullanır.
+
+`refined(self, refinement)` immutable bir kopya üretir; "ek style ile yeni base
+elde et" senaryolarında uygundur.
+
+### MergeFrom
+
+`crates/settings_content/src/merge_from.rs`:
+
+```rust
+pub trait MergeFrom {
+    fn merge_from(&mut self, other: &Self);
+    fn merge_from_option(&mut self, other: Option<&Self>) {
+        if let Some(other) = other { self.merge_from(other); }
+    }
+}
+```
+
+Default kurallar:
+
+- HashMap, BTreeMap, struct: derin merge — sadece `other`'da var olan alanlar
+  yazılır.
+- `Option<T>`: `None` ezmez; `Some` recursive merge eder.
+- Diğer tipler (Vec, primitive): tam üzerine yazma.
+
+`#[derive(MergeFrom)]` derive'ı struct alanları için recursive merge üretir.
+Davranışı değiştirmek için `ExtendingVec<T>` (her merge'te concat) ve
+`SaturatingBool` (bir kez true olunca kalır) gibi sarıcılar mevcuttur.
+
+Settings yükleme zinciri:
+
+1. `assets/settings/default.json` → `SettingsContent::default()` baz alınır.
+2. User `~/.config/zed/settings.json` parse → `merge_from_option`.
+3. Aktif profil → `merge_from_option`.
+4. Worktree `.zed/settings.json` → `merge_from_option`.
+5. Sonuç `Settings::from_settings(content)` ile concrete struct'a çevrilir.
+
+Tuzaklar:
+
+- `Refineable` zincirinde `default()` baz değeri her seferinde yeniden hesaplanır;
+  ağır base style'ları cache'le.
+- `MergeFrom` sıralaması alt-üst değildir: en spesifik kaynağı en sona koy
+  (`local > profile > user > default`).
+- Vec'leri append etmek için `ExtendingVec`; üzerine yazmak gerekiyorsa düz `Vec`.
+- `Option<Option<T>>` gibi yapı yapmak istiyorsan `MergeFrom`'un default davranışı
+  doğru sonucu vermeyebilir; özel impl yaz.
+
+## 81. PaintQuad, Window Paint Primitives ve BorderStyle
+
+`canvas` ve custom `Element::paint` içinde GPU'ya gönderilen primitive'ler:
+
+```rust
+window.paint_quad(fill(bounds, rgb(0xeeeeee)));
+
+window.paint_quad(
+    quad(
+        bounds,
+        Corners::all(px(8.)),                  // corner_radii
+        rgb(0xffffff),                         // background
+        Edges::all(px(1.)),                    // border_widths
+        rgb(0xdddddd),                         // border_color
+        BorderStyle::Solid,                    // veya Dashed
+    ),
+);
+
+window.paint_quad(outline(bounds, rgb(0xff0000), BorderStyle::Solid));
+```
+
+`PaintQuad` builder yardımcıları (`window.rs:5848+`):
+
+- `.corner_radii(impl Into<Corners<Pixels>>)`
+- `.border_widths(impl Into<Edges<Pixels>>)`
+- `.border_color(impl Into<Hsla>)`
+- `.background(impl Into<Background>)`
+
+Diğer paint API'leri:
+
+- `window.paint_path(Path<Pixels>, impl Into<Background>)`: tessellated path.
+- `window.paint_underline(Point, width, &UnderlineStyle)`: text underline.
+- `window.paint_strikethrough(Point, width, &StrikethroughStyle)`.
+- `window.paint_glyph(...)`: tek glyph rasterize ve çizim. Genellikle TextLayout
+  zaten kullanır; nadiren elle çağrılır.
+- `window.paint_emoji(...)`: emoji renk glyph.
+- `window.paint_image(bounds, corner_radii, RenderImage, ...)`: raster image.
+- `window.paint_surface(bounds, CVPixelBuffer)`: macOS native surface.
+- `window.paint_shadows(bounds, corner_radii, &[BoxShadow])`: drop shadow set.
+- `window.paint_layer(bounds, |window| ...)`: aynı bounds üzerinde clip ile yeni
+  render katmanı; overflow gizleme ve transform için.
+
+`BorderStyle` (`crates/gpui/src/scene.rs:544`): `Solid` ve `Dashed`.
+`Corners<P>`, `Edges<P>`, `Bounds<P>`, `Hsla`, `Background` zaten bilinen
+geometri/renk tipleridir; her builder bunlara `Into` üzerinden kabul eder.
+
+Tuzaklar:
+
+- `paint_*` çağrıları yalnızca `Element::paint` fazında geçerlidir; prepaint veya
+  layout'ta panic verir.
+- `paint_path` her frame yeniden tessellate edersen FPS düşer; mümkünse path
+  prepaint'te oluştur ve element state'inde sakla.
+- `paint_layer` clip'lediği için içerik bounds dışına taşan kısımlar gizlenir;
+  shadow gibi taşan efektler için layer dışında çiz.
+- `border_widths` dört kenara ayrı değer verebilir (`Edges { top, right, bottom, left }`);
+  düz bir değer verirsen `Edges::all(px(1.))`.
+
+## 82. CursorStyle, FontWeight ve Sabit Enum Tabloları
+
+Sık başvurulan ama her seferinde aramak zorunda kalınan platform sabitleri:
+
+### `CursorStyle` (`crates/gpui/src/platform.rs:1745+`)
+
+CSS cursor karşılıklarıyla:
+
+- `Arrow` (default)
+- `IBeam`, `IBeamCursorForVerticalLayout` — text input
+- `Crosshair`
+- `OpenHand` (`grab`), `ClosedHand` (`grabbing`)
+- `PointingHand` (`pointer`)
+- `ResizeLeft`, `ResizeRight`, `ResizeLeftRight` — yatay resize
+- `ResizeUp`, `ResizeDown`, `ResizeUpDown` — dikey resize
+- `ResizeUpLeftDownRight`, `ResizeUpRightDownLeft` — köşe resize
+- `ResizeColumn`, `ResizeRow` — tablo/grid resize
+- `OperationNotAllowed` (`not-allowed`)
+- `DragLink` (`alias`), `DragCopy` (`copy`)
+- `ContextualMenu` (`context-menu`)
+
+Element'te: `.cursor(CursorStyle::PointingHand)` veya kısayollar
+`.cursor_pointer()`, `.cursor_text()`, `.cursor_grab()`, `.cursor_default()`.
+
+### `FontWeight` (`crates/gpui/src/text_system.rs:871+`)
+
+CSS weight değerleriyle birebir:
+
+- `THIN` (100), `EXTRA_LIGHT` (200), `LIGHT` (300)
+- `NORMAL` (400, default), `MEDIUM` (500)
+- `SEMIBOLD` (600), `BOLD` (700)
+- `EXTRA_BOLD` (800), `BLACK` (900)
+
+`FontWeight::ALL` dizisi tüm değerleri sırayla taşır. UI bileşenlerinde
+genellikle `FontWeight::SEMIBOLD` ve `FontWeight::BOLD` kullanılır.
+
+### `FontStyle`
+
+`Normal`, `Italic`, `Oblique`. `.italic()` fluent kısayolu Italic'e set eder.
+
+### `WindowControlArea` (`crates/gpui/src/window.rs:564`)
+
+`Drag`, `Close`, `Max`, `Min`. Custom titlebar yazarken Windows native hit-test
+için zorunlu.
+
+### `HitboxBehavior` (`crates/gpui/src/window.rs:692`)
+
+`Normal`, `BlockMouse`, `BlockMouseExceptScroll`. `.occlude()` ve
+`.block_mouse_except_scroll()` element kısayolları sırasıyla son ikisini set eder.
+
+### `BorderStyle` (`crates/gpui/src/scene.rs:544`)
+
+`Solid`, `Dashed`. `Style::border_style` veya `paint_quad` ile geçilir.
+
+### `Anchor` / `Corner` (`crates/gpui/src/elements/anchored.rs`)
+
+Eskiden `Anchor` adıyla geçen tip artık `Corner`'dır:
+`TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`, `Center`. Layer-shell
+modülündeki `Anchor` (bitflag, `TOP|BOTTOM|LEFT|RIGHT`) bundan ayrı bir tiptir.
+
+### `ResizeEdge` (`crates/gpui/src/platform.rs:358`)
+
+`Top`, `Bottom`, `Left`, `Right`, `TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`.
+`window.start_window_resize(edge)` argümanı.
+
+## 83. Action Makro Detayları, register_action! ve Deprecated Alias
+
+`#[derive(Action)]` ve `actions!` makrosu çoğu zaman yeterlidir, ancak action
+sözleşmesinin ek köşe taşları vardır.
+
+### `Action` trait'inin gerçek yüzeyi (`crates/gpui/src/action.rs:117+`)
+
+```rust
+pub trait Action: Any + Send {
+    fn boxed_clone(&self) -> Box<dyn Action>;
+    fn partial_eq(&self, other: &dyn Action) -> bool;
+    fn name(&self) -> &'static str;
+    fn name_for_type() -> &'static str where Self: Sized;
+    fn build(value: serde_json::Value) -> Result<Box<dyn Action>>
+        where Self: Sized;
+    fn action_json_schema(_: &mut SchemaGenerator) -> Option<Schema>
+        where Self: Sized { None }
+    fn deprecated_aliases() -> &'static [&'static str]
+        where Self: Sized { &[] }
+}
+```
+
+`name(&self)` runtime ad, `name_for_type()` static ad — runtime polymorphism
+gerekirse ilkini, registration'da ikincisini kullan.
+
+### `#[action(...)]` attribute'leri
+
+`#[derive(Action)]` üzerinde:
+
+- `namespace = my_crate`: action adını `my_crate::Save` formuna çevirir.
+- `name = "OpenFile"`: namespace içinde özel ad.
+- `no_json`: `Deserialize`/`JsonSchema` derive zorunluluğunu kaldırır;
+  `build()` her zaman hata döndürür, `action_json_schema()` `None`.
+  Pure-code action (örn. `RangeAction { start: usize }`) için kullan.
+- `no_register`: inventory üzerinden otomatik kaydı atlar; trait'i elle
+  uygularken veya conditional kayıt yaparken gerekir.
+- `deprecated_aliases = ["editor::OldName", "old::Name"]`: keymap'te eski adı
+  kabul ederken kullanıcıya warning üretmek için.
+
+### `register_action!` makrosu
+
+`#[derive(Action)]` kullanmadan `Action`'u manuel implement ediyorsan, action'ın
+inventory'e girmesi için:
+
+```rust
+use gpui::register_action;
+
+register_action!(Paste);
+```
+
+Bu makro yalnızca `inventory::submit!` çağrısı üretir; struct/impl tanımına
+dokunmaz. `no_register` ile birleştiği takdirde elle ne zaman register
+edileceğini sen belirlersin.
+
+### Action runtime API'leri
+
+- `cx.is_action_available(&action) -> bool`: focused element path'te bu action'ı
+  dinleyen biri var mı? Menü item'larını disable etmek için ideal.
+- `window.is_action_available(&action, cx)`: window-spesifik versiyon.
+- `cx.dispatch_action(&action)`: focused window'a yayınla.
+- `window.dispatch_action(action.boxed_clone(), cx)`: window-spesifik.
+- `cx.build_action(name, json_value)`: keymap entry'sinden runtime action üretir;
+  schema yoksa `ActionBuildError` döner.
+
+### Tuzaklar
+
+- `partial_eq` derive default'ta `PartialEq` impl'i kullanır; derive ekleme
+  unutulursa karşılaştırma yanlış sonuç verebilir.
+- Aynı `name()` döndüren iki action register edilirse inventory startup'ta
+  panic eder; namespace kullanmak çakışmayı önler.
+- `deprecated_aliases` keymap parser'ı eski adı yeni action'a yönlendirir, ama
+  Rust kodunda eski tipi referans etmeye devam edersen iki tanım çakışır.
+- `no_json` action'ı keymap dosyasından çağıramazsın; sadece kod içinden
+  `dispatch_action` ile tetiklenir.
+
+## 84. Task, TaskExt ve Async Hata Yönetimi
+
+`Task<T>` GPUI'ın temel async handle'ıdır. Yardımcı trait `TaskExt`
+(`crates/gpui/src/executor.rs:33+`) `Task<Result<T, E>>` üzerine ek metotlar ekler:
+
+```rust
+pub trait TaskExt<T, E> {
+    fn detach_and_log_err(self, cx: &App);
+    fn detach_and_log_err_with_backtrace(self, cx: &App);
+}
+```
+
+`detach_and_log_err` task'ı arka plana atar ve hata oluşursa
+`log::error!("...: {err}")` formatında loglar. `_with_backtrace` aynı işlevi
+`{:?}` formatıyla yapar; `anyhow::Error` durumlarında full backtrace ister.
+
+Pratik akış:
+
+```rust
+cx.spawn_in(window, async move |this, cx| {
+    let data = http_client.get(url).await?;
+    this.update_in(cx, |this, window, cx| {
+        this.apply(data, window, cx);
+    })?;
+    anyhow::Ok(())
+})
+.detach_and_log_err(cx);
+```
+
+Detach varyantları:
+
+- `task.detach()`: hata loglanmaz, sessizce yutulur. UI'da gösterilemeyen
+  fire-and-forget iş için.
+- `task.detach_and_log_err(cx)`: standart akış, prod kodunda tercih edilir.
+- `task.detach_and_prompt_err(prompt_label, window, cx, |err, window, cx| ...)`:
+  workspace UI'sında kullanılan ek helper (workspace crate'inde tanımlı);
+  hatayı modal prompt'la kullanıcıya gösterir.
+
+Yazarken kararlar:
+
+- Async sonuç caller'a dönmesi gerekiyorsa `Task<R>` döndür ve await et; struct
+  alanında saklamak iptal davranışı verir.
+- Caller fire-and-forget yaptıysa task'ı return etmek gereksiz; doğrudan
+  `detach_and_log_err(cx)` çağır.
+- Result'ı log'a düşürmemek için manuel `if let Err(e) = task.await { ... }`
+  yazma; `detach_and_log_err` zaten `track_caller` ile log location'ı tutar.
+
+Tuzaklar:
+
+- Result tipinin `E` argümanı `Display + Debug` istemeli; `anyhow::Error` ve
+  custom error tipi otomatik uyar.
+- Task'ı `Vec<Task<()>>` içinde topladıysan drop sırası sürpriz olabilir;
+  iptal etmek istemediğin tipik akışta `detach()` daha açık bir niyet bildirir.
+- `cx.spawn_in(window, ...)` Window düştüğünde task otomatik iptal etmez;
+  WeakEntity üzerinden `update`/`update_in` çağrısı `Result` döndüğünden
+  bunu erken çıkış sinyali olarak ele al.
+
+## 85. Global State Yardımcıları ve `cx.defer`
+
+`App` üzerinde bulunan yardımcı global state metotları, mevcut bölümlerde
+parça parça geçtiği için burada tek listede topluyoruz:
+
+- `cx.set_global<T: Global>(value)`: var olanı ezer; yoksa kurar.
+- `cx.global<T>() -> &T`: panic eder; var olduğundan eminsen.
+- `cx.global_mut<T>()`: aynı, mutable.
+- `cx.has_global<T>() -> bool`: kontrol etmeden global okumak istediğinde.
+- `cx.try_global<T>() -> Option<&T>`: nullable okuma.
+- `cx.update_global<T, R>(|g, cx| ...) -> R`: kapsamlı update.
+- `cx.read_global<T, R>(|g, cx| ...) -> R`: kapsamlı read.
+- `cx.remove_global<T>() -> T`: instance'ı geri alır; bir daha set edilmezse
+  global yok sayılır.
+- `cx.observe_global<T>(|cx| ...) -> Subscription`: global her notify olduğunda.
+
+Effect cycle yönetimi:
+
+- `cx.defer(|cx| ...)`: mevcut effect cycle bittiğinde çalışır. Reentrant
+  `update` veya entity'leri stack'e geri vermek için ideal.
+- `Context<T>::defer_in(window, |this, window, cx| ...)`: window-bound varyant.
+- `window.defer(cx, |window, cx| ...)`: doğrudan window context'inden ertele.
+- `window.refresh()`: pencereyi bir sonraki frame'de redraw için işaretle.
+- `cx.refresh_windows()`: tüm pencereler için aynı.
+
+Tuzaklar:
+
+- `cx.global<T>()` ve `cx.global_mut<T>()` panic eder; init'i kontrol etmediğin
+  call site'ta `try_global` veya `has_global` kullan.
+- `update_global` sırasında aynı global'i tekrar update etmek panic verir;
+  iç içe çağrılarda `defer` ile ertelemek güvenli yoldur.
+- Subscription `detach()` edilmezse owner drop'unda iptal olur; uzun yaşayan
+  observer için sahibi olan struct'a kaydet.
+
+## 86. Notlar: Eski Sürümlerde Karşılaşılan Yanlış İsimler
+
+Rehberi eski Zed sürümlerine bakarak yazıyorsan veya internette eski örnekler
+görüyorsan birkaç ad değişikliği vardır; doğrularını burada toplu liste:
+
+- `Anchor` (anchored elementi için) → `Corner`. Layer-shell `Anchor` ayrı tiptir.
+- `Settings::load(SettingsSources)` → `Settings::from_settings(&SettingsContent)`.
+- `SettingsStore::update_user_settings` artık yalnızca test-support; production
+  kodu `update_settings_file(fs, cx, |content, cx| ...)` kullanır.
+- `ScreenCaptureSource::start_capture` yok; doğrusu `stream(&ForegroundExecutor, frame_callback)`.
+- `Keystroke` artık `ime_key` alanı taşımaz; yalnızca `key`, `key_char`, `modifiers`.
+- `WindowOptions.bounds` yok; doğrusu `window_bounds: Option<WindowBounds>`.
+- `cx.theme()` artık `&Arc<Theme>` döner; `theme.styles.colors.background`
+  yerine `theme.colors().background` kullan.
+- `ActiveTheme::set_active` yok; tema değişimi `theme_settings::reload_theme(cx)`
+  ile `GlobalTheme` üzerinden yapılır.
+- `KeymapAction` enum değil, `KeymapAction(Value)` tuple struct'tır.
+- `WindowBackgroundAppearance::Acrylic` yok; Windows'ta acrylic-benzeri efekt
+  `MicaBackdrop` veya `MicaAltBackdrop` üzerinden.
