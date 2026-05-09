@@ -1343,6 +1343,24 @@ let h = hsla(0.0, 1.0, 0.5, 1.0);           // saf kırmızı
 let grey = opaque_grey(0.5, 1.0);           // gri yardımcısı
 ```
 
+Hazır renk sabitleri (hepsi `pub const fn ... -> Hsla`, `color.rs:344+`):
+
+| Fonksiyon | HSLA değeri | Not |
+|---|---|---|
+| `black()` | `(0.0, 0.0, 0.0, 1.0)` | Saf siyah |
+| `white()` | `(0.0, 0.0, 1.0, 1.0)` | Saf beyaz |
+| `transparent_black()` | `(0.0, 0.0, 0.0, 0.0)` | Tam saydam siyah — gradient ucu olarak kullanışlı |
+| `transparent_white()` | `(0.0, 0.0, 1.0, 0.0)` | Tam saydam beyaz |
+| `red()` | `(0.0, 1.0, 0.5, 1.0)` | %100 doygun kırmızı |
+| `blue()` | `(0.666…, 1.0, 0.5, 1.0)` | %100 doygun mavi |
+| `yellow()` | `(0.166…, 1.0, 0.5, 1.0)` | %100 doygun sarı |
+| `green()` | `(0.333…, 1.0, **0.25**, 1.0)` | Diğerlerinden farklı: lightness 0.25 (koyu yeşil) |
+
+Bunlar Zed tasarım sisteminden bağımsızdır; tema renkleri için `cx.theme().colors()`
+kullan. Debug placeholder, GPU shader test'i veya tema-bağımsız palette örneği
+gerekirse bu sabitler hazır gelir. `transparent_black()` `linear_gradient` ucu
+olarak en yaygın kullanılan tek-parça çağrısıdır (ör. fade-out maskeleri).
+
 Sık kullanılan metotlar (`color.rs:472+`):
 
 - `is_transparent()`, `is_opaque()`
@@ -1616,6 +1634,15 @@ div().w(px(120.))           // Pixels
 
 Generic container'lar `Point<T>`, `Size<T>`, `Bounds<T>`, `Edges<T>`, `Corners<T>`
 çoğu metot için aritmetik destekler (`+`, `-`, `*`, `/`).
+
+Hazır oran sabitleri:
+
+- `phi() -> DefiniteLength` (`geometry.rs:3698`): altın oranı `relative(1.618_034)`
+  olarak döndürür — yani parent'ın **1.618 katı**, %50 değil. GPUI'nin kendisi
+  default `TextStyle::line_height` değeri olarak `phi()` kullanır
+  (`style.rs:451`); yani bir font için satır yüksekliği `font_size * 1.618`'dir.
+  Layout oranlamada (örn. golden-ratio iki sütun) parent'ın katı olarak
+  istenirse aynı sabit kullanılabilir.
 
 Tuzaklar:
 
@@ -4150,15 +4177,58 @@ GPUI ve Zed'de iki kompozisyon paterni paralel çalışır: render zincirinde
 
 ```rust
 pub trait Refineable: Clone {
-    type Refinement;
+    type Refinement: Refineable<Refinement = Self::Refinement> + IsEmpty + Default;
+
     fn refine(&mut self, refinement: &Self::Refinement);
     fn refined(self, refinement: Self::Refinement) -> Self;
+
+    fn from_cascade(cascade: &Cascade<Self>) -> Self
+        where Self: Default + Sized;
+
+    fn is_superset_of(&self, refinement: &Self::Refinement) -> bool;
+    fn subtract(&self, refinement: &Self::Refinement) -> Self::Refinement;
+}
+
+pub trait IsEmpty {
+    fn is_empty(&self) -> bool;
 }
 ```
 
+Trait sözleşmesi göründüğünden zengindir:
+
+- `type Refinement` da `Refineable` olmalı; yani refinement'ın kendisi tekrar
+  refine edilebilir (`refine_a.refine(&refine_b)` zincirleme merge için).
+- Aynı `Refinement` ayrıca `IsEmpty + Default` zorunluluğunu taşır. `IsEmpty`
+  "bu refinement uygulansa hiçbir alan değişir mi?" sorusunu cevaplar; merge,
+  layout cache invalidation ve `subtract` çıktısı bu kontrole dayanır.
+- `is_superset_of(refinement)` instance'ın halihazırda bu refinement'ı kapsayıp
+  kapsamadığını söyler — gereksiz `refine` çağrılarını atlayabilirsin.
+- `subtract(refinement)` aradaki farkı yeni bir refinement olarak verir.
+- `from_cascade(cascade)` aşağıdaki `Cascade` yapısını default değer üzerine
+  uygular; tema/stil katmanlamasının sondaki "düzleştirme" adımıdır.
+
 `#[derive(Refineable)]` (gpui re-export'lu): orijinal struct ile aynı alanlara
 sahip ama her alanı `Option`'lı hale getirilmiş `XRefinement` türü üretir.
-`refine` çağrısı yalnızca `Some` alanları yazar.
+`refine` çağrısı yalnızca `Some` alanları yazar. Aşağıdaki somut türler hep
+derive ile üretilir; ayrı yazmak gerekmez:
+
+| Refinement türü | Üreten struct | Kaynak |
+|---|---|---|
+| `StyleRefinement` | `Style` | `style.rs:178` |
+| `TextStyleRefinement` | `TextStyle` | `style.rs` |
+| `UnderlineStyleRefinement` | `UnderlineStyle` | `style.rs` |
+| `StrikethroughStyleRefinement` | `StrikethroughStyle` | `style.rs` |
+| `BoundsRefinement` | `Bounds` | `geometry.rs` |
+| `PointRefinement` | `Point` | `geometry.rs` |
+| `SizeRefinement` | `Size` | `geometry.rs` |
+| `EdgesRefinement` | `Edges` | `geometry.rs` |
+| `CornersRefinement` | `Corners` | `geometry.rs` |
+| `GridTemplateRefinement` | `GridTemplate` | `geometry.rs` |
+
+Bu `*Refinement` tipleri çoğunlukla doğrudan adlandırılarak kullanılmaz; fluent
+API zinciri arka planda toplar. Doğrudan elle inşa etmen gereken tek tip
+genelde `StyleRefinement`'tır (örn. `.hover(|style| style.bg(...))` callback
+imzası).
 
 Tipik kullanım `Style`/`StyleRefinement` (`crates/gpui/src/style.rs:178`):
 
@@ -4176,6 +4246,48 @@ refine ediliyor. `TextStyle`/`TextStyleRefinement`, `HighlightStyle`,
 
 `refined(self, refinement)` immutable bir kopya üretir; "ek style ile yeni base
 elde et" senaryolarında uygundur.
+
+### Cascade ve CascadeSlot
+
+`Refineable` tek başına iki katmanı (base + refinement) birleştirir; daha derin
+hover/focus/active akışları için `crates/refineable/src/refineable.rs:80,93`
+katman yığını sağlar:
+
+```rust
+pub struct Cascade<S: Refineable>(Vec<Option<S::Refinement>>);
+pub struct CascadeSlot(usize);
+```
+
+API:
+
+- `Cascade::default()` slot 0'ı `Some(default)` ile kurar; ek slotlar başta
+  `None`'dur. Slot 0 her zaman dolu kalır ve "base" refinement'tır.
+- `cascade.reserve() -> CascadeSlot`: yeni `None` slot ekler ve handle döndürür.
+  Hover, focus, active gibi her dinamik katman için bir slot ayrılır.
+- `cascade.base() -> &mut S::Refinement`: slot 0'ı mutable verir; layout başına
+  asıl style yazılır.
+- `cascade.set(slot, Option<S::Refinement>)`: belirli slot'a refinement koyar
+  veya `None` ile devre dışı bırakır.
+- `cascade.merged() -> S::Refinement`: slot 0 üstüne diğer dolu slotları
+  sırayla `refine` eder; sonraki slot önceki slotu ezer.
+- `Refineable::from_cascade(&cascade) -> Self`: `default().refined(merged())`
+  shortcut'ı; render sırasında nihai stili üretmek için kullanılır.
+
+Önemli not: GPUI'nin kendi `Interactivity` katmanı (`.hover(...)`, `.active(...)`,
+`.focus(...)`, `.focus_visible(...)`, `.in_focus(...)`, `.group_hover(...)`,
+`.group_active(...)` zinciri) **`Cascade`/`CascadeSlot` kullanmaz**;
+`Interactivity` struct'ında her durum için ayrı bir `Option<Box<StyleRefinement>>`
+alanı tutar (`elements/div.rs:1681+`'deki `hover_style`, `active_style`,
+`focus_style`, `in_focus_style`, `focus_visible_style`, `group_hover_style`,
+`group_active_style`) ve render fazında bu refinement'ları sırayla `refine`
+eder. Yani hover style'ında verdiğin `StyleRefinement::bg(...)` base
+background'u ezer ama `font_size`'a dokunmazsa base'in font_size'ı korunur —
+None alan "etki yok" demektir.
+
+`Cascade<S>` ve `CascadeSlot` arayüzü `refineable` crate'inde public olarak
+durur fakat GPUI çekirdeği veya Zed bu sürümde içeriden kullanmıyor;
+çoklu-katmanlı (3+) refinement yığınını dışarıdan inşa etmek isteyen kütüphane
+yazarları için bir uzantı noktasıdır.
 
 ### MergeFrom
 
