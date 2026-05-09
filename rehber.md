@@ -2536,17 +2536,24 @@ metotları üretiyor:
 | `visibility_style_methods!()` | `visible()`, `invisible()` |
 | `margin_style_methods!()` | `m_*` ile birlikte `mt_`, `mb_`, `my_`, `mx_`, `ml_`, `mr_` ve her birinin spacing scale + `auto` varyantları (`mt_auto()` gibi) |
 | `padding_style_methods!()` | `p_*`, `pt_`, `pb_`, `py_`, `px_`, `pl_`, `pr_` (margin ailesinin padding karşılığı) |
-| `position_style_methods!()` | Hem konum hem boyut hem gap ailesi: `relative()`, `absolute()`, ve şu prefix'lerin Tailwind-stili suffix tablosu: `inset`, `top`, `bottom`, `left`, `right`, `w`, `h`, `size`, `min_size`, `min_w`, `min_h`, `max_size`, `max_w`, `max_h`, `gap`, `gap_x`, `gap_y`. Yani `w_*`, `min_h_*`, `gap_*` gibi Bölüm 50 başında "Boyut" / "Layout" altında listelenen metotlar bu macrodan üretilir |
+| `position_style_methods!()` | `relative()`, `absolute()` ve positioned element offset prefix'leri: `inset`, `top`, `bottom`, `left`, `right` |
 | `overflow_style_methods!()` | `overflow_hidden()`, `overflow_x_hidden()`, `overflow_y_hidden()` |
 | `cursor_style_methods!()` | `cursor(CursorStyle)`, `cursor_default()`, `cursor_pointer()`, `cursor_text()`, `cursor_move()`, `cursor_not_allowed()`, `cursor_context_menu()`, `cursor_crosshair()`, `cursor_vertical_text()`, `cursor_alias()`, `cursor_copy()`, `cursor_no_drop()`, `cursor_grab()`, `cursor_grabbing()`, ve resize ailesi: `cursor_ew_resize()`, `cursor_ns_resize()`, `cursor_nesw_resize()`, `cursor_nwse_resize()`, `cursor_col_resize()`, `cursor_row_resize()`, `cursor_n_resize()`, `cursor_e_resize()`, `cursor_s_resize()`, `cursor_w_resize()` |
 | `border_style_methods!()` | `border_color(C)` ve `border_*` width prefix'leri (`border_*`, `border_t_*`, `border_r_*`, `border_b_*`, `border_l_*`, `border_x_*`, `border_y_*`) × suffix tablosu (`_0`, `_1`, `_2`, `_4`, `_8`, vb.) |
-| `box_shadow_style_methods!()` | `shadow(Vec<BoxShadow>)`, `shadow_none()`, `shadow_2xs()`, `shadow_xs()`, `shadow_sm()`, `shadow_md()`, `shadow_lg()` (Tailwind-stili boyut basamakları; `xl`/`2xl` GPUI'de tanımlı değil) |
+| `box_shadow_style_methods!()` | `shadow(Vec<BoxShadow>)`, `shadow_none()`, `shadow_2xs()`, `shadow_xs()`, `shadow_sm()`, `shadow_md()`, `shadow_lg()`, `shadow_xl()`, `shadow_2xl()` |
 
 Bu makrolar `pub` (proc) macro olarak `gpui_macros` crate'inden export edilir
 ve `gpui::{visibility_style_methods, margin_style_methods, ...}` üzerinden de
 yeniden re-export edilir. Doğrudan uygulama kodu çağırmaz — fluent metotlar
 zaten `Styled` trait'inin parçası olduğu için her `Styled` impl'i otomatik
 sahip olur.
+
+`Styled` trait içinde ayrıca `gpui_macros::style_helpers!()` çağrısı vardır, fakat
+bu proc macro `#[doc(hidden)]` olduğu ve `gpui` crate kökünden re-export
+edilmediği için `target/doc/gpui/all.html` macro listesinde yer almaz. `w_*`,
+`h_*`, `size_*`, `min_size_*`, `min_w_*`, `min_h_*`, `max_size_*`, `max_w_*`,
+`max_h_*`, `gap_*`, `gap_x_*`, `gap_y_*` ve `rounded_*` aileleri bu internal
+macrodan gelir.
 
 Custom bir element için `Styled` impl ediyorsan trait'in tüm metotları
 otomatik miras kalır; bu makroları yeniden invoke etmek gerekmez. Yalnız
@@ -6554,13 +6561,17 @@ application kodunda nadiren doğrudan kullanılır:
 
 - Display/diagnostic: `DisplayId`, `ThermalState`, `SourceMetadata`,
   `RequestFrameOptions`, `WindowParams`, `InputLatencySnapshot`.
-- Dispatcher/executor: `PlatformDispatcher`, `RunnableVariant` (`Runnable<RunnableMeta>`
-  type alias'ı; ham scheduler runnable wrapper'ı), `TimerResolutionGuard`,
-  `Scope`. Buna ek olarak:
+- Dispatcher/executor: rustdoc public yüzeyinde `Scope`, `FallibleTask`,
+  `SchedulerForegroundExecutor` ve `RunnableMeta` görünür. Buna ek olarak
+  platform sınırında `#[doc(hidden)]` tutulan `PlatformDispatcher`,
+  `RunnableVariant` (`Runnable<RunnableMeta>` type alias'ı) ve
+  `TimerResolutionGuard` vardır; bunlar `target/doc/gpui/all.html` listesinde
+  yer almaz ve uygulama API'si olarak kullanılmamalıdır.
+  Detay:
   - `RunnableMeta { location: &'static Location<'static> }`
     (`scheduler/src/scheduler.rs:59`) — her scheduled task'a iliştirilen debug
     metadata. `track_caller` ile yakalanan kaynak konumunu taşır; profiler ve
-    log akışı `RunnableVariant`'tan bu alana ulaşır.
+    log akışı doc-hidden `RunnableVariant` üzerinden bu alana ulaşır.
   - `FallibleTask<T>` (`scheduler/src/executor.rs:250`) — `Task::fallible(self)`
     çağrısının döndürdüğü wrapper. Future olarak poll edildiğinde `Option<T>`
     döner; iptal edilirse panik atmaz, `None` üretir. `must_use` işaretli olduğu
@@ -6695,6 +6706,55 @@ ve async context'ler üzerinden çalışmak doğru sınırdır.
 - `scap_screen_sources(...)`: screen capture kaynaklarını platforma göre toplar;
   uygulama kodunda çoğu zaman `cx.screen_capture_sources(...)` tercih edilir.
 
+### Constants ve Type Aliases
+
+`target/doc/gpui/all.html` altında ayrı listelenen sabitler:
+
+- `DEFAULT_WINDOW_SIZE = 1536x1095`: `WindowOptions.window_bounds` verilmezse
+  default placement için kullanılan ana pencere boyutu.
+- `DEFAULT_ADDITIONAL_WINDOW_SIZE = 900x750`: settings/rules library gibi ek
+  işlevsel pencereler için önerilen minimum oranlı boyut.
+- `KEYSTROKE_PARSE_EXPECTED_MESSAGE`: `InvalidKeystrokeError` mesajının
+  "beklenen modifier + key" açıklaması.
+- `LOADING_DELAY = 200ms`: `img()` elementinin loading state'i göstermeden önce
+  beklediği süre.
+- `MAX_BUTTONS_PER_SIDE = 3`: `WindowButtonLayout` içinde bir tarafta tutulabilen
+  native control button slot sayısı.
+- `SHUTDOWN_TIMEOUT = 100ms`: `Context::on_app_quit` future'larının app quit
+  sırasında çalışabileceği süre.
+- `SMOOTH_SVG_SCALE_FACTOR = 2.0`: SVG'leri daha yumuşak raster etmek için
+  kullanılan yüksek çözünürlük scale'i.
+- `SUBPIXEL_VARIANTS_X = 4`, `SUBPIXEL_VARIANTS_Y = 1`: glyph atlas subpixel
+  rasterization varyant sayıları.
+
+Type alias'lar:
+
+- `AlignSelf = AlignItems`, `JustifyItems = AlignItems`,
+  `JustifySelf = AlignItems`, `JustifyContent = AlignContent`: style enum
+  alias'ları.
+- `DrawOrder = u32`: scene layer/primitive sıralama anahtarı.
+- `ImageLoadingTask = Shared<Task<Result<Arc<RenderImage>, ImageCacheError>>>`:
+  image cache loader task tipi.
+- `ImgResourceLoader = AssetLogger<ImageAssetLoader>`: `img()` elementinin asset
+  loader alias'ı.
+- `InspectorRenderer = Box<dyn Fn(&mut Inspector, &mut Window,
+  &mut Context<Inspector>) -> AnyElement>`: `App::set_inspector_renderer(...)`
+  ile kurulan inspector UI renderer callback'i.
+- `PathVertex_ScaledPixels = PathVertex<ScaledPixels>`: scene path vertex alias'ı.
+- `Result = anyhow::Result`: crate kök hata alias'ı.
+- `Transform = lyon::math::Transform`: path builder transform alias'ı.
+
+Renk/geometri kısa fonksiyonları:
+
+- Renk: `rgb(0xRRGGBB)`, `rgba(0xRRGGBBAA)`, `hsla(h, s, l, a)`,
+  `black()`, `white()`, `red()`, `green()`, `blue()`, `yellow()`,
+  `transparent_black()`, `transparent_white()`, `opaque_grey(l, a)`.
+- Background: `solid_background(color)`, `linear_color_stop(color, percentage)`,
+  `linear_gradient(angle, from, to)`, `pattern_slash(color, width, interval)`,
+  `checkerboard(color, size)`.
+- Geometri: `point(x, y)`, `size(width, height)`, `px(f32)`, `rems(f32)`,
+  `relative(f32)`, `percentage(f32)`, `radians(f32)`, `auto()`, `phi()`.
+
 ### Kök Re-export ve Makro Yüzeyi
 
 `gpui.rs` crate kökünde yalnız GPUI modüllerini değil, bazı yardımcı crate'leri de
@@ -6715,8 +6775,24 @@ yeniden export eder:
   sağlar.
 - `proptest`: yalnız `test-support`/test build'lerinde property test yardımcılarını
   export eder.
-- Makrolar: `Action`, `IntoElement`, `Render`, `AppContext`, `VisualContext`,
-  `register_action`, `test`, `property_test`.
+- Makrolar: `Action`, `IntoElement`, `AppContext`, `VisualContext`,
+  `register_action`, `test`, `property_test`. `gpui.rs` ayrıca `Render`
+  derive'ını da re-export eder, fakat makro kaynağında `#[doc(hidden)]`
+  olduğu için `target/doc/gpui/all.html` içinde listelenmez ve
+  `derive.Render.html` sayfası üretilmez. Bu derive yalnız boş bir
+  `Render` impl'i üretir; `render` gövdesi `gpui::Empty` döndürür. Gerçek UI
+  üreten view'lerde manuel `impl Render` yazılır.
+
+Rustdoc listesindeki `Action`, `IntoElement`, `Refineable`, `AppContext` ve
+`VisualContext` kısa adları tek bir öğe değildir; trait ve derive macro
+yüzeyleri ayrı namespace'lerde yaşar. `#[derive(AppContext)]` struct içinde
+`#[app]` ile işaretlenmiş `&mut App` alanını bulur ve `AppContext` metodlarını
+o alana delege eder. `#[derive(VisualContext)]` hem `#[app]` hem `#[window]`
+ister; `VisualContext` için `type Result<T> = T` üretir, `window_handle`,
+`update_window_entity`, `new_window_entity`, `replace_root_view` ve `focus`
+çağrılarını ilgili `App`/`Window` alanlarına indirir. `prelude::IntoElement`,
+`prelude::Refineable` ve `prelude::VisualContext` rustdoc'ta görünen derive
+macro alias'larıdır; yeni trait veya farklı runtime davranışı değildir.
 
 Bu re-export'lar yeni API anlamına gelmez; modüllerde anlatılan aynı yüzeyin
 crate kökünden ergonomik erişimidir. Özellikle `property_test` ve `proptest`
