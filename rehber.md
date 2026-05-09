@@ -2477,6 +2477,36 @@ tipleriyle daha nettir:
   `row_span_full` kullanılır. Altta `GridTemplate`,
   `TemplateColumnMinSize` ve `GridPlacement::{Line, Span, Auto}` vardır.
 
+Yukarıdaki fluent metotların büyük kısmı `Styled` trait body'sinde tek tek
+yazılmaz; bir grup proc macro tarafından üretilir. `crates/gpui/src/styled.rs`
+trait gövdesinde bu makrolar tek satır olarak invoke edilir, `gpui_macros`
+crate'i ise her invoke için onlarca metot expand eder. Hangi macro hangi
+metotları üretiyor:
+
+| Proc macro (`gpui_macros::...!()`) | Üretilen fluent metotlar (Styled trait üyesi olarak) |
+|---|---|
+| `visibility_style_methods!()` | `visible()`, `invisible()` |
+| `margin_style_methods!()` | `m_*` ile birlikte `mt_`, `mb_`, `my_`, `mx_`, `ml_`, `mr_` ve her birinin spacing scale + `auto` varyantları (`mt_auto()` gibi) |
+| `padding_style_methods!()` | `p_*`, `pt_`, `pb_`, `py_`, `px_`, `pl_`, `pr_` (margin ailesinin padding karşılığı) |
+| `position_style_methods!()` | Hem konum hem boyut hem gap ailesi: `relative()`, `absolute()`, ve şu prefix'lerin Tailwind-stili suffix tablosu: `inset`, `top`, `bottom`, `left`, `right`, `w`, `h`, `size`, `min_size`, `min_w`, `min_h`, `max_size`, `max_w`, `max_h`, `gap`, `gap_x`, `gap_y`. Yani `w_*`, `min_h_*`, `gap_*` gibi Bölüm 50 başında "Boyut" / "Layout" altında listelenen metotlar bu macrodan üretilir |
+| `overflow_style_methods!()` | `overflow_hidden()`, `overflow_x_hidden()`, `overflow_y_hidden()` |
+| `cursor_style_methods!()` | `cursor(CursorStyle)`, `cursor_default()`, `cursor_pointer()`, `cursor_text()`, `cursor_move()`, `cursor_not_allowed()`, `cursor_context_menu()`, `cursor_crosshair()`, `cursor_vertical_text()`, `cursor_alias()`, `cursor_copy()`, `cursor_no_drop()`, `cursor_grab()`, `cursor_grabbing()`, ve resize ailesi: `cursor_ew_resize()`, `cursor_ns_resize()`, `cursor_nesw_resize()`, `cursor_nwse_resize()`, `cursor_col_resize()`, `cursor_row_resize()`, `cursor_n_resize()`, `cursor_e_resize()`, `cursor_s_resize()`, `cursor_w_resize()` |
+| `border_style_methods!()` | `border_color(C)` ve `border_*` width prefix'leri (`border_*`, `border_t_*`, `border_r_*`, `border_b_*`, `border_l_*`, `border_x_*`, `border_y_*`) × suffix tablosu (`_0`, `_1`, `_2`, `_4`, `_8`, vb.) |
+| `box_shadow_style_methods!()` | `shadow(Vec<BoxShadow>)`, `shadow_none()`, `shadow_2xs()`, `shadow_xs()`, `shadow_sm()`, `shadow_md()`, `shadow_lg()` (Tailwind-stili boyut basamakları; `xl`/`2xl` GPUI'de tanımlı değil) |
+
+Bu makrolar `pub` (proc) macro olarak `gpui_macros` crate'inden export edilir
+ve `gpui::{visibility_style_methods, margin_style_methods, ...}` üzerinden de
+yeniden re-export edilir. Doğrudan uygulama kodu çağırmaz — fluent metotlar
+zaten `Styled` trait'inin parçası olduğu için her `Styled` impl'i otomatik
+sahip olur.
+
+Custom bir element için `Styled` impl ediyorsan trait'in tüm metotları
+otomatik miras kalır; bu makroları yeniden invoke etmek gerekmez. Yalnız
+GPUI'nin kendisi gibi yeni bir style framework yazıyorsan (paralel bir
+`Styled` benzeri trait için) bu macro'ları kendi trait'inin içinde invoke
+edebilirsin — `method_visibility` parametresi public/pub(crate) ayarına izin
+verir.
+
 Pratik kararlar:
 
 - Görünüm state'e bağlıysa `Render` içinde koşullu `.when(...)` kullan; style'ı
