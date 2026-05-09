@@ -231,7 +231,12 @@ let handle = cx.open_window(
 `WindowOptions` alanları:
 
 - `window_bounds`: `None` ise GPUI display default bounds seçer. `Some` verilirse
-  `Windowed`, `Maximized` veya `Fullscreen` başlangıcı yapılır.
+  `Windowed`, `Maximized` veya `Fullscreen` başlangıcı yapılır. Default seçilirken
+  baz alınan boyut `gpui::DEFAULT_WINDOW_SIZE: Size<Pixels>` (1536×1095, ana
+  Zed penceresi için) ve `gpui::DEFAULT_ADDITIONAL_WINDOW_SIZE` (900×750, 6:5
+  oranında settings/rules library benzeri ek pencereler için) const'larıdır
+  (`window.rs:70,74`); kendi varsayılan boyutunu override etmek istemiyorsan
+  bu değerlere güvenebilirsin.
 - `titlebar`: `Some(TitlebarOptions)` sistem başlık çubuğu konfigürasyonu.
   `None`, custom titlebar için kullanılır.
 - `focus`: oluşturulduğunda odak alıp almayacağı.
@@ -490,7 +495,9 @@ akış kullanılır.
 Linux `WindowButtonLayout`:
 
 - `WindowButton::{Minimize, Maximize, Close}` sıralı control tipleridir; layout
-  sol ve sağ taraf için üçer `Option<WindowButton>` slot taşır.
+  sol ve sağ taraf için `Option<WindowButton>` slot dizileri taşır. Slot başı
+  sayısı `gpui::MAX_BUTTONS_PER_SIDE: usize = 3` (`platform.rs:457`) ile
+  sabittir; `WindowButtonLayout::{left, right}` bu sayıda elementli dizidir.
 - Platformdan `cx.button_layout()` ile gelir.
 - GNOME tarzı `"close,minimize:maximize"` formatı parse edilebilir.
 - Default Linux fallback: sağda minimize, maximize, close.
@@ -1516,7 +1523,10 @@ Tuzaklar:
 - Custom closure `'static` olmalı; `Window`/`App` sadece closure çağrısında
   parametre olarak kullanılmalı.
 - `with_fallback` yalnızca yükleme tamamlandığında ve hatalıysa fallback render eder.
-- `with_loading` yükleme 200 ms'den uzun sürerse loading fallback'ini render eder.
+- `with_loading` yükleme 200 ms'den uzun sürerse loading fallback'ini render
+  eder. Bu eşik `gpui::LOADING_DELAY: Duration` const'ında tanımlıdır
+  (`elements/img.rs:31`); kendi delayed-fallback akışın için aynı değeri
+  ödünç alabilirsin.
 - `RenderImage` GIF/animated WebP için `frame_count()` ve `delay(frame_index)`
   sağlar; `img` element'i aktif pencerede frame ilerletip animation frame ister.
 
@@ -2208,7 +2218,11 @@ Tuzaklar:
 - `text_ellipsis`, `line_clamp`, `white_space` gibi overflow davranışları layout
   genişliğine bağlıdır; parent width belirsizse truncation beklediğin gibi çalışmaz.
 - Uygulama genel text rendering modu `cx.set_text_rendering_mode(...)` ile
-  `PlatformDefault`, `Subpixel`, `Grayscale` arasında seçilir.
+  `PlatformDefault`, `Subpixel`, `Grayscale` arasında seçilir. Subpixel akışı
+  her glyph için yatayda `gpui::SUBPIXEL_VARIANTS_X: u8 = 4`, dikeyde
+  `gpui::SUBPIXEL_VARIANTS_Y: u8 = 1` farklı varyant rasterize eder
+  (`text_system.rs:45,48`); yani glyph atlas boyutu yatay subpixel pozisyonuna
+  duyarlı, dikey değil.
 
 ## 47. Input, Clipboard, Prompt ve Platform Servisleri
 
@@ -3089,6 +3103,11 @@ Quit ve activation:
   kapanınca quit.
 - `QuitMode::LastWindowClosed`: son window kapanınca otomatik çık.
 - `QuitMode::Explicit`: yalnızca `App::quit()` ile çık.
+- `cx.on_app_quit(|cx| async { ... })` callback'lerinin tamamı sürdürülürken
+  uygulama `gpui::SHUTDOWN_TIMEOUT: Duration = 100ms` (`app.rs:71`) süresince
+  bekler. Bu eşik aşılırsa pending future'lar iptal edilip platform exit
+  sürdürülür; uzun teardown işlerini fire-and-forget değil, uygun bir lifecycle
+  observer'ında yap.
 - `cx.activate(ignoring_other_apps)`, `cx.hide()`, `cx.hide_other_apps()`,
   `cx.unhide_other_apps()` platform app state'ini yönetir.
 - `window.activate_window()`, `window.minimize_window()`,
@@ -3657,7 +3676,10 @@ Ana tipler:
   karakter `key_char`'a düşer. Ayrı bir `ime_key` alanı yoktur.
 - `KeybindingKeystroke`: binding dosyalarında görünen display modifier/key ile
   eşleşme için kullanılan sarıcı.
-- `InvalidKeystrokeError`: parse hatası.
+- `InvalidKeystrokeError`: parse hatası. Hatanın `Display` çıktısı
+  `gpui::KEYSTROKE_PARSE_EXPECTED_MESSAGE: &str` const'ını şablon olarak
+  kullanır (`platform/keystroke.rs:69`); kullanıcı keymap parser'ında aynı
+  bekleyiş cümlesini göstermek istersen bu sabite bağlan.
 - `Modifiers`: `control`, `alt`, `shift`, `platform`, `function` alanları.
 - `AsKeystroke`: hem `Keystroke` hem display wrapper'ları üzerinden ortak
   keystroke erişimi sağlayan küçük trait.
@@ -4536,8 +4558,11 @@ Frame/paint yardımcıları:
 - `window.set_tooltip(AnyTooltip) -> TooltipId`: tooltip request'i prepaint
   fazında kaydedilir.
 - `window.paint_svg(...)`: `SvgRenderer` ve sprite atlas üzerinden monochrome SVG
-  mask'i çizer; `paint_image` decode edilmiş raster frame, `paint_surface` ise
-  macOS native surface içindir.
+  mask'i çizer. SVG'yi her zaman hedef boyutun
+  `gpui::SMOOTH_SVG_SCALE_FACTOR: f32 = 2.0` (`svg_renderer.rs:81`) katı
+  çözünürlükte rasterize edip tekrar küçültür; bu yüzden `paint_svg` çağrısı
+  küçük icon boyutlarında bile yumuşak kenar üretir. `paint_image` decode
+  edilmiş raster frame, `paint_surface` ise macOS native surface içindir.
 
 Generic asset yükleme:
 
