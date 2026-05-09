@@ -722,7 +722,12 @@ Focus olayları:
 - `cx.on_focus(handle, window, ...)`: handle doğrudan focus aldı.
 - `cx.on_focus_in(handle, window, ...)`: handle veya descendant focus aldı.
 - `cx.on_blur(handle, window, ...)`: handle focus kaybetti.
-- `cx.on_focus_out(handle, window, ...)`: handle veya descendant focus dışına çıktı.
+- `cx.on_focus_out(handle, window, |this, event, window, cx| ...)`: handle veya
+  descendant focus dışına çıktı; callback view state alır ve `FocusOutEvent`
+  içinden blur'lanan handle'a (`event.blurred`) erişilebilir.
+- `window.on_focus_out(handle, cx, |event, window, cx| ...)`: aynı olayın view
+  state almayan düşük seviyeli `Window` varyantı; geri çağrımı `Subscription`
+  olarak döner.
 - `cx.on_focus_lost(window, ...)`: pencere içinde focus kalmadı.
 
 Keyboard action akışı:
@@ -767,14 +772,20 @@ desenidir:
 
 ```rust
 canvas(
-    |_bounds, window, _| {
+    |bounds, window, _cx| {
         window.insert_hitbox(bounds, HitboxBehavior::Normal)
     },
-    |_bounds, hitbox, window, cx| {
+    |_bounds, hitbox, window, _cx| {
         window.set_cursor_style(CursorStyle::ResizeLeftRight, &hitbox);
     },
 )
 ```
+
+Burada `canvas` imzası `prepaint: FnOnce(Bounds<Pixels>, &mut Window, &mut App) -> T`
+ve `paint: FnOnce(Bounds<Pixels>, T, &mut Window, &mut App)` şeklindedir; ikinci
+closure'da ilk pozisyonel argüman `bounds` (kullanılmıyorsa `_bounds`), ikinci
+argüman ise prepaint'in döndürdüğü değer (`hitbox`) olur. `set_cursor_style`
+hitbox'a referans ister; bu yüzden `&hitbox` geçilir.
 
 ## 19. Async İşler
 
@@ -889,24 +900,49 @@ Window observe:
 
 ## 21. Platform Servisleri
 
-`App` üzerinden:
+`App` üzerinden ulaşılan ana platform servisleri (her biri `crates/gpui/src/app.rs`
+içinde wrapper, gerçek davranış `Platform` trait implementasyonunda):
 
-- Uygulama: `quit`, `restart`, `activate`, `hide`, `hide_other_apps`, `unhide_other_apps`
-- Pencereler: `windows`, `active_window`, `window_stack`
-- Display: `displays`, `primary_display`, `find_display`
-- Appearance: `window_appearance`, `button_layout`
-- Clipboard: `read_from_clipboard`, `write_to_clipboard`
-- Linux primary selection: `read_from_primary`, `write_to_primary`
-- macOS find pasteboard: `read_from_find_pasteboard`, `write_to_find_pasteboard`
-- Keychain: `write_credentials`, `read_credentials`, `delete_credentials`
-- URL: `open_url`, `register_url_scheme`
+- Uygulama yaşam döngüsü: `quit`, `restart`, `set_restart_path`,
+  `on_app_quit(|cx| async ...)`, `on_app_will_restart`, `activate`, `hide`,
+  `hide_other_apps`, `unhide_other_apps`.
+- Pencereler: `windows`, `active_window`, `window_stack`, `refresh_windows`.
+- Display: `displays`, `primary_display`, `find_display`.
+- Appearance: `window_appearance`, `button_layout`, `should_auto_hide_scrollbars`,
+  `set_cursor_hide_mode`.
+- Clipboard: `read_from_clipboard`, `write_to_clipboard`.
+- Linux primary selection: `read_from_primary`, `write_to_primary`.
+- macOS find pasteboard: `read_from_find_pasteboard`, `write_to_find_pasteboard`.
+- Keychain / credential store: `write_credentials(url, username, password)`,
+  `read_credentials(url) -> Task<Result<Option<(String, Vec<u8>)>>>`,
+  `delete_credentials(url)`. Geri dönen `Task` background executor üzerinde çalışır;
+  await edilebilir veya `detach_and_log_err(cx)` ile bırakılabilir.
+- URL: `open_url`, `register_url_scheme`.
 - Dosya/prompt: `prompt_for_paths`, `prompt_for_new_path`, `reveal_path`,
-  `open_with_system`, `can_select_mixed_files_and_dirs`
+  `open_with_system`, `can_select_mixed_files_and_dirs`.
 - Menü: `set_menus`, `get_menus`, `set_dock_menu`, `add_recent_document`,
-  `update_jump_list`
-- Termal durum: `thermal_state`, `on_thermal_state_change`
-- Cursor: `set_cursor_style`, `hide_cursor_until_mouse_moves`, `is_cursor_visible`
-- Screen capture: `is_screen_capture_supported`, `screen_capture_sources`
+  `update_jump_list`.
+- Termal durum: `thermal_state`, `on_thermal_state_change`.
+- Cursor: `set_cursor_style`, `hide_cursor_until_mouse_moves`, `is_cursor_visible`.
+- Screen capture: `is_screen_capture_supported`, `screen_capture_sources`.
+- Klavye: `keyboard_layout()`, `keyboard_mapper()`,
+  `on_keyboard_layout_change(|cx| ...)`.
+- HTTP client: `http_client() -> Arc<dyn HttpClient>`,
+  `set_http_client(Arc<dyn HttpClient>)`. `Application::with_http_client(...)`
+  ile başlatma sırasında da set edilir; tipik olarak `crates/http_client` içindeki
+  Zed varsayılanı kullanılır.
+- Uygulama yolu ve compositor: `app_path() -> Result<PathBuf>` (macOS bundle path
+  ya da Linux executable), `path_for_auxiliary_executable(name)` (yardımcı binary
+  yolu için bundle search), `compositor_name() -> &'static str` (Linux'ta `wayland`,
+  `x11`, `xwayland` gibi adlar; diğer platformlarda boş string).
+
+`Window` üzerinden:
+
+- `window.on_window_should_close(cx, |window, cx| -> bool)`: kullanıcı close
+  butonuna bastığında çalıştırılır; `false` döndürerek kapatmayı iptal eder.
+- `window.appearance()`, `window.observe_window_appearance(...)`.
+- `window.tabbed_windows()`, `window.set_tabbing_identifier(...)` ve diğer native
+  window tab API'leri (bkz. Bölüm 64).
 
 Platform trait implementasyonu yazıyorsan `Platform` ve `PlatformWindow` içindeki
 tüm bu sözleşmeleri karşılaman gerekir. Uygulama geliştirirken doğrudan trait'e
@@ -1967,7 +2003,8 @@ Subscription üreten yöntemler (`Context<T>` üzerinde):
 - `cx.observe_global::<G>(f)`: global state değişti.
 - `cx.observe_release(entity, f)`: entity drop edildi.
 - `cx.on_focus(handle, window, f)` / `cx.on_blur(...)` / `cx.on_focus_in(...)` /
-  `cx.on_focus_out(...)` / `cx.on_focus_lost(window, f)`.
+  `cx.on_focus_lost(window, f)`. Descendant focus-out için düşük seviyeli
+  `window.on_focus_out(handle, cx, f)` kullanılır.
 - `cx.observe_window_bounds`, `cx.observe_window_activation`,
   `cx.observe_window_appearance`, `cx.observe_button_layout_changed`,
   `cx.observe_pending_input`, `cx.observe_keystrokes`.
@@ -2144,6 +2181,14 @@ Prompt ve dosya seçici:
 - `cx.prompt_for_new_path(directory, suggested_name)` save dialog açar.
 - `cx.open_url(url)`, `cx.register_url_scheme(scheme)`, `cx.reveal_path(path)`,
   `cx.open_with_system(path)` platform servislerine gider.
+- Platform credential store: `cx.write_credentials(url, username, password)`,
+  `cx.read_credentials(url)`, `cx.delete_credentials(url)` async `Task<Result<_>>`
+  döndürür.
+- Uygulama yolu ve sistem bilgisi: `cx.app_path()`,
+  `cx.path_for_auxiliary_executable(name)`, `cx.compositor_name()`,
+  `cx.should_auto_hide_scrollbars()`.
+- Restart ve HTTP client: `cx.set_restart_path(path)`, `cx.restart()`,
+  `cx.http_client()`, `cx.set_http_client(client)`.
 
 ## 48. Layer Shell ve Özel Platform Pencereleri
 
@@ -2274,3 +2319,1111 @@ Pratik kararlar:
   child konumu beklediğin sonucu vermeyebilir.
 - Kart/toolbar/list gibi tekrar eden UI'da boyutları `min/max/aspect_ratio` ile
   sabitle; hover veya loading state layout shift üretmemeli.
+
+## 51. WindowAppearance ve Tema Modu
+
+`crates/gpui/src/platform.rs:1604` içinde tanımlı:
+
+```rust
+pub enum WindowAppearance {
+    Light,        // macOS: aqua
+    VibrantLight, // macOS: NSAppearanceNameVibrantLight
+    Dark,         // macOS: darkAqua
+    VibrantDark,  // macOS: NSAppearanceNameVibrantDark
+}
+```
+
+`Vibrant` varyantları macOS `NSAppearance` değerleriyle doğrudan eşleşir. Diğer
+platformlar bu enum'u yine taşır, fakat vibrancy'nin gerçek etkisi platform
+implementasyonuna bağlıdır. Sistem açık/koyu tercih ettiğinde GPUI bunu platform
+appearance olarak yansıtır; kullanıcı manuel tema override yapmıyorsa Zed teması
+bu sinyali takip eder.
+
+Erişim:
+
+- `cx.window_appearance() -> WindowAppearance`: uygulama-genel platform tercihi.
+- `window.appearance() -> WindowAppearance`: pencerenin gerçek görünümü
+  (parent override edebilir).
+- `window.observe_window_appearance(|window, cx| ...)`: entity state'e gerek
+  yoksa doğrudan pencere observer'ı.
+- `cx.observe_window_appearance(window, |this, window, cx| ...)`: `Context<T>`
+  içinden view state ile birlikte değişimi izle.
+- `window.observe_button_layout_changed(...)` ve
+  `cx.observe_button_layout_changed(window, ...)`: platform pencere kontrol
+  butonu düzeni değiştiğinde çalışır.
+
+Zed örüntüsü `crates/zed/src/main.rs` içinde tema seçimine bağlanır:
+
+```rust
+cx.observe_window_appearance(window, |_, window, cx| {
+    let appearance = window.appearance();
+    *SystemAppearance::global_mut(cx) = SystemAppearance(appearance.into());
+    theme_settings::reload_theme(cx);
+    theme_settings::reload_icon_theme(cx);
+}).detach();
+```
+
+Tuzaklar:
+
+- macOS dışında `VibrantLight`/`VibrantDark` üretilmez; eşleştirme tablosunda
+  yine de tüm dört değeri ele al.
+- Sistem temasını değiştirmek pencere açıldıktan sonra `window_background_appearance`
+  değişimini tetiklemez; tema akışında manuel `window.set_background_appearance(...)`
+  çağrısı gerekir.
+- `Vibrant*` ile birlikte `WindowBackgroundAppearance::Blurred` eklenirse macOS'ta
+  blur'un üzerine extra vibrancy bindirilir; tasarım sisteminde tek katman seç.
+
+## 52. Entity Reservation ve Çift Yönlü Referans
+
+`crates/gpui/src/app/async_context.rs:43+` ve `app.rs::reserve_entity`/`insert_entity`.
+
+Bazen bir entity oluşturulurken başka bir entity'nin kimliğini veya zayıf handle'ını
+önceden bilmek gerekir (ör. `Workspace` ve `Pane`). Bunu kuvvetli referans döngüsü
+kurmadan yapmak için `Reservation` deseni vardır:
+
+```rust
+let pane_reservation: Reservation<Pane> = cx.reserve_entity();
+let pane_id = pane_reservation.entity_id();
+
+let workspace = cx.new(|cx| {
+    Workspace::with_pane_id(pane_id, cx)
+});
+
+let pane = cx.insert_entity(pane_reservation, |cx| {
+    Pane::new(workspace.downgrade(), cx)
+});
+```
+
+`Reservation<T>`:
+
+- `entity_id()` daha entity oluşturulmadan kimliği verir.
+- `cx.insert_entity(reservation, build)` rezervasyonu doldurur ve `Entity<T>` döner.
+- Doldurulmadan drop edilirse rezervasyon iptal olur.
+
+Deseni: çocuk entity ebeveyne `WeakEntity` ile bağlanır; rezervasyon sayesinde
+ebeveynin oluştururken çocuk handle'ı önceden bilinmesi gerektiği durumlarda da
+döngü oluşmaz. `AsyncApp` üzerinden de aynı API çağrılabilir.
+
+Tuzaklar:
+
+- Reservation kullanmadan iki `Entity<T>` birbirine kuvvetli sahiplikle bağlanırsa
+  hiçbir handle drop olmadığında bellek sızıntısı oluşur.
+- `insert_entity` çağrılmadan reservation drop'ta entity oluşturulmamış sayılır;
+  daha önce `entity_id()` ile yayılmış kimlik artık geçersizdir.
+- `cx.new` mevcut güncellemenin içinde rezervasyonu da doldurabilir; reentrant
+  `update` yasakları aynı şekilde geçerlidir.
+
+## 53. SharedString, SharedUri ve Ucuz Klonlanan Tipler
+
+`SharedString` GPUI'nin `gpui_shared_string` re-export'udur; `SharedUri`
+`crates/gpui/src/shared_uri.rs` içinde bu string tipini sarar.
+
+UI ağacı her render'da yeniden oluşturulduğu için string ve URI kopyalama maliyeti
+hızla birikir. GPUI bunun için `Arc` tabanlı tipler sunar:
+
+- `SharedString`: `&'static str` veya `Arc<str>`. `Clone` ucuzdur (ref-count).
+  `Display`, `AsRef<str>`, `Into<SharedString>` impl'ler mevcuttur. `&'static str`,
+  `String` ve `Cow<'_, str>` ücretsizce dönüşür.
+- `SharedUri`: aynı stratejiyle URI; `ImageSource::Resource(Resource::Uri(...))`
+  burada `SharedUri` ister.
+
+Render içinde `String` üretip clone etmek yerine entity state'de `SharedString`
+sakla:
+
+```rust
+struct Header { title: SharedString }
+
+impl Header {
+    fn set_title(&mut self, title: impl Into<SharedString>, cx: &mut Context<Self>) {
+        self.title = title.into();
+        cx.notify();
+    }
+}
+
+impl Render for Header {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div().child(self.title.clone())
+    }
+}
+```
+
+İlgili ucuz klon tipleri:
+
+- `Arc<str>`, `Arc<Path>`, `Arc<[T]>`: GPUI sıkça `Arc` based slice/path bekler.
+- `Hsla`/`Rgba`: `Copy` tipli, doğrudan değer geçirilir.
+- `ElementId`: `Clone`, internal ID veya string varyantları taşır.
+
+Tuzaklar:
+
+- `SharedString::from(String)` çağrısı bir kez allocation yapar; sonraki klonlar
+  ücretsiz. Hot path'te tekrar tekrar `String` üretmekten kaçın.
+- `to_string()` çağrısı yeni `String` allocation üretir; gerekmiyorsa
+  `as_ref()` veya `Display` ile yaz.
+- Format string her render'da çalışıyorsa `format!` sonucu da her frame allocation
+  yapar; sonucu cache'lemek için entity state'te tut.
+
+## 54. Drag ve Drop İçerik Üretimi
+
+`crates/gpui/src/elements/div.rs:572+` ve `1271+`.
+
+GPUI'de drag, drag edilen elementin yerine ayrı bir "ghost" view oluşturur ve
+mouse'u onun ile takip eder.
+
+```rust
+div()
+    .id("draggable")
+    .on_drag(payload.clone(), |payload, mouse_offset, window, cx| {
+        cx.new(|_| GhostView::for_payload(payload.clone(), mouse_offset))
+    })
+```
+
+İmza:
+
+```rust
+fn on_drag<T, W>(
+    self,
+    value: T,
+    constructor: impl Fn(&T, Point<Pixels>, &mut Window, &mut App) -> Entity<W> + 'static,
+) -> Self
+where
+    T: 'static,
+    W: 'static + Render;
+```
+
+- `value: T` drag payload tipidir; alıcı tarafta `on_drop::<T>` ile aynı tip ile
+  bağlanır.
+- `constructor` her drag başlangıcında ghost view üretir; mouse offset'i payload'a
+  göre konumlandırır.
+- `W: Render` ghost'un kendi entity'sidir; standart render gibi davranır.
+
+Drop tarafı:
+
+```rust
+div()
+    .drag_over::<MyPayload>(|style, payload, window, cx| {
+        style.bg(rgb(0xeeeeee))
+    })
+    .can_drop(|payload, window, cx| {
+        payload
+            .downcast_ref::<MyPayload>()
+            .is_some_and(|payload| payload.is_compatible(window, cx))
+    })
+    .on_drop::<MyPayload>(cx.listener(|this, payload: &MyPayload, window, cx| {
+        this.accept(payload.clone());
+        cx.notify();
+    }))
+```
+
+API:
+
+- `.on_drag::<T, W>(value, ctor)`: drag başlat.
+- `.drag_over::<T>(|style, payload, window, cx| -> StyleRefinement)`: hover sırasında
+  uygulanan stil refinement.
+- `.can_drop(|payload: &dyn Any, window, cx| -> bool)`: drop kabul edilip
+  edilmeyeceği. Tip kontrolü gerekiyorsa `downcast_ref::<T>()` kullanılır.
+- `.on_drop::<T>(listener)`: drop tamamlandı.
+- `.on_drag_move::<T>(listener)`: drag süresince mouse pozisyonu.
+
+Harici sürükleme (dosya sistem drag-in) için `FileDropEvent` ve `ExternalPaths`
+akışı kullanılır. Platform `FileDropEvent::Entered/Pending/Submit/Exited`
+üretir; `Window::dispatch_event` bunu dahili `active_drag` durumuna ve
+`ExternalPaths` payload'ına çevirir. UI tarafında normal drag/drop API'siyle
+yakalanır:
+
+```rust
+div()
+    .on_drag_move::<ExternalPaths>(cx.listener(|this, event, window, cx| {
+        let paths = event.drag(cx).paths();
+        this.preview_external_drop(paths, event.bounds, window, cx);
+    }))
+    .on_drop(cx.listener(|this, paths: &ExternalPaths, window, cx| {
+        this.handle_external_paths_drop(paths, window, cx);
+    }))
+```
+
+`ExternalPaths::paths()` `&[PathBuf]` döndürür. Ghost view platform tarafından
+dosya ikonları olarak çizilir; GPUI tarafındaki `Render for ExternalPaths`
+bilerek `Empty` döndürür.
+
+Tuzaklar:
+
+- Drag edilen tip `T: 'static` olmalıdır; lifetime taşıyan tip kabul edilmez.
+- Aynı element üzerinde `on_drag` iki kez çağrılırsa panic ("calling on_drag more
+  than once on the same element is not supported").
+- Ghost view her drag'de yeni `cx.new(...)` ile yaratılır; yan etkilerden kaçın.
+- `can_drop` false dönerse `drag_over`/`group_drag_over` stilleri uygulanmaz ve
+  `on_drop` çağrılmaz; kabul edilmeyen hedefin visual feedback'ini ayrı state ile
+  göstermen gerekiyorsa `on_drag_move` kullan.
+
+## 55. Headless, Screen Capture ve Test Renderer
+
+`crates/gpui/src/platform.rs::screen_capture_sources` ve
+`crates/gpui_platform/src/gpui_platform.rs::headless()`.
+
+Headless platform ile pencere açmadan GPUI uygulaması çalıştırmak mümkündür:
+
+```rust
+gpui_platform::headless().run(|cx: &mut App| {
+    // Background tasks, asset loading, network IO; render yok.
+});
+```
+
+Bu yol özellikle CLI alt komutlar, batch işler ve sunucu/benchmark süreçleri
+için kullanılır. UI doğrulama veya screenshot gerekiyorsa `gpui_platform::headless`
+ile karıştırmadan `HeadlessAppContext`/`VisualTestContext` kullanılır.
+`gpui_platform::current_headless_renderer()` yalnızca `test-support` feature'ı
+altında vardır; şu anda macOS'ta Metal headless renderer döndürebilir, diğer
+platformlarda `None` olabilir.
+
+Screen capture API'si:
+
+```rust
+let supported = cx.update(|cx| cx.is_screen_capture_supported());
+
+let sources_rx = cx.update(|cx| cx.screen_capture_sources());
+let sources = sources_rx.await??;
+if let Some(source) = sources.first() {
+    let stream_rx = source.stream(
+        cx.foreground_executor(),
+        Box::new(|frame| {
+            // frame: ScreenCaptureFrame
+        }),
+    );
+    let stream = stream_rx.await??;
+    let metadata = stream.metadata()?;
+}
+```
+
+`ScreenCaptureSource` her platformda farklı kaynak listesi sunar. Capture,
+`ScreenCaptureSource::stream(&ForegroundExecutor, frame_callback)` ile başlar.
+Dönen `oneshot::Receiver<Result<Box<dyn ScreenCaptureStream>>>` stream handle'ını
+verir; frame'ler callback'e `ScreenCaptureFrame` olarak gelir.
+
+Tuzaklar:
+
+- macOS izinleri (`Screen Recording`) kullanıcı onayı ister; ilk çağrıda dialog
+  açılır ve sonraki başlatmalarda da geçerlidir.
+- Platform screen capture desteklemiyorsa `is_screen_capture_supported()` false
+  dönebilir veya kaynak listesi boş olabilir.
+- UI testinde gerçek platform penceresi yerine `TestAppContext`,
+  `VisualTestContext` veya renderer factory verilen `HeadlessAppContext` seç.
+
+## 56. Persist, Settings ve Theme Akışı (Zed Tarafı)
+
+GPUI çekirdeği değil ama yeni pencere/UI eklerken temaya ve ayarlara takılı
+kalmak gerekir. Ana dosyalar: `crates/settings`, `crates/settings_content`,
+`crates/theme`, `crates/theme_settings`.
+
+Akış:
+
+1. Kullanıcı `~/.config/zed/settings.json` veya proje `.zed/settings.json` yazar.
+2. `SettingsStore` global'i değişimi yayar.
+3. `Settings` trait'leri (`WorkspaceSettings`, `ThemeSettings`, ...) kendi
+   bölümlerini parse eder.
+4. UI tarafları `cx.observe_global::<SettingsStore>(...)` ile değişimi izler ve
+   yeniden render eder.
+
+Yeni bir ayar eklemek için önce `settings_content` içindeki JSON içerik modeline
+alan eklenir, sonra runtime settings tipi `Settings` trait'ini uygular. Bu
+repodaki gerçek trait ilişkili içerik tipi veya `load` yöntemi değil,
+`from_settings` kullanır:
+
+```rust
+#[derive(Clone, Deserialize, RegisterSetting)]
+pub struct YourSettings {
+    pub enabled: bool,
+}
+
+impl Settings for YourSettings {
+    fn from_settings(content: &settings::SettingsContent) -> Self {
+        let section = &content.your_feature;
+        Self {
+            enabled: section.enabled.unwrap_or(false),
+        }
+    }
+}
+```
+
+`RegisterSetting` derive'ı inventory üzerinden tipi `SettingsStore` içine kaydeder.
+Elle kayıt gerekiyorsa uygulama başlangıcında `YourSettings::register(cx)` da
+kullanılabilir. `Settings::get_global(cx)`, `Settings::get(path, cx)` ve
+`Settings::try_get(cx)` okuma tarafındaki standart giriş noktalarıdır.
+
+Tema renkleri:
+
+```rust
+let colors = cx.theme().colors();
+let panel_bg = colors.panel_background;
+let border = colors.border;
+```
+
+`cx.theme()` aktif `ThemeVariant` (light/dark) döndürür. `.colors()`,
+`.players()`, `.syntax()` bölümlerini taşır. `theme::ActiveTheme` extension trait
+`App` üzerinde olduğu için `cx.theme()` doğrudan çalışır.
+
+Persist edilen örnekler:
+
+- Pencere bounds (bkz. Bölüm 41).
+- Açık projeler ve recent: `crates/recent_projects`.
+- Workspace serialization: `crates/workspace/src/persistence.rs` ve
+  `db` crate'i (SQLite tabanlı).
+- Vim mod, panel boyutları, dock state: workspace serialization.
+
+Tuzaklar:
+
+- `cx.theme()` panel açılırken `None` olmaz; ancak `cx.global::<ThemeRegistry>()`
+  henüz yüklenmemişse fallback theme döner.
+- Settings serialization `SettingsContent` merge akışına bağlıdır; user/global,
+  project ve language-specific kaynaklar `SettingsStore` içinde recompute edilir.
+- Yeni ayar eklerken `settings_content` schema güncellenmeden JSON schema
+  doğrulaması eski formatı kabul etmez.
+
+## 57. Element ID, Element State ve Type Erasure
+
+GPUI'de her render'da element ağacı yeniden kurulur; kalıcı element state'i için
+stabil ID gerekir. Ana tipler:
+
+- `ElementId`: `Name`, `Integer`, `NamedInteger`, `Path`, `Uuid`,
+  `FocusHandle`, `CodeLocation` gibi varyantlar taşır.
+- `GlobalElementId`: parent namespace zinciriyle birleşmiş gerçek ID.
+- `AnyElement`: element type erasure; child listelerinde heterojen element tutar.
+- `AnyView`/`AnyEntity`: view veya entity type erasure.
+
+Element state API'leri `Window` üzerindedir ve yalnızca element çizimi sırasında
+kullanılmalıdır:
+
+```rust
+let row_state = window.use_keyed_state(
+    ElementId::named_usize("row", row_ix),
+    cx,
+    |_, cx| RowState::new(cx),
+);
+```
+
+Alt seviye API:
+
+```rust
+window.with_global_id("image-cache".into(), |global_id, window| {
+    window.with_element_state::<MyState, _>(global_id, |state, window| {
+        let mut state = state.unwrap_or_else(MyState::default);
+        state.prepare(window);
+        (state.snapshot(), state)
+    })
+});
+```
+
+Kurallar:
+
+- Liste item'larında `use_state` yerine `use_keyed_state` kullan; `use_state`
+  caller location ile ID üretir ve aynı render noktasındaki çoklu item'ları ayıramaz.
+- `with_element_namespace(id, ...)` custom element içinde child ID çakışmasını
+  önlemek için kullanılır.
+- Aynı `GlobalElementId` ve aynı state tipi için reentrant
+  `with_element_state` çağrısı panic eder.
+- ID değişirse önceki frame'in state'i devam etmez; animasyon, hover, scroll ve
+  image cache state'i sıfırlanır.
+
+Type erasure kararları:
+
+- Public component API child kabul ediyorsa `impl IntoElement` al.
+- Struct içinde saklayacaksan `AnyElement` kullan.
+- View/entity saklıyorsan mümkün olduğunca typed `Entity<T>` tut; yalnızca plugin,
+  dock item veya heterojen koleksiyon gerekiyorsa `AnyEntity`/`AnyView` seç.
+
+## 58. Keymap, KeyContext ve Dispatch Stack
+
+Action tanımlamak tek başına yetmez; keybinding'in çalışması için focused element
+dispatch path'inde uygun `KeyContext` bulunmalıdır.
+
+Context koyma:
+
+```rust
+div()
+    .track_focus(&self.focus_handle)
+    .key_context("Editor mode=insert")
+    .on_action(cx.listener(|this, _: &Save, window, cx| {
+        this.save(window, cx);
+    }))
+```
+
+Binding ekleme:
+
+```rust
+cx.bind_keys([
+    KeyBinding::new("cmd-s", Save, Some("Editor")),
+    KeyBinding::new("ctrl-g", GoToLine { line: 0 }, Some("Workspace && !Editor")),
+]);
+```
+
+Önemli parçalar:
+
+- `KeyContext::parse("Editor mode = insert")`: elementin bağlamını üretir.
+- `KeyBindingContextPredicate`: binding tarafındaki predicate dilidir:
+  `Editor`, `mode == insert`, `!Terminal`, `Workspace > Editor`,
+  `A && B`, `A || B`.
+- `Keymap::bindings_for_input(input, context_stack)`: eşleşen action'ları ve
+  pending multi-stroke durumunu döndürür.
+- `window.context_stack()`: focused node'dan root'a dispatch path context'leri.
+- `window.keystroke_text_for(&action)`: UI'da gösterilecek en yüksek öncelikli
+  binding string'i.
+- `window.possible_bindings_for_input(&[keystroke])`: chord/pending yardım UI'ları
+  için kullanılabilir.
+
+Öncelik:
+
+- Context path'te daha derin eşleşme daha yüksek önceliklidir.
+- Aynı derinlikte sonra eklenen binding önce gelir; user keymap bu yüzden built-in
+  binding'leri ezebilir.
+- `NoAction` ve `Unbind` binding'leri devre dışı bırakma için kullanılır.
+- Printable input IME'ye gidecekse `InputHandler::prefers_ime_for_printable_keys`
+  keybinding yakalamayı geriye çekebilir.
+
+Tuzaklar:
+
+- `.key_context(...)` olmayan subtree'de context predicate'li binding çalışmaz.
+- Handler focus path'te değilse action bubble oraya ulaşmaz; global handler için
+  `cx.on_action(...)`, local handler için element `.on_action(...)` kullan.
+- `KeyBinding::new` parse hatasında panic edebilir; kullanıcı JSON'undan yükleme
+  yaparken `KeyBinding::load` ve error reporting tercih edilir.
+
+## 59. List ve UniformList Sanallaştırma
+
+GPUI'de büyük listeler için iki çekirdek element vardır:
+
+- `list(state, render_item)`: item yükseklikleri farklı olabilir. Ölçüm cache'i
+  `ListState` içindedir.
+- `uniform_list(id, item_count, render_range)`: tüm item'lar aynı yükseklikteyse
+  daha hızlıdır; ilk/örnek item ölçülür ve görünür range çizilir.
+
+Değişken yükseklikli liste:
+
+```rust
+struct LogView {
+    rows: Vec<Row>,
+    list_state: ListState,
+}
+
+impl LogView {
+    fn new() -> Self {
+        Self {
+            rows: Vec::new(),
+            list_state: ListState::new(0, ListAlignment::Top, px(300.)),
+        }
+    }
+
+    fn replace_rows(&mut self, rows: Vec<Row>, cx: &mut Context<Self>) {
+        self.rows = rows;
+        self.list_state.reset(self.rows.len());
+        cx.notify();
+    }
+}
+```
+
+Render:
+
+```rust
+list(self.list_state.clone(), |ix, window, cx| {
+    render_row(ix, window, cx).into_any_element()
+})
+.with_sizing_behavior(ListSizingBehavior::Auto)
+```
+
+`ListState` yönetimi:
+
+- `reset(count)`: tüm item seti değişti.
+- `splice(old_range, count)`: aralık değişti; scroll offset'i korunur.
+- `remeasure()`: font/theme gibi tüm yükseklikleri etkileyen değişim.
+- `remeasure_items(range)`: streaming text veya lazy content gibi belirli item'lar.
+- `set_follow_mode(FollowMode::Tail)`: chat/log gibi tail-follow davranışı.
+- `scroll_to_end()`, `scroll_to(ListOffset)`, `scroll_to_reveal_item(ix)`.
+- `set_scroll_handler(...)`: görünür range ve follow state takibi.
+
+Uniform liste:
+
+```rust
+let scroll_handle = self.scroll_handle.clone();
+
+uniform_list("search-results", self.items.len(), move |range, window, cx| {
+    range
+        .map(|ix| render_result(ix, window, cx))
+        .collect()
+})
+.track_scroll(&scroll_handle)
+.with_width_from_item(Some(0))
+```
+
+`UniformListScrollHandle`:
+
+- `scroll_to_item(ix, ScrollStrategy::Nearest)`
+- `scroll_to_item_strict(ix, ScrollStrategy::Center)`
+- `scroll_to_item_with_offset(ix, strategy, offset)`
+- `scroll_to_bottom()`
+- `is_scrollable()`, `is_scrolled_to_end()`
+- `y_flipped(true)`: item 0 altta olacak şekilde ters akış.
+
+Karar:
+
+- Item yükseklikleri gerçekten aynıysa `uniform_list`.
+- Yükseklik değişebiliyorsa `list` ve doğru `splice`/`remeasure` çağrıları.
+- Focusable item'lar sanallaştırılıyorsa `splice_focusable` ile focus handle ver;
+  aksi halde görünür olmayan focused item render dışı kalabilir.
+
+## 60. Deferred Draw, Prepaint Order ve Overlay Katmanı
+
+`deferred(child)` child'ın layout'unu bulunduğu yerde tutar, fakat paint'i ancestor
+paint'lerinden sonraya erteler. Popover, context menu, resize handle ve dock drop
+overlay gibi "üstte çizilmeli ama layout'ta yer tutmamalı" parçalar için kullanılır.
+
+```rust
+deferred(
+    anchored()
+        .anchor(Anchor::TopRight)
+        .position(menu_position)
+        .child(menu),
+)
+.with_priority(1)
+```
+
+Davranış:
+
+- `request_layout`: child normal layout alır.
+- `prepaint`: child `window.defer_draw(...)` ile deferred queue'ya taşınır.
+- `paint`: deferred element kendi paint'inde bir şey çizmez.
+- `with_priority(n)`: aynı frame'deki deferred elementler arasında z-order verir;
+  yüksek priority üstte çizilir.
+
+`Div` prepaint yardımcıları:
+
+- `on_children_prepainted(|bounds, window, cx| ...)`: child bounds'larını ölçüp
+  sonraki paint için state üretir.
+- `with_dynamic_prepaint_order(...)`: child prepaint sırasını runtime'da belirler.
+  Özellikle bir child'ın autoscroll veya ölçüm sonucu diğer child'ı etkiliyorsa
+  kullanılır.
+
+Tuzaklar:
+
+- Deferred child layout'ta yer tuttuğu için absolute/anchored konumu hâlâ doğru
+  parent bounds'a bağlıdır.
+- Overlay mouse'u bloke etmeliyse child içinde `.occlude()` veya
+  `.block_mouse_except_scroll()` kullan.
+- Priority global z-index değildir; aynı window frame içindeki deferred queue
+  için geçerlidir.
+
+## 61. Asset, ImageCache ve Surface Boru Hattı
+
+GPUI asset katmanı üç seviyelidir:
+
+- `AssetSource`: embedded/static asset byte'larını sağlar.
+- `Asset`: async loader trait'i; `Source -> Output`.
+- `Resource`: image/svg kaynak adresi: `Uri(SharedUri)`, `Path(Arc<Path>)`,
+  `Embedded(SharedString)`.
+
+Image cache elementleri:
+
+```rust
+div()
+    .image_cache(retain_all("avatars"))
+    .child(img(avatar_uri.clone()).object_fit(ObjectFit::Cover))
+```
+
+Alternatif wrapper:
+
+```rust
+image_cache(retain_all("preview-cache"))
+    .child(img(preview_path.clone()))
+```
+
+`RetainAllImageCache`:
+
+- `RetainAllImageCache::new(cx)` entity cache oluşturur.
+- `retain_all(id)` element-local cache provider oluşturur.
+- `load(resource, window, cx)` sonuç hazır değilse `None`, hazırsa
+  `Some(Result<Arc<RenderImage>, ImageCacheError>)` döndürür.
+- Release sırasında `cx.drop_image(...)` ile GPU image kaynaklarını bırakır.
+
+Custom cache gerektiğinde `ImageCache` trait'i uygulanır:
+
+```rust
+impl ImageCache for MyImageCache {
+    fn load(
+        &mut self,
+        resource: &Resource,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
+        self.load_or_poll(resource, window, cx)
+    }
+}
+```
+
+`Surface` ayrı bir yol izler: macOS'ta `CVPixelBuffer` gibi platform surface
+kaynaklarını `surface(buffer).object_fit(...)` ile çizmek içindir. Genel image
+asset cache'i yerine `window.paint_surface(...)` boru hattını kullanır ve şu anda
+platforma bağlıdır.
+
+Tuzaklar:
+
+- Cache ID'si değişirse decode edilmiş image state'i düşer.
+- `img("literal")` URL değilse embedded resource olarak yorumlanır; filesystem
+  için `PathBuf`/`Arc<Path>` ver.
+- Çok büyük veya sürekli değişen image setlerinde `RetainAllImageCache` sınırsız
+  büyüyebilir; özel eviction stratejisi için kendi `ImageCache` implementasyonu yaz.
+
+## 62. Application Yaşam Döngüsü ve Platform Olayları
+
+`Application` GPUI başlamadan önceki builder katmanıdır:
+
+```rust
+let app = gpui_platform::application()
+    .with_assets(Assets)
+    .with_http_client(http_client)
+    .with_quit_mode(QuitMode::Default);
+
+app.on_open_urls(|urls| {
+    // Platform URL open event.
+});
+
+app.on_reopen(|cx| {
+    cx.activate(true);
+});
+
+app.run(|cx| {
+    // Global init, keymap, windows.
+});
+```
+
+Quit ve activation:
+
+- `QuitMode::Default`: macOS'ta explicit quit, diğer platformlarda son pencere
+  kapanınca quit.
+- `QuitMode::LastWindowClosed`: son window kapanınca otomatik çık.
+- `QuitMode::Explicit`: yalnızca `App::quit()` ile çık.
+- `cx.activate(ignoring_other_apps)`, `cx.hide()`, `cx.hide_other_apps()`,
+  `cx.unhide_other_apps()` platform app state'ini yönetir.
+- `window.activate_window()`, `window.minimize_window()`,
+  `window.toggle_fullscreen()` pencere seviyesidir.
+
+Platform sinyalleri:
+
+- `cx.on_keyboard_layout_change(...)`: klavye layout değişimi.
+- `cx.keyboard_layout()` ve `cx.keyboard_mapper()`: keystroke mapping için.
+- `cx.thermal_state()` ve `cx.on_thermal_state_change(...)`: yoğun render,
+  indexing veya background iş throttling'i için.
+- `cx.set_cursor_hide_mode(CursorHideMode::...)`: typing/action sonrası cursor
+  gizleme politikasını değiştirir.
+- `cx.refresh_windows()`: tüm pencereleri tek effect cycle içinde redraw'a zorlar.
+
+Tuzaklar:
+
+- `on_open_urls` callback'i `&mut App` almaz; app state gerekiyorsa URL'leri
+  kendi queue/global state'inize aktaracak bir köprü kurun.
+- `on_reopen` macOS Dock/app icon senaryosunda önemlidir; açık pencere yoksa yeni
+  workspace açma mantığı burada tetiklenir.
+- `refresh_windows()` state değiştirmez; yalnızca redraw effect'i planlar.
+
+## 63. Entity Release, Cleanup ve Leak Detection
+
+Entity handle'ları ref-count mantığıyla yaşar. Son güçlü `Entity<T>` handle'ı
+düştüğünde entity release edilir; `WeakEntity<T>` bunu engellemez.
+
+Cleanup API'leri:
+
+- `cx.on_release(|this, cx| ...)`: mevcut entity release edilirken çalışır.
+- `App::observe_release(&entity, |entity, cx| ...)`: app context'ten başka bir
+  entity'nin release'ini izle.
+- `Context<T>::observe_release(&entity, |this, entity, cx| ...)`: view state ile
+  başka bir entity'nin release'ini izle.
+- `window.observe_release(&entity, cx, |entity, window, cx| ...)`: release
+  sırasında window context gerekiyorsa.
+- `cx.on_drop(...)` / `AsyncApp::on_drop(...)`: Rust scope drop'unda entity update
+  etmek için `Deferred` callback üretir; entity zaten düşmüşse update başarısız
+  olabilir.
+
+Örnek:
+
+```rust
+struct Preview {
+    cache: Entity<RetainAllImageCache>,
+    cache_released: bool,
+    _subscriptions: Vec<Subscription>,
+}
+
+impl Preview {
+    fn new(cx: &mut Context<Self>) -> Self {
+        let cache = RetainAllImageCache::new(cx);
+        let subscription = cx.observe_release(&cache, |this, _cache, cx| {
+            this.cache_released = true;
+            cx.notify();
+        });
+
+        Self {
+            cache,
+            cache_released: false,
+            _subscriptions: vec![subscription],
+        }
+    }
+}
+```
+
+Leak kontrolü testlerde/feature altında:
+
+```rust
+let snapshot = cx.leak_detector_snapshot();
+// Test body.
+cx.assert_no_new_leaks(&snapshot);
+```
+
+Tuzaklar:
+
+- Subscription saklanmazsa hemen drop olur ve listener iptal edilir.
+- Karşılıklı `Entity<T>` alanları cycle üretir; bir taraf `WeakEntity<T>` olmalı.
+- Release callback içinde uzun async iş başlatacaksan entity state'in artık
+  kapanmakta olduğunu varsay; gerekli veriyi callback başında kopyala.
+- `WeakEntity::update/read_with` her zaman `Result` döndürür; entity düşmüş
+  olabileceği için hatayı görünür biçimde ele al.
+
+## 64. Native Window Tabs ve SystemWindowTabController
+
+macOS native window tabbing GPUI'de iki katmanlıdır:
+
+- `WindowOptions::tabbing_identifier`: aynı identifier'a sahip windows native tab
+  group'a girebilir.
+- `SystemWindowTabController`: GPUI global'i olarak native tab gruplarını ve
+  görünürlük state'ini izler.
+
+Window API'leri:
+
+- `window.tabbed_windows() -> Option<Vec<SystemWindowTab>>`
+- `window.tab_bar_visible() -> bool`
+- `window.merge_all_windows()`
+- `window.move_tab_to_new_window()`
+- `window.toggle_window_tab_overview()`
+- `window.set_tabbing_identifier(Some(identifier))`
+
+Kullanım kararı:
+
+- Zed workspace tab/pane sistemi için native tabbing yerine `workspace::Pane` ve
+  `TabBar` kullanılır.
+- İşletim sistemi seviyesinde birden çok top-level window'u aynı native tab gruba
+  almak istiyorsan `tabbing_identifier` ver.
+- Native tab state'i platformdan gelir; Linux/Windows üzerinde bu API'lerin bir
+  kısmı no-op veya `None` dönebilir.
+
+Tuzaklar:
+
+- Native window tab ile Zed pane tab aynı kavram değildir; persistence ve command
+  routing farklıdır.
+- Window title değiştiğinde native tab title için `window.set_window_title(...)`
+  ve controller update akışı birlikte düşünülmelidir.
+
+## 65. Text Input Handler ve IME Derin Akış
+
+Metin düzenleyen custom element yazıyorsan yalnızca key event dinlemek yeterli
+değildir. IME, dead key, marked text ve candidate window için platforma
+`InputHandler` vermen gerekir.
+
+View tarafı:
+
+```rust
+impl EntityInputHandler for EditorLikeView {
+    fn selected_text_range(
+        &mut self,
+        ignore_disabled_input: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Option<UTF16Selection> {
+        self.selection_utf16(ignore_disabled_input, window, cx)
+    }
+
+    fn marked_text_range(
+        &self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Option<Range<usize>> {
+        self.marked_range_utf16(window, cx)
+    }
+
+    fn unmark_text(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        self.clear_marked_text(window, cx);
+    }
+
+    // text_for_range, replace_text_in_range,
+    // replace_and_mark_text_in_range, bounds_for_range,
+    // character_index_for_point da uygulanır.
+}
+```
+
+Element paint sırasında:
+
+```rust
+window.handle_input(
+    &focus_handle,
+    ElementInputHandler::new(bounds, view_entity.clone()),
+    cx,
+);
+```
+
+Kurallar:
+
+- Range değerleri UTF-16 offset'idir; Rust byte index'iyle karıştırma.
+- `bounds_for_range` screen/candidate positioning için doğru absolute bounds
+  döndürmelidir.
+- Cursor/selection hareketinden sonra `window.invalidate_character_coordinates()`
+  çağır; IME paneli yeni konuma taşınır.
+- `accepts_text_input` false ise platform text insertion engellenebilir.
+- `prefers_ime_for_printable_keys` true ise non-ASCII IME aktifken printable
+  tuşlar keybinding'den önce IME'ye gider.
+
+Tuzaklar:
+
+- Sadece `.on_key_down` ile text editor yazmak IME ve dead-key dillerinde bozulur.
+- UTF-16 range'i byte slice'a doğrudan uygulamak çok byte'lı karakterlerde panic
+  veya yanlış seçim üretir.
+- Input handler frame'e bağlıdır; focused element paint edilmezse platform input
+  handler da düşer.
+
+## 66. Hitbox, Cursor, Pointer Capture ve Autoscroll
+
+Hitbox, mouse hit-test ve cursor davranışının temelidir. Element handler'ları çoğu
+zaman bunu senin yerine kurar; custom canvas/element yazarken doğrudan kullanılır.
+
+```rust
+let hitbox = window.insert_hitbox(bounds, HitboxBehavior::Normal);
+if hitbox.is_hovered(window) {
+    window.set_cursor_style(CursorStyle::PointingHand, &hitbox);
+}
+```
+
+Davranış tipleri:
+
+- `HitboxBehavior::Normal`: arkadaki hitbox'ları etkilemez.
+- `HitboxBehavior::BlockMouse`: arkadaki mouse, hover, tooltip ve scroll hitbox
+  davranışlarını bloke eder; `.occlude()` bunu kullanır.
+- `HitboxBehavior::BlockMouseExceptScroll`: arkadaki mouse interaction'ı bloke
+  eder ama scroll seçimini geçirebilir; `.block_mouse_except_scroll()` bunu kullanır.
+
+Pointer capture:
+
+```rust
+window.capture_pointer(hitbox.id);
+// drag/resize bittiğinde
+window.release_pointer();
+```
+
+Capture aktifken ilgili hitbox hovered sayılır; resize handle ve sürükleme
+etkileşimlerinde mouse bounds dışına çıksa bile hareketi takip etmek için kullanılır.
+
+Autoscroll:
+
+- `window.request_autoscroll(bounds)`: drag sırasında viewport kenarına yakın
+  bölge için autoscroll talep eder.
+- `window.take_autoscroll()`: scroll container tarafında talebi tüketir.
+
+Cursor:
+
+- `window.set_cursor_style(style, &hitbox)`: hitbox hovered ise cursor ayarlar.
+- `window.set_window_cursor_style(style)`: window genel cursor state'i.
+- `cx.set_active_drag_cursor_style(style, window)`: aktif drag payload'ı için
+  cursor override.
+- `cx.active_drag_cursor_style()` mevcut drag cursor'unu okur.
+
+Tuzaklar:
+
+- `Hitbox::is_hovered` keyboard input modality sırasında false dönebilir; scroll
+  handler yazarken `should_handle_scroll` kullan.
+- Overlay elementleri `.occlude()` kullanmazsa arkadaki butonlar hover/click
+  almaya devam edebilir.
+- Pointer capture release edilmezse sonraki mouse hareketlerinde yanlış hitbox
+  hovered kalabilir.
+
+## 67. SettingsStore: Kayıt, Okuma, Override ve Migration
+
+`crates/settings/src/settings_store.rs`. `SettingsStore` Zed'in tüm ayar
+kaynaklarını tek bir tip-güvenli store içinde birleştirir.
+
+Ayar kayıt yolları:
+
+```rust
+// Derive ile inventory üzerinden otomatik kayıt:
+#[derive(Clone, Deserialize, RegisterSetting)]
+pub struct YourSettings { pub enabled: bool }
+
+impl Settings for YourSettings {
+    fn from_settings(content: &SettingsContent) -> Self {
+        Self { enabled: content.your_feature.as_ref()
+            .and_then(|f| f.enabled).unwrap_or(false) }
+    }
+}
+
+// Manuel kayıt (her zaman çalışan path):
+YourSettings::register(cx);
+```
+
+`RegisterSetting` derive `inventory::collect!` ile build-time topluluk yaratır;
+`SettingsStore::new(cx)` çağrısı tüm registered setting'leri otomatik yükler.
+
+Okuma:
+
+- `YourSettings::get_global(cx)`: aktif global değer.
+- `YourSettings::get(Some(SettingsLocation { worktree_id, path }), cx)`:
+  worktree veya `.zed/settings.json` override'ı dahil değer.
+- `YourSettings::try_get(cx)`: store register edilmemişse `None`.
+- `YourSettings::try_read_global(async_cx, |s| ...)`: async context içinde.
+
+Yazma:
+
+- `YourSettings::override_global(value, cx)`: programatik override; persist
+  edilmez, sadece runtime state'i değiştirir.
+- `SettingsStore::update_global(cx, |store, cx| store.update_user_settings(...))`:
+  user JSON'unu yazma yolu; `crates/settings/src/settings_file.rs::update_settings_file`
+  helper'ı dosya I/O dahil tüm akışı yapar.
+
+Observer akışı:
+
+```rust
+cx.observe_global::<SettingsStore>(|cx| {
+    let theme = ThemeSettings::get_global(cx);
+    apply_theme(theme, cx);
+}).detach();
+```
+
+`SettingsStore` global'i her dosya değişimi veya programatik override sonrası
+notify edilir; observer içinde değer zaten yeni state'tedir.
+
+Migration:
+
+- Kullanıcı JSON'u eski schema kullanıyorsa
+  `crates/settings/src/migrator/` modülü değerleri yeni anahtarlara taşır.
+- `SettingsStore::set_user_settings(...)` çağrısında migration otomatik denenir;
+  başarısız olursa orijinal JSON parse edilir ve UI'ya warning gönderilir.
+- `MigrationStatus::Migrated`/`MigrationFailed`/`NoMigrationNeeded` state'leri
+  observer'lar için `SettingsStore::user_settings_migration_status()` ile okunur.
+
+Tuzaklar:
+
+- `from_settings` panic ediyorsa default JSON eksiktir; her alan
+  `assets/settings/default.json` içinde tanımlı olmalıdır.
+- Per-language ayar gerekiyorsa `LanguageSettings::get(Some(location), cx)` ile
+  worktree-specific override otomatik gelir.
+- Observer'da `cx.notify()` çağrısı entity'yi yeniden render etmek için gereklidir;
+  `observe_global` sadece callback'i çalıştırır, view'i invalidate etmez.
+
+## 68. ThemeRegistry, ThemeFamily ve Tema Yükleme
+
+`crates/theme/src/registry.rs`, `crates/theme/src/theme.rs`,
+`crates/theme_settings/src/theme_settings.rs`.
+
+Tema veri modeli:
+
+- `ThemeFamily { name, author, themes: Vec<Theme> }`: bir paket içindeki light/dark
+  varyantlar.
+- `Theme { name, appearance, styles }`: belirli bir varyant.
+- `ThemeColors`, `StatusColors`, `PlayerColors`, `SyntaxTheme`: alt kategoriler.
+- `Appearance::Light | Dark`: theme'in nominal görünüm modu.
+
+`ThemeRegistry`:
+
+- `ThemeRegistry::global(cx) -> Arc<Self>`: aktif registry.
+- `registry.list_names() -> Vec<SharedString>`: yüklü tema adları.
+- `registry.get(name) -> Result<Arc<Theme>, ThemeNotFoundError>`.
+- `registry.insert_user_theme_families(families)`: kullanıcı yüklü temaları ekle.
+- `registry.remove_user_themes()`: kullanıcı temalarını temizle.
+
+Aktif tema akışı:
+
+```rust
+let theme = cx.theme();        // &Arc<Theme>
+let colors = theme.colors();   // &ThemeColors
+let status = theme.status();   // &StatusColors
+let players = theme.players(); // &PlayerColors
+let syntax = theme.syntax();   // &SyntaxTheme
+```
+
+`cx.theme()` extension trait `theme::ActiveTheme` ile sağlanır; `App` üzerinde
+çalışır. Aktif tema `ThemeSettings` içindeki seçimden ve `SystemAppearance`'tan
+hesaplanır:
+
+```rust
+// crates/theme_settings içinde:
+pub fn reload_theme(cx: &mut App) {
+    let appearance = SystemAppearance::global(cx).0;
+    let settings = ThemeSettings::get_global(cx);
+    let name = settings.theme.name(appearance);
+    let theme = ThemeRegistry::global(cx).get(&name)?;
+    ThemeSettings::set_active(theme, cx);
+}
+```
+
+Custom tema yükleme:
+
+```rust
+let theme_json: ThemeFamilyContent = serde_json::from_str(&user_json)?;
+let family: ThemeFamily = theme_json.try_into()?;
+ThemeRegistry::global(cx).insert_user_theme_families([family]);
+theme_settings::reload_theme(cx);
+```
+
+`crates/theme_importer/` VS Code temalarından `ThemeFamily` üretmek için
+yardımcılar içerir. Live theme reload için `crates/theme/src/registry.rs`
+file watcher entegrasyonu zaten kuruludur.
+
+Tuzaklar:
+
+- `cx.theme()` ilk frame'de fallback theme döndürebilir; observer ile
+  `SystemAppearance` veya `SettingsStore` dinleyip rerender şarttır.
+- `ThemeColors` tüm tokenları içerir; eksik token kullanıcı temada `null`
+  bırakılırsa default light/dark theme'den fallback alınır.
+- `Theme.styles.colors.background` yerine doğrudan `theme.colors().background`
+  kullan; styles alanı internal layout'tur.
+
+## 69. FluentBuilder ve Koşullu Element Üretimi
+
+`crates/gpui/src/util.rs::FluentBuilder` trait'i tüm element tiplerine üç
+yardımcı ekler:
+
+```rust
+pub trait FluentBuilder {
+    fn map<U>(self, f: impl FnOnce(Self) -> U) -> U;
+    fn when(self, condition: bool, then: impl FnOnce(Self) -> Self) -> Self;
+    fn when_else(
+        self,
+        condition: bool,
+        then: impl FnOnce(Self) -> Self,
+        else_fn: impl FnOnce(Self) -> Self,
+    ) -> Self;
+    fn when_some<T>(self, option: Option<T>, then: impl FnOnce(Self, T) -> Self) -> Self;
+    fn when_none<T>(self, option: &Option<T>, then: impl FnOnce(Self) -> Self) -> Self;
+}
+```
+
+Kullanım:
+
+```rust
+div()
+    .flex()
+    .when(self.is_active, |this| this.bg(rgb(0xFF0000)))
+    .when_some(self.icon.as_ref(), |this, icon| this.child(icon.clone()))
+    .when_else(self.is_loading,
+        |this| this.opacity(0.5),
+        |this| this.opacity(1.0),
+    )
+    .map(|this| match self.density {
+        Density::Compact => this.gap_1(),
+        Density::Comfortable => this.gap_2(),
+        Density::Spacious => this.gap_4(),
+    })
+```
+
+Avantajlar:
+
+- Method chain bozulmaz; if/match dışı yapılar olmadan koşullu UI yazılır.
+- Closure içine geçen element'in tipi korunur; child eklemek serbesttir.
+- `map` keyfi bir transform için "escape hatch" sağlar.
+
+Tuzaklar:
+
+- `when` closure her render'da çalışır; ağır hesap yapma.
+- Aynı element üzerinde defalarca `when_some` zinciri okunabilirliği bozarsa
+  state'i normal `if let` ile pre-compute edip tek `child` çağrısı tercih edilir.
+- `map` element tipini değiştirebilir; `when` ise tipi değiştirmez (refinement
+  zincirinde tutulur).
