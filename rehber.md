@@ -814,7 +814,7 @@ cx.spawn(async move |cx| {
 Entity task:
 
 ```rust
-cx.spawn(|this, cx| async move {
+cx.spawn(async move |this, cx| {
     cx.background_executor().timer(Duration::from_millis(200)).await;
     this.update(cx, |this, cx| {
         this.ready = true;
@@ -828,7 +828,7 @@ cx.spawn(|this, cx| async move {
 Window'a bağlı task:
 
 ```rust
-cx.spawn_in(window, |this, cx| async move {
+cx.spawn_in(window, async move |this, cx| {
     this.update_in(cx, |this, window, cx| {
         window.activate_window();
         cx.notify();
@@ -837,6 +837,8 @@ cx.spawn_in(window, |this, cx| async move {
 })
 .detach_and_log_err(cx);
 ```
+
+`Context::spawn` ve `spawn_in` imzaları `AsyncFnOnce(WeakEntity<T>, &mut AsyncApp/AsyncWindowContext)` ister; bu yüzden modern Zed kodu `async move |this, cx| { ... }` (async closure) yazımını kullanır, eski `|this, cx| async move { ... }` formu yerine değil. Closure'dan `Result` dönmek istiyorsan örnekteki gibi `Ok::<(), anyhow::Error>(())` ile tip annotate et veya en üstte `let _: Result<_, anyhow::Error> = ...` kullan.
 
 `window.to_async(cx)` doğrudan `AsyncWindowContext` üretir; callback dışına
 taşınacak pencere bağlı async helper yazarken kullanılır. Çoğu entity/view kodunda
@@ -1012,7 +1014,9 @@ Zed'de yeni UI yazarken önce `ui` bileşenlerini ara. Başlıca bileşenler:
   `Notification`, `CountBadge`, `Indicator`, `ProgressBar`, `CircularProgress`
 - Diğer: `Avatar`, `Facepile`, `Chip`, `DiffStat`, `Disclosure`,
   `GradientFade`, `Image`, `KeyBinding`, `KeybindingHint`, `Navigable`,
-  `RedistributableColumns`
+  `RedistributableColumnsState` + `bind_redistributable_columns()` /
+  `render_redistributable_columns_resize_handles()` (yeniden boyutlanabilir
+  tablo başlıkları için state + helper fonksiyon çifti)
 - AI/collab özel: `AiSettingItem`, `AgentSetupButton`, `ThreadItem`,
   `ConfiguredApiCard`, `CollabNotification`, `UpdateButton`
 
@@ -1783,13 +1787,20 @@ cx.bind_keys([
 ]);
 ```
 
-Context predicate gramer (`crates/gpui/src/keymap/context.rs`):
+Context predicate gramer (`crates/gpui/src/keymap/context.rs:172,360+`):
 
-- `Editor` — context stack'te `Editor` değeri var.
-- `Editor && !ReadOnly`
-- `pane == focused`
-- `os == macos`
-- `vim_mode in (normal, visual)`
+- `Editor` — context stack'te `Editor` identifier'ı var.
+- `Editor && !ReadOnly` — birleştirme + negasyon.
+- `Workspace > Editor` — `>` operatörü "Editor parent dispatch path'inde Workspace
+  altında" anlamına gelen descendant predicate'idir.
+- `mode == insert` — eşitlik (`KeyContext::set("mode", "insert")` ile yazılan
+  key/value değerine bakar).
+- `mode != normal` — eşitsizlik.
+- `(Editor || Terminal) && !ReadOnly` — parantezle gruplama.
+
+Gerçek parser yalnızca şu operatörleri tanır: `>`, `&&`, `||`, `==`, `!=`, `!`.
+`in (a, b)`, `not in`, fonksiyon çağrısı gibi syntax'lar yoktur. Vim modu gibi
+çoklu seçenek için `mode == normal || mode == visual` yazılır.
 
 `.key_context("Editor")` ile element ağaca context push eder; child'lar üst
 context'leri görür. Aynı binding birden çok context'te match ederse en
@@ -1884,11 +1895,25 @@ Sık kullanılan API'ler:
 - `window.update(cx, |view, window, cx| ...)`: pencere içi state mutate.
 
 `add_window_view` veya `add_empty_window` ile alınan `VisualTestContext` pencere
-bağlamını taşır; bu yüzden kısaltılmış `cx.simulate_keystrokes("cmd-p")`,
-`cx.simulate_input("hello")`, `cx.simulate_mouse_move(position, button, modifiers)`,
-`cx.simulate_mouse_down(position, button, modifiers)`, `cx.simulate_mouse_up(...)`,
-`cx.simulate_click(position, modifiers)`, `cx.debug_bounds("selector")` ve
-`cx.draw(origin, size, |window, cx| element)` gibi yöntemleri kullanırsın.
+bağlamını taşıdığı için *bazı* metotları window argümansız çağrılır:
+
+- `cx.simulate_keystrokes("cmd-p")` ve `cx.simulate_input("hello")` — `self.window`
+  kullanır.
+- `cx.dispatch_action(action)` — yine `self.window` üzerinden dispatch eder.
+- `cx.run_until_parked()`, `cx.window_title()`, `cx.document_path()` window-less
+  helper'lardır.
+
+Mouse simülasyon metotları VisualTestContext üzerinde de window argümanı ister
+(`visual_test_context.rs:257-320`):
+
+- `cx.simulate_mouse_move(window, position, button, modifiers)`
+- `cx.simulate_mouse_down(window, position, button, modifiers)`
+- `cx.simulate_mouse_up(window, position, button, modifiers)`
+- `cx.simulate_click(window, position, modifiers)`
+
+`VisualTestContext.window` private field olduğu için dışarıdan erişilemez;
+`add_window` çağrısının döndürdüğü `WindowHandle<V>`'i ayrı sakla ve mouse
+metotlarına `handle.into()` veya `AnyWindowHandle` olarak geçir.
 
 Pratik kurallar:
 
@@ -3554,9 +3579,9 @@ fallible değildir, bu yüzden `?` ile yayılmaz. Pencere içi async çalışmad
 
 Entity ve window bağlı priority spawn:
 
-- `cx.spawn_in_with_priority(priority, window, |weak, cx| async move { ... })`
+- `cx.spawn_in_with_priority(priority, window, async move |weak, cx| { ... })`
   current entity'nin `WeakEntity<T>` handle'ını ve `AsyncWindowContext` verir.
-- `window.spawn_with_priority(priority, cx, |cx| async move { ... })` pencere
+- `window.spawn_with_priority(priority, cx, async move |cx| { ... })` pencere
   handle'ına bağlı ama entity'siz async iş içindir.
 - Priority yalnızca foreground executor kuyruğunda polling önceliği verir;
   uzun CPU işi hâlâ `background_spawn` tarafına taşınmalıdır.
