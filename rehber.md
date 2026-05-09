@@ -838,7 +838,11 @@ cx.spawn_in(window, async move |this, cx| {
 .detach_and_log_err(cx);
 ```
 
-`Context::spawn` ve `spawn_in` imzaları `AsyncFnOnce(WeakEntity<T>, &mut AsyncApp/AsyncWindowContext)` ister; bu yüzden modern Zed kodu `async move |this, cx| { ... }` (async closure) yazımını kullanır, eski `|this, cx| async move { ... }` formu yerine değil. Closure'dan `Result` dönmek istiyorsan örnekteki gibi `Ok::<(), anyhow::Error>(())` ile tip annotate et veya en üstte `let _: Result<_, anyhow::Error> = ...` kullan.
+`Context::spawn` ve `spawn_in` imzaları
+`AsyncFnOnce(WeakEntity<T>, &mut AsyncApp/AsyncWindowContext)` ister; closure
+`async move |this, cx| { ... }` formuyla yazılır. Closure `Result` döndürüyorsa
+örnekteki gibi `Ok::<(), anyhow::Error>(())` ile tip annotate et veya en üstte
+`let _: Result<_, anyhow::Error> = ...` kullan.
 
 `window.to_async(cx)` doğrudan `AsyncWindowContext` üretir; callback dışına
 taşınacak pencere bağlı async helper yazarken kullanılır. Çoğu entity/view kodunda
@@ -4470,29 +4474,7 @@ Tuzaklar:
 - Subscription `detach()` edilmezse owner drop'unda iptal olur; uzun yaşayan
   observer için sahibi olan struct'a kaydet.
 
-## 86. Notlar: Eski Sürümlerde Karşılaşılan Yanlış İsimler
-
-Rehberi eski Zed sürümlerine bakarak yazıyorsan veya internette eski örnekler
-görüyorsan birkaç ad değişikliği vardır; doğrularını burada toplu liste:
-
-- Anchored elementte doğru tip hâlâ `gpui::Anchor`; `Corner` diye ayrı bir
-  anchored enum'u yoktur. `Corners<T>` border radius içindir, layer-shell
-  `Anchor` ise ayrı bitflag tipidir.
-- `Settings::load(SettingsSources)` → `Settings::from_settings(&SettingsContent)`.
-- `SettingsStore::update_user_settings` artık yalnızca test-support; production
-  kodu `update_settings_file(fs, cx, |content, cx| ...)` kullanır.
-- `ScreenCaptureSource::start_capture` yok; doğrusu `stream(&ForegroundExecutor, frame_callback)`.
-- `Keystroke` artık `ime_key` alanı taşımaz; yalnızca `key`, `key_char`, `modifiers`.
-- `WindowOptions.bounds` yok; doğrusu `window_bounds: Option<WindowBounds>`.
-- `cx.theme()` artık `&Arc<Theme>` döner; `theme.styles.colors.background`
-  yerine `theme.colors().background` kullan.
-- `ActiveTheme::set_active` yok; tema değişimi `theme_settings::reload_theme(cx)`
-  ile `GlobalTheme` üzerinden yapılır.
-- `KeymapAction` enum değil, `KeymapAction(Value)` tuple struct'tır.
-- `WindowBackgroundAppearance::Acrylic` yok; Windows'ta acrylic-benzeri efekt
-  `MicaBackdrop` veya `MicaAltBackdrop` üzerinden.
-
-## 87. Window Drawing Context Stack, Asset Fetch ve SVG Transform
+## 86. Window Drawing Context Stack, Asset Fetch ve SVG Transform
 
 Custom element yazarken `Window` yalnızca paint primitive çağırdığın yer değildir;
 draw fazlarında aktif style, offset, clipping ve asset yükleme context'ini de
@@ -4582,7 +4564,7 @@ Tuzaklar:
 - SVG transformation görsel olarak döndürür/ölçekler, fakat pointer hitbox'ı
   eski layout rect'inde kalır.
 
-## 88. Window Runtime Snapshot, Layout Ölçümü ve Frame Zamanlama
+## 87. Window Runtime Snapshot, Layout Ölçümü ve Frame Zamanlama
 
 Zed'in `workspace` ve `ui` katmanında sık görülen bazı `Window` çağrıları
 render çıktısı üretmez; o anki pencere/input durumunu okumak veya işi doğru frame
@@ -4669,7 +4651,7 @@ Low-level custom element hook'ları:
   yenileme ve observer notify işlemini tetikler. Platform/test altyapısı içindir;
   app code'da resize simülasyonu dışında çağırma.
 
-## 89. Window-bound Observer, Release ve Focus Helper Desenleri
+## 88. Window-bound Observer, Release ve Focus Helper Desenleri
 
 Normal `observe`, `subscribe` ve `on_release` callback'leri sadece `App` veya
 `Context<T>` verir. UI katmanında çoğu iş pencere de istediği için GPUI aynı
@@ -4759,7 +4741,7 @@ Tuzaklar:
 - `focus_self` delayed çalıştığı için hemen sonraki satırda focus değişmiş gibi
   okumak yanlıştır; sonucu sonraki effect/frame akışında gözle.
 
-## 90. Zed UI Prelude, Style Extension Trait'leri ve Component Sözleşmesi
+## 89. Zed UI Prelude, Style Extension Trait'leri ve Component Sözleşmesi
 
 Zed uygulama kodu çoğu zaman doğrudan `gpui::prelude::*` değil
 `ui::prelude::*` import eder. Bu prelude GPUI çekirdeğini yeniden export eder ve
@@ -4846,7 +4828,7 @@ Tuzaklar:
 - `VisibleOnHover` için parent'ta aynı group adıyla hover group kurulmadıysa
   element hiçbir zaman görünmez.
 
-## 91. Action ve Keymap Runtime Introspection
+## 90. Action ve Keymap Runtime Introspection
 
 Action tanımlama ve dispatch önceki bölümlerde var; Zed komut paleti, keymap UI
 ve geliştirici diagnostikleri için runtime introspection yüzeyi ayrıca bilinmeli.
@@ -4929,7 +4911,7 @@ Tuzaklar:
 - Interceptor'lar global etkilidir; modal özelinde key engelleyeceksen mümkünse
   element action/capture handler ile sınırla.
 
-## 92. App/Window Low-level Servisleri: Platform, Text, Palette ve Atlas
+## 91. App/Window Low-level Servisleri: Platform, Text, Palette ve Atlas
 
 Bu küçük API'ler ana render modelinin parçası değildir, fakat Zed başlangıcı,
 editor text davranışı ve image cache gibi yerlerde kullanılır.
@@ -5003,7 +4985,7 @@ Tuzaklar:
 - `show_character_palette` her platformda gerçek UI açmayabilir; platform
   implementasyonu no-op olabilir.
 
-## 93. Workspace Item, Pane, Modal, Toast ve Notification Sistemi
+## 92. Workspace Item, Pane, Modal, Toast ve Notification Sistemi
 
 GPUI bir UI framework'üdür; Zed'in workspace katmanı bunun üstünde tab/pane,
 modal, toast ve bildirim akışlarını standartlaştırır. Yeni bir editor benzeri
@@ -5215,7 +5197,7 @@ let task = workspace.open_paths(
   beklemeye girer; testte `run_until_parked()` ile resolve sürecini ilerletmen
   gerekir.
 
-## 94. Workspace Serialization, OpenOptions, ProjectItem ve SearchableItem
+## 93. Workspace Serialization, OpenOptions, ProjectItem ve SearchableItem
 
 Workspace item açma yalnızca `Pane::add_item` değildir; Zed session restore,
 project item resolution, search bar ve collab follow gibi katmanları da item
@@ -5360,7 +5342,7 @@ Tuzaklar:
   anlamına gelmez; path açma davranışını özellikle directory/file ayrımı için
   açık seç.
 
-## 95. PaneGroup, NavHistory, Toolbar ve Sidebar Entegrasyonu
+## 94. PaneGroup, NavHistory, Toolbar ve Sidebar Entegrasyonu
 
 Pane ve workspace yalnız tab listesi değildir; split ağacı, navigation history,
 toolbar item'ları ve multi-workspace sidebar birlikte çalışır.
@@ -5467,7 +5449,7 @@ Tuzaklar:
 - Split yönü hardcode etmek yerine user ayarlı default isteniyorsa
   `SplitDirection::vertical(cx)` / `horizontal(cx)` kullan.
 
-## 96. Workspace Notification Yardımcıları ve Async Hata Gösterimi
+## 95. Workspace Notification Yardımcıları ve Async Hata Gösterimi
 
 Bildirim sistemi yalnız `show_notification` değildir; workspace dışı app-level
 notification ve async error propagation için yardımcı trait'ler vardır.
@@ -5511,7 +5493,7 @@ Tuzaklar:
 - `MessageNotification` click handler'ları `Window` ve `App` alır; workspace state
   gerekiyorsa weak workspace/entity yakala ve düşmüş olma ihtimalini ele al.
 
-## 97. AppState, WorkspaceStore, WorkspaceDb ve OpenListener Akışı
+## 96. AppState, WorkspaceStore, WorkspaceDb ve OpenListener Akışı
 
 Zed uygulamasında workspace açma, sadece `open_window` çağrısı değildir. Startup,
 CLI/open-url istekleri, workspace DB ve collab follow state'i birkaç global/handle
@@ -5600,7 +5582,7 @@ Tuzaklar:
   yeni item türü eklerken `register_serializable_item` startup init'inde
   çağrılmalıdır.
 
-## 98. Item Ayarları, Context Menu, ApplicationMenu ve Focus-Follows-Mouse
+## 97. Item Ayarları, Context Menu, ApplicationMenu ve Focus-Follows-Mouse
 
 Zed UI kodunda sık görülen ama GPUI çekirdeği olmayan birkaç yardımcı katman daha
 vardır.
@@ -5693,7 +5675,7 @@ Tuzaklar:
 - Focus-follows-mouse global debounce state kullanır; aynı anda birden çok hover
   target'ı yarışabilir, bu nedenle daha spesifik child kontrolünü kaldırma.
 
-## 99. CommandPalette: Filter, Aliases ve Interceptor
+## 98. CommandPalette: Filter, Aliases ve Interceptor
 
 `crates/command_palette_hooks/` global'leri komut paleti UX'ini şekillendirir.
 UI'ı yazmadan önce bu global'leri tanımak gerekir, çünkü odaktaki elementten
@@ -5825,7 +5807,7 @@ Action trait'inin `documentation()`, `deprecation_message()` ve
   normal action listesinden komutlara ulaşamaz; gerçekten "tek doğru sonuç var"
   iken set et.
 
-## 100. CommandPalette Runtime Akışı, Fuzzy Arama ve Geçmiş
+## 99. CommandPalette Runtime Akışı, Fuzzy Arama ve Geçmiş
 
 `crates/command_palette/src/command_palette.rs` Zed'in gerçek komut paleti
 akışıdır. Başlatma ve açma sırası:
@@ -5894,7 +5876,7 @@ Onay davranışı:
   foreground'da bekleyebilir; bu, palette açılırken boş liste parlamasını ve
   otomasyon sırasında erken enter basılmasını azaltır.
 
-## 101. Picker, PickerDelegate ve PickerPopoverMenu
+## 100. Picker, PickerDelegate ve PickerPopoverMenu
 
 `crates/picker/` command palette dışında da kullanılan genel seçim/arama
 bileşenidir. Bir picker yazarken ana iş `PickerDelegate` implementasyonudur:
