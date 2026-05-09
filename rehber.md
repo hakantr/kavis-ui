@@ -4068,6 +4068,50 @@ Validator:
 - Validator hatası `MarkdownString` döner; keymap UI bunu kullanıcıya
   açıklanabilir hata olarak gösterebilir.
 
+Disable / unbind sentinel action'ları:
+
+GPUI iki ayrı sentinel action sağlar (`gpui::action.rs:425-453`); ikisinin de
+runtime davranışı **dispatch etmemek**, fakat keymap dispatch tablosundaki
+işlevleri farklıdır:
+
+- **`zed::NoAction`** — `actions!(zed, [NoAction])` ile tanımlı, veri taşımaz.
+  Keymap JSON'unda eylem değeri olarak `null` veya `"zed::NoAction"` yazılır:
+
+  ```json
+  { "context": "Editor", "bindings": { "cmd-p": null } }
+  ```
+
+  Aynı keystroke'a daha düşük öncelikle bağlanmış action'lar bu context için
+  iptal edilir; eşleşme `Keymap::resolve_binding` tarafında
+  `disabled_binding_matches_context(...)` çağrısıyla **context-aware** olarak
+  filtrelenir (`gpui/src/keymap.rs:120`). Yani `NoAction` belirli bir context
+  predicate'i içinde tuşu sessize alır.
+
+- **`zed::Unbind(SharedString)`** — `derive(Action)` ile tanımlı, payload bir
+  action adıdır. JSON formatı:
+
+  ```json
+  ["zed::Unbind", "editor::NewLine"]
+  ```
+
+  Keymap parser'ı bu sentinel'ı gördüğünde aynı keystroke'a aynı action adıyla
+  ileriden gelen tüm binding'leri **action context'inden bağımsız olarak**
+  iptal eder (`keymap.rs:124-128`'deki `is_unbind` kolu). Yani `editor::NewLine`
+  için `enter` tuşunu tüm context'lerde unbind etmek için kullanılır.
+
+Sentinel kontrol API'leri:
+
+- `gpui::is_no_action(&dyn Action) -> bool` (`action.rs:445`): `as_any().is::<NoAction>()`
+  ile downcast eder. Custom keymap UI veya komut paleti listesinde
+  "(disabled)" göstergesi koymak için kullanılabilir.
+- `gpui::is_unbind(&dyn Action) -> bool` (`action.rs:450`): aynı şekilde
+  `Unbind` instance'ını downcast eder.
+
+`KeymapFile::update_keybinding` `KeybindUpdateOperation::Remove` için bu iki
+sentinel'i bağlama göre üretir: user binding'leri `Remove` doğrudan dosyadan
+siler, framework/default binding'leri ise sessize alabilmek için kullanıcı
+keymap'ine `null` (NoAction) veya `["zed::Unbind", ...]` entry yazar.
+
 Dosya güncelleme:
 
 ```rust
