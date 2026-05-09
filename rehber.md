@@ -732,7 +732,8 @@ Focus olayları:
 
 Keyboard action akışı:
 
-1. `actions!(namespace, [ActionA, ActionB])` veya `#[gpui::action]` ile action tanımla.
+1. `actions!(namespace, [ActionA, ActionB])` veya `#[derive(Action)]` +
+   `#[action(...)]` ile action tanımla.
 2. Element ağacında `.key_context("context-name")` belirt.
 3. `cx.bind_keys([KeyBinding::new("cmd-k", ActionA, Some("context-name"))])`.
 4. Handler için `.on_action(...)`, `.capture_action(...)` veya `cx.on_action(...)` kullan.
@@ -1504,7 +1505,9 @@ anchored()
 
 API:
 
-- `anchor(Anchor)`: child'ın hangi köşesinin `position`'a hizalanacağı.
+- `anchor(Anchor)`: child'ın hangi referans noktasının `position`'a
+  hizalanacağı. `Anchor` varyantları `TopLeft`, `TopRight`, `BottomLeft`,
+  `BottomRight`, `TopCenter`, `BottomCenter`, `LeftCenter`, `RightCenter`.
 - `position(point)`: anchor noktası (window veya local koordinatlarda).
 - `offset(point)`: hizalama sonrası ek kayma.
 - `position_mode(AnchoredPositionMode::Window | Local)`: koordinat referansı.
@@ -1725,10 +1728,11 @@ use gpui::Action;
 pub struct GoToLine { pub line: u32 }
 ```
 
-`#[action(namespace = ..., name = "...", no_json, deprecated_aliases = [...])]`
-attribute'leri kontrol sağlar. Default olarak `Deserialize` derive edilmesi
-ve `JsonSchema` implement edilmesi beklenir; pure code action için `no_json`
-kullan, register edilmesini istemiyorsan `no_register` ekle.
+`#[action(namespace = ..., name = "...", no_json, no_register,
+deprecated_aliases = [...], deprecated = "...")]` attribute'leri kontrol sağlar.
+Default olarak `Deserialize` derive edilmesi ve `JsonSchema` implement edilmesi
+beklenir; pure code action için `no_json` kullan, register edilmesini
+istemiyorsan `no_register` ekle.
 
 Dispatch:
 
@@ -3532,6 +3536,10 @@ Test zamanı:
   kabul etmek içindir; production path'e taşınmaz.
 - `block_with_timeout` timeout olduğunda future'ı geri verir; bu, işi iptal
   etmek ya da sonra yeniden poll etmek için çağıranın karar vermesini sağlar.
+- `PriorityQueueSender<T>` / `PriorityQueueReceiver<T>` yalnızca
+  Windows/Linux/wasm cfg'lerinde re-export edilir. `send(priority, item)`,
+  `try_pop()`, `pop()`, `try_iter()` ve `iter()` ile high/medium/low kuyrukları
+  ağırlıklı seçimle tüketir; `Priority::RealtimeAudio` bu kuyruğa girmez.
 
 ## 71. Keystroke, Modifiers ve Platform Bağımsız Kısayollar
 
@@ -3757,6 +3765,8 @@ Tema sistemi dışındaki küçük ama pratik platform yüzeyleri:
   `merge_all_windows()`, `move_tab_to_new_window()`,
   `toggle_window_tab_overview()`, `set_tabbing_identifier(...)`: macOS'a özgü
   pencere/tab entegrasyonlarıdır.
+- `window.input_latency_snapshot()`: `input-latency-histogram` feature'ı açıkken
+  input-to-frame ve mid-frame input histogramlarını döndürür.
 
 Bu API'ler tema veya pencere oluşturma akışının merkezinde değildir; ama
 diagnostic ekranları, test harness'leri, macOS doküman pencereleri ve platforma
@@ -3959,23 +3969,25 @@ Kontrol bayrakları (`crates/gpui/src/app.rs:2021+`):
 - `cx.propagate()`: bir önceki `stop_propagation()` etkisini geri alır. Action
   handler'lar bubble fazında default olarak propagation'ı durdurur, bu yüzden
   parent'a düşmesini istiyorsan handler içinden `cx.propagate()` çağır.
-- `window.prevent_default()` / `window.default_prevented()`: özellikle keystroke
-  observer'larında "platform varsayılan davranışı yapma" sinyali. Örneğin IME
-  composition'ı tüketildiğinde set edilir.
+- `window.prevent_default()` / `window.default_prevented()`: aynı dispatch içinde
+  default element davranışını bastıran pencere bayrağıdır. Mevcut kullanımın
+  en görünür örneği mouse down sırasında parent focus transferini engellemektir.
 
 Platform tarafına döndürülen sonuç:
 
 ```rust
 pub struct DispatchEventResult {
     pub propagate: bool,        // hâlâ bubble ediliyorsa true
-    pub default_prevented: bool, // platform default'u atla
+    pub default_prevented: bool, // GPUI default davranışı bastırıldı mı
 }
 ```
 
 `PlatformWindow::on_input` callback'i `Fn(PlatformInput) -> DispatchEventResult`
-döndürür. macOS native key handling, Windows IME ve Wayland keyboard akışı
-buradaki `default_prevented` ve `propagate` değerlerine bakar; menü kısayolları
-veya browser tarzı default davranışları seçici olarak iptal etmek için kullanılır.
+döndürür. Mevcut platform backend'lerinde "event işlendi mi?" kararı esas olarak
+`propagate` üzerinden alınır (`!propagate` handled anlamına gelir).
+`default_prevented` GPUI dispatch ağacındaki default element davranışını ve
+test/diagnostic sonucu taşır; platform default action kontrolü gibi genelleme
+yapmadan, handler'ın açıkça kontrol ettiği yerlerde anlamlandır.
 
 Pratik akış:
 
@@ -3983,8 +3995,8 @@ Pratik akış:
 2. Listener event'i tüketmek istiyorsa `cx.stop_propagation()` çağırır.
 3. Action handler default davranışı korumak istiyorsa `cx.propagate()` ile
    bubble'ı yeniden açar.
-4. Keystroke handler platforma "ben hallettim, default tetikleme" demek için
-   `window.prevent_default()` çağırır.
+4. Default focus transferi gibi GPUI içi davranış bastırılacaksa
+   `window.prevent_default()` çağrılır.
 
 Tuzaklar:
 
@@ -3993,8 +4005,9 @@ Tuzaklar:
   element'i runtime'da kontrol et.
 - Action propagation davranışı mouse/key event'lerden ters çalışır. Yeni action
   yazarken ezbere `stop_propagation` koymak parent action'larını öldürebilir.
-- `default_prevented` yalnızca keystroke ve bazı pointer event'lerinde anlamlıdır;
-  custom event tipinde set etmek no-op'tur.
+- `default_prevented` genel bir platform cancellation API'si değildir; hangi
+  davranışı durdurduğunu anlamak için ilgili element/window handler'ının
+  `window.default_prevented()` kontrol edip etmediğine bak.
 
 ## 80. Refineable, StyleRefinement ve MergeFrom
 
@@ -4113,7 +4126,9 @@ Diğer paint API'leri:
   zaten kullanır; nadiren elle çağrılır.
 - `window.paint_emoji(...)`: emoji renk glyph.
 - `window.paint_image(bounds, corner_radii, RenderImage, ...)`: raster image.
-- `window.paint_surface(bounds, CVPixelBuffer)`: macOS native surface.
+- `window.paint_svg(bounds, path, data, transformation, color, cx)`: monochrome
+  SVG mask'i, `SvgRenderer` atlas cache'i üzerinden.
+- `window.paint_surface(bounds, CVPixelBuffer)`: macOS-only native surface.
 - `window.paint_shadows(bounds, corner_radii, &[BoxShadow])`: drop shadow set.
 - `window.paint_layer(bounds, |window| ...)`: aynı bounds üzerinde clip ile yeni
   render katmanı; overflow gizleme ve transform için.
@@ -4187,11 +4202,15 @@ için zorunlu.
 
 `Solid`, `Dashed`. `Style::border_style` veya `paint_quad` ile geçilir.
 
-### `Anchor` / `Corner` (`crates/gpui/src/elements/anchored.rs`)
+### `Anchor`, `Corners` ve Layer-shell `Anchor`
 
-Eskiden `Anchor` adıyla geçen tip artık `Corner`'dır:
-`TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`, `Center`. Layer-shell
-modülündeki `Anchor` (bitflag, `TOP|BOTTOM|LEFT|RIGHT`) bundan ayrı bir tiptir.
+Anchored elementte kullanılan tip `gpui::Anchor`'dır:
+`TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`, `TopCenter`,
+`BottomCenter`, `LeftCenter`, `RightCenter`.
+
+`Corners<T>` farklı bir tiptir; border radius/quad köşe yarıçapları içindir.
+Layer-shell modülündeki `Anchor` ise bitflag yapısıdır
+(`TOP | BOTTOM | LEFT | RIGHT`) ve anchored element `Anchor`'ıyla karıştırılmaz.
 
 ### `ResizeEdge` (`crates/gpui/src/platform.rs:358`)
 
@@ -4217,6 +4236,10 @@ pub trait Action: Any + Send {
         where Self: Sized { None }
     fn deprecated_aliases() -> &'static [&'static str]
         where Self: Sized { &[] }
+    fn deprecation_message() -> Option<&'static str>
+        where Self: Sized { None }
+    fn documentation() -> Option<&'static str>
+        where Self: Sized { None }
 }
 ```
 
@@ -4236,6 +4259,8 @@ gerekirse ilkini, registration'da ikincisini kullan.
   uygularken veya conditional kayıt yaparken gerekir.
 - `deprecated_aliases = ["editor::OldName", "old::Name"]`: keymap'te eski adı
   kabul ederken kullanıcıya warning üretmek için.
+- `deprecated = "message"`: action'ın kendisini deprecated işaretler;
+  `deprecation_message()` bu metni döndürür.
 
 ### `register_action!` makrosu
 
@@ -4297,7 +4322,7 @@ cx.spawn_in(window, async move |this, cx| {
     this.update_in(cx, |this, window, cx| {
         this.apply(data, window, cx);
     })?;
-    anyhow::Ok(())
+    Ok::<(), anyhow::Error>(())
 })
 .detach_and_log_err(cx);
 ```
@@ -4338,6 +4363,8 @@ parça parça geçtiği için burada tek listede topluyoruz:
 - `cx.set_global<T: Global>(value)`: var olanı ezer; yoksa kurar.
 - `cx.global<T>() -> &T`: panic eder; var olduğundan eminsen.
 - `cx.global_mut<T>()`: aynı, mutable.
+- `cx.default_global<T: Default>() -> &mut T`: yoksa default instance oluşturur,
+  varsa mevcut global'i mutable döndürür.
 - `cx.has_global<T>() -> bool`: kontrol etmeden global okumak istediğinde.
 - `cx.try_global<T>() -> Option<&T>`: nullable okuma.
 - `cx.update_global<T, R>(|g, cx| ...) -> R`: kapsamlı update.
@@ -4369,7 +4396,9 @@ Tuzaklar:
 Rehberi eski Zed sürümlerine bakarak yazıyorsan veya internette eski örnekler
 görüyorsan birkaç ad değişikliği vardır; doğrularını burada toplu liste:
 
-- `Anchor` (anchored elementi için) → `Corner`. Layer-shell `Anchor` ayrı tiptir.
+- Anchored elementte doğru tip hâlâ `gpui::Anchor`; `Corner` diye ayrı bir
+  anchored enum'u yoktur. `Corners<T>` border radius içindir, layer-shell
+  `Anchor` ise ayrı bitflag tipidir.
 - `Settings::load(SettingsSources)` → `Settings::from_settings(&SettingsContent)`.
 - `SettingsStore::update_user_settings` artık yalnızca test-support; production
   kodu `update_settings_file(fs, cx, |content, cx| ...)` kullanır.
@@ -4383,3 +4412,88 @@ görüyorsan birkaç ad değişikliği vardır; doğrularını burada toplu list
 - `KeymapAction` enum değil, `KeymapAction(Value)` tuple struct'tır.
 - `WindowBackgroundAppearance::Acrylic` yok; Windows'ta acrylic-benzeri efekt
   `MicaBackdrop` veya `MicaAltBackdrop` üzerinden.
+
+## 87. Window Drawing Context Stack, Asset Fetch ve SVG Transform
+
+Custom element yazarken `Window` yalnızca paint primitive çağırdığın yer değildir;
+draw fazlarında aktif style, offset, clipping ve asset yükleme context'ini de
+taşır.
+
+Context stack yardımcıları:
+
+- `window.with_text_style(Some(TextStyleRefinement), |window| ...)`: aktif text
+  style stack'ine refinement ekler. İçeride `window.text_style()` birleşmiş
+  sonucu verir.
+- `window.with_rem_size(Some(px(...)), |window| ...)`: rem override stack'i;
+  `window.rem_size()` içeride override değerini döndürür.
+- `window.set_rem_size(px(...))`: pencerenin base rem değerini kalıcı değiştirir.
+- `window.with_content_mask(Some(ContentMask { bounds }), |window| ...)`:
+  mevcut mask ile intersection alır; paint/prepaint içindeki `content_mask()`
+  bu aktif clip'i verir.
+- `window.with_element_offset(offset, |window| ...)` ve
+  `with_absolute_element_offset(offset, |window| ...)`: prepaint sırasında child
+  offset'ini değiştirir. Scroll/list implementasyonlarının hitbox ve layout
+  koordinatlarını doğru üretmesi buna dayanır.
+- `window.element_offset()`: prepaint sırasında aktif offset'i okur.
+- `window.transact(|window| -> Result<_, _> { ... })`: prepaint yan etkilerini
+  deneme amaçlı yapar; closure `Err` dönerse hitbox/tooltip/dispatch/layout
+  kayıtları eski index'e truncate edilir.
+
+Frame/paint yardımcıları:
+
+- `window.set_window_cursor_style(style)`: hitbox'a bağlı olmayan, tüm pencere
+  için cursor request'i; paint fazında çağrılır ve hitbox cursor'larından önceliklidir.
+- `window.set_tooltip(AnyTooltip) -> TooltipId`: tooltip request'i prepaint
+  fazında kaydedilir.
+- `window.paint_svg(...)`: `SvgRenderer` ve sprite atlas üzerinden monochrome SVG
+  mask'i çizer; `paint_image` decode edilmiş raster frame, `paint_surface` ise
+  macOS native surface içindir.
+
+Generic asset yükleme:
+
+```rust
+if let Some(result) = window.use_asset::<MyAsset>(&source, cx) {
+    render_loaded(result, window, cx);
+}
+```
+
+- `window.use_asset::<A>(&source, cx) -> Option<A::Output>`: load bitmediyse
+  `None` döner ve ilk load tamamlanınca current view'i next frame'de notify eder.
+- `window.get_asset::<A>(&source, cx) -> Option<A::Output>`: cache'i poll eder,
+  ama tamamlandığında view redraw planlamaz.
+- `cx.fetch_asset::<A>(&source) -> (Shared<Task<A::Output>>, bool)`: daha düşük
+  seviye ortak task cache'i; aynı asset type/source için tek `Asset::load`
+  future'ı paylaşılır.
+- `AssetLogger<T>` `Asset<Output = Result<R, E>>` yükleyicisini sarar ve error
+  sonucunu loglar.
+
+SVG transform:
+
+```rust
+svg()
+    .path("icons/check.svg")
+    .with_transformation(
+        Transformation::rotate(radians(0.2))
+            .with_scaling(size(1.2, 1.2))
+            .with_translation(point(px(2.), px(0.))),
+    )
+```
+
+- `svg().path(...)`: embedded `AssetSource` içinden SVG okur.
+- `svg().external_path(...)`: filesystem path'i okur.
+- `Transformation::{scale, translate, rotate}` ve
+  `with_scaling/with_translation/with_rotation` sadece çizimi etkiler; hitbox ve
+  layout boyutu değişmez.
+- Lower-level `TransformationMatrix::{unit, translate, rotate, scale}` scene
+  primitive'lerinde kullanılır.
+- `SvgSize::{Size(DevicePixels), ScaleFactor(f32)}` `SvgRenderer` render
+  isteğinin raster boyutunu tanımlar.
+
+Tuzaklar:
+
+- `with_content_mask` sadece clip mask'idir; hitbox veya layout'u otomatik
+  küçültmez.
+- `use_asset` redraw'ı current view entity'sine bağlar; view dışı helper'da
+  çağırıyorsan current view beklentisini bozma.
+- SVG transformation görsel olarak döndürür/ölçekler, fakat pointer hitbox'ı
+  eski layout rect'inde kalır.
