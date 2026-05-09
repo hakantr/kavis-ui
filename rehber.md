@@ -1692,6 +1692,52 @@ canvas(
   build öncesi dönüştürür.
 - `build()` → tessellated `Path<Pixels>` döner; `?` ile hata yay.
 
+Tessellator parametreleri (`PathStyle`, `FillOptions`, `StrokeOptions`,
+`FillRule`):
+
+GPUI bu tipleri lyon'dan re-export eder
+(`pub use lyon::tessellation::{FillOptions, FillRule, StrokeOptions}`,
+`path_builder.rs:11-12`). `PathBuilder.style: PathStyle` alanı public'tir; iki
+varyantı vardır:
+
+```rust
+pub enum PathStyle {
+    Stroke(StrokeOptions),
+    Fill(FillOptions),
+}
+```
+
+Default constructor'lar default lyon parametrelerini set eder
+(`PathBuilder::fill()` → `FillOptions::default()`; `PathBuilder::stroke(width)`
+→ `StrokeOptions::default().with_line_width(width.0)`). Bu seçenekleri
+özelleştirmek istersen `path.style` alanını doğrudan değiştir veya path inşa
+ettikten sonra yeni `PathStyle` ata:
+
+- `FillOptions`: `tolerance` (flattening hassasiyeti, default 0.1), `fill_rule`
+  (`FillRule::{EvenOdd, NonZero}`, SVG `fill-rule` semantiği; default
+  **`EvenOdd`** — `lyon_tessellation::FillOptions::DEFAULT_FILL_RULE`),
+  `sweep_orientation` (default `Orientation::Vertical`),
+  `handle_intersections` (default `true`). Hızlı yardımcılar:
+  `FillOptions::even_odd()`, `FillOptions::non_zero()`,
+  `FillOptions::tolerance(t)`.
+- `StrokeOptions`: `line_width` (default 1.0), `start_cap` ve `end_cap` (her
+  sub-path için başlangıç/bitiş cap'i, default `LineCap::Butt`), `line_join`
+  (default `LineJoin::Miter`), `miter_limit` (default 4.0), `tolerance`
+  (default 0.1). Tüm bu sabitler
+  `lyon_tessellation::StrokeOptions::{DEFAULT_LINE_CAP, DEFAULT_LINE_JOIN,
+  DEFAULT_MITER_LIMIT, DEFAULT_LINE_WIDTH, DEFAULT_TOLERANCE}` const'larında
+  görünür.
+- `FillRule::EvenOdd` (lyon ve gpui default'u): SVG even-odd kuralı; iç içe
+  path'lerde delik üretir. İki üst üste binen kapalı path'in çakışan bölgesi
+  şeffaf olur.
+  `FillRule::NonZero`: SVG non-zero winding kuralı; yön kombinasyonuna göre
+  kapsama hesaplar, çakışan path'ler genelde dolu kalır. Karmaşık kompozit
+  shape'ler için kasıtlı olarak `non_zero()` seçilir.
+
+Lyon API'sine inmek istersen `lyon::tessellation::FillOptions::tolerance(0.5)`
+gibi builder zincirleri kullanılabilir; gpui bu builder'ları olduğu gibi
+yeniden export ettiği için ek wrapper'a ihtiyacın yoktur.
+
 Window paint API'leri:
 
 - `window.paint_path(path, color)`
